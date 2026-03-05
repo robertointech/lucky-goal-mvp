@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --lucky-green: #00FF88;
+  --lucky-dark: #1a1a2e;
+  --lucky-card: #0D1117;
+}
+
+body {
+  background-color: var(--lucky-dark);
+  color: white;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Mobile-first responsive */
+.container-mobile {
+  @apply w-full max-w-md mx-auto px-4;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply bg-lucky-green text-black font-bold py-3 px-6 rounded-lg 
+         hover:bg-green-400 transition-colors duration-200
+         active:scale-95 transform;
+}
+
+.btn-option {
+  @apply w-full bg-lucky-card border border-gray-700 text-white py-4 px-4 rounded-lg
+         hover:border-lucky-green transition-all duration-200
+         active:scale-95 transform text-left;
+}
+
+.btn-option.correct {
+  @apply bg-green-900 border-lucky-green;
+}
+
+.btn-option.incorrect {
+  @apply bg-red-900 border-red-500;
+}
+
+/* Card styles */
+.card {
+  @apply bg-lucky-card rounded-xl p-6 border border-gray-800;
+}
+
+/* Goal zones */
+.goal-zone {
+  @apply flex-1 h-32 border-2 border-gray-600 rounded-lg 
+         flex items-center justify-center cursor-pointer
+         hover:border-lucky-green hover:bg-lucky-card transition-all duration-200
+         active:scale-95 transform;
+}
+
+.goal-zone.selected {
+  @apply border-lucky-green bg-lucky-card;
+}
