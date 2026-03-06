@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getTournament, submitAnswer, recordGoal } from "@/lib/gameLogic";
 import { useGameSync } from "@/hooks/useGameSync";
@@ -66,9 +66,16 @@ export default function PlayerGamePage() {
   const currentQ = currentTournament?.current_question ?? 0;
   const question = triviaQuestions[currentQ];
 
-  // Reset state when question changes
+  // Guards to ensure each phase initializes exactly once per question round.
+  // Without these, effects can re-fire on dependency changes (e.g. penaltyRestart
+  // reference) and reset local state mid-phase — causing double kicks, lost state, etc.
+  const questionInitRef = useRef(-1);
+  const penaltyInitRef = useRef(-1);
+
+  // Reset ALL state when a new question arrives
   useEffect(() => {
-    if (status === "question") {
+    if (status === "question" && questionInitRef.current !== currentQ) {
+      questionInitRef.current = currentQ;
       setSelectedOption(null);
       setAnswered(false);
       setLastAnswerCorrect(null);
@@ -80,22 +87,28 @@ export default function PlayerGamePage() {
       setPenaltyDone(false);
       setScorePopup(null);
       restart(20);
-    } else {
+    } else if (status !== "question") {
       triviaStop();
     }
   }, [status, currentQ, restart, triviaStop]);
 
-  // Reset penalty state when entering penalty phase (covers missed "question" phase)
+  // Initialize penalty phase exactly once per question round.
+  // Only resets direction/result — does NOT reset kicked/penaltyDone if already set
+  // (covers players who missed the "question" phase entirely).
   useEffect(() => {
-    if (status === "penalty") {
-      setSelectedDirection(null);
-      setKicked(false);
-      setGoalkeeperDirection(null);
-      setPenaltyResult(null);
-      setPenaltyDone(false);
-      penaltyRestart(10);
+    if (status === "penalty" && penaltyInitRef.current !== currentQ) {
+      penaltyInitRef.current = currentQ;
+      // Only reset if player hasn't already kicked this round
+      // (question reset already cleared these if they saw the question)
+      if (!kicked) {
+        setSelectedDirection(null);
+        setGoalkeeperDirection(null);
+        setPenaltyResult(null);
+        setPenaltyDone(false);
+        penaltyRestart(10);
+      }
     }
-  }, [status, currentQ, penaltyRestart]);
+  }, [status, currentQ, penaltyRestart, kicked]);
 
   useEffect(() => {
     if (timeLeft === 0 && !answered && status === "question") {
@@ -103,14 +116,18 @@ export default function PlayerGamePage() {
     }
   }, [timeLeft, answered, status]);
 
-  // Auto-kick when penalty timer expires — only if timer was actually running
-  // (isFinished transitions from running to done, not initial idle state)
+  // Auto-kick when penalty timer expires — only fires if the timer actually ran
+  // down (penaltyIsRunning was true and reached 0, not if it was never started)
   const penaltyTimerExpired = penaltyTimeLeft === 0 && !penaltyIsRunning;
   useEffect(() => {
-    if (penaltyTimerExpired && !kicked && status === "penalty" && !penaltyDone) {
-      // Only auto-kick if the timer was started (penalty phase reset sets it running)
-      // The countdown hook sets isRunning=false when it reaches 0, so
-      // penaltyTimerExpired is true only after the timer ran down
+    // Guard: only auto-kick if we initialized penalty for this round
+    if (
+      penaltyTimerExpired &&
+      !kicked &&
+      status === "penalty" &&
+      !penaltyDone &&
+      penaltyInitRef.current === currentQ
+    ) {
       setKicked(true);
       const directions: Direction[] = ["left", "center", "right"];
       const randomDir = selectedDirection || directions[Math.floor(Math.random() * directions.length)];
@@ -118,7 +135,7 @@ export default function PlayerGamePage() {
       setGoalkeeperDirection(randomDir);
       setPenaltyResult("saved");
     }
-  }, [penaltyTimerExpired, kicked, status, penaltyDone, selectedDirection]);
+  }, [penaltyTimerExpired, kicked, status, penaltyDone, selectedDirection, currentQ]);
 
   const handleSubmitAnswer = useCallback(
     (optionIndex: number) => {
@@ -165,12 +182,12 @@ export default function PlayerGamePage() {
     }
   };
 
-  const handleKickComplete = async (scored: boolean) => {
+  const handleKickComplete = useCallback(async (scored: boolean) => {
     if (scored && playerId) {
       await recordGoal(playerId);
     }
     setPenaltyDone(true);
-  };
+  }, [playerId]);
 
   const winner = players.find((p) => p.is_winner);
   const sorted = [...players].sort((a, b) => b.score - a.score);
@@ -426,7 +443,6 @@ export default function PlayerGamePage() {
             kicked={kicked}
             selectedDirection={selectedDirection}
             penaltyResult={penaltyResult}
-            lastAnswerCorrect={lastAnswerCorrect}
             onDirectionSelect={handleDirectionSelect}
             onKick={handleKick}
             onKickComplete={handleKickComplete}
@@ -489,7 +505,6 @@ function PenaltyArena({
   kicked,
   selectedDirection,
   penaltyResult,
-  lastAnswerCorrect,
   onDirectionSelect,
   onKick,
   onKickComplete,
@@ -498,7 +513,6 @@ function PenaltyArena({
   kicked: boolean;
   selectedDirection: Direction | null;
   penaltyResult: "goal" | "saved" | null;
-  lastAnswerCorrect: boolean | null;
   onDirectionSelect: (d: Direction) => void;
   onKick: () => void;
   onKickComplete: (scored: boolean) => void;
@@ -540,14 +554,8 @@ function PenaltyArena({
           <span className="animate-[ballSpin_1s_linear_infinite]">&#9917;</span>
           Patea el Penal!
         </h2>
-        <p
-          className={`text-xs mt-1 font-semibold ${
-            lastAnswerCorrect ? "text-[#00FF88]" : "text-red-400"
-          }`}
-        >
-          {lastAnswerCorrect
-            ? "Respuesta correcta — puedes meter gol!"
-            : "Respuesta incorrecta — el arquero te ataja"}
+        <p className="text-xs mt-1 font-semibold text-gray-400">
+          Elige una esquina y patea!
         </p>
       </div>
 
