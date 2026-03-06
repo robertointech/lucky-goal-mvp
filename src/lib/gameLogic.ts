@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { triviaQuestions } from "./questions";
+import { QUESTIONS_PER_GAME } from "./questions";
 import type { Tournament, Player, GameStatus } from "@/types/game";
 import { TOURNAMENT_CODE_LENGTH } from "@/types/game";
 
@@ -70,10 +70,10 @@ export async function submitAnswer(
   playerId: string,
   questionIndex: number,
   selectedIndex: number,
-  timeMs: number
+  timeMs: number,
+  correctIndex: number
 ) {
-  const question = triviaQuestions[questionIndex];
-  const isCorrect = selectedIndex === question.correctIndex;
+  const isCorrect = selectedIndex === correctIndex;
 
   // Insert answer
   await supabase.from("answers").insert({
@@ -150,5 +150,5 @@ export async function setPlayerWallet(playerId: string, walletAddress: string) {
 }
 
 export function getTotalQuestions(): number {
-  return triviaQuestions.length;
+  return QUESTIONS_PER_GAME;
 }

@@ -5,6 +5,41 @@ export interface Question {
   correctIndex: number;
 }
 
+export const QUESTIONS_PER_GAME = 5;
+
+// Simple seeded PRNG (mulberry32) — deterministic shuffle from tournament code
+function seededRng(seed: number) {
+  return () => {
+    seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function hashCode(str: string): number {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+  }
+  return h;
+}
+
+/**
+ * Get the questions for a specific tournament. Uses the tournament code
+ * as seed so host and all players get the same set in the same order.
+ */
+export function getGameQuestions(tournamentCode: string): Question[] {
+  const rng = seededRng(hashCode(tournamentCode));
+  const indices = triviaQuestions.map((_, i) => i);
+  // Fisher-Yates shuffle with seeded RNG
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  return indices.slice(0, QUESTIONS_PER_GAME).map((i) => triviaQuestions[i]);
+}
+
 export const triviaQuestions: Question[] = [
   // --- Deportes ---
   {

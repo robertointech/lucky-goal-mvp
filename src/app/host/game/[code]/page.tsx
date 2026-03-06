@@ -11,7 +11,7 @@ import {
 import { useGameSync } from "@/hooks/useGameSync";
 import { useCountdown } from "@/hooks/useCountdown";
 import { useSendTransaction } from "thirdweb/react";
-import { triviaQuestions } from "@/lib/questions";
+import { getGameQuestions } from "@/lib/questions";
 import { prepareClaimPrize } from "@/lib/escrow";
 import type { Tournament, Player, GameStatus } from "@/types/game";
 
@@ -55,7 +55,8 @@ export default function HostGamePage() {
   const currentTournament = tournament || localTournament;
   const currentQ = currentTournament?.current_question ?? 0;
   const totalQ = getTotalQuestions();
-  const question = triviaQuestions[currentQ];
+  const gameQuestions = getGameQuestions(code);
+  const question = gameQuestions[currentQ];
 
   // Refs to avoid stale closures in setTimeout callbacks
   const currentQRef = useRef(currentQ);

@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { getTournament, submitAnswer, recordGoal } from "@/lib/gameLogic";
 import { useGameSync } from "@/hooks/useGameSync";
 import { useCountdown } from "@/hooks/useCountdown";
-import { triviaQuestions } from "@/lib/questions";
+import { getGameQuestions, QUESTIONS_PER_GAME } from "@/lib/questions";
 import type { Tournament, Player, Direction } from "@/types/game";
 
 // Kahoot-style colors
@@ -64,7 +64,8 @@ export default function PlayerGamePage() {
   const currentTournament = tournament || localTournament;
   const status = currentTournament?.status;
   const currentQ = currentTournament?.current_question ?? 0;
-  const question = triviaQuestions[currentQ];
+  const gameQuestions = getGameQuestions(code);
+  const question = gameQuestions[currentQ];
 
   // Guards to ensure each phase initializes exactly once per question round.
   // Without these, effects can re-fire on dependency changes (e.g. penaltyRestart
@@ -141,7 +142,7 @@ export default function PlayerGamePage() {
     (optionIndex: number) => {
       if (answered || !playerId || !currentTournament) return;
 
-      const q = triviaQuestions[currentQ];
+      const q = gameQuestions[currentQ];
       const isCorrect = optionIndex >= 0 && optionIndex === q.correctIndex;
       setLastAnswerCorrect(isCorrect);
       setSelectedOption(optionIndex);
@@ -155,7 +156,7 @@ export default function PlayerGamePage() {
       }
 
       const timeMs = Date.now() - answerStartTime;
-      submitAnswer(currentTournament.id, playerId, currentQ, optionIndex, timeMs);
+      submitAnswer(currentTournament.id, playerId, currentQ, optionIndex, timeMs, q.correctIndex);
     },
     [answered, playerId, currentTournament, currentQ, answerStartTime]
   );
@@ -295,11 +296,11 @@ export default function PlayerGamePage() {
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
         <div className="flex items-center gap-2">
           <span className="text-gray-500 text-sm">
-            {currentQ + 1}/{triviaQuestions.length}
+            {currentQ + 1}/{QUESTIONS_PER_GAME}
           </span>
           {/* Progress dots */}
           <div className="flex gap-1">
-            {triviaQuestions.map((_, i) => (
+            {gameQuestions.map((_, i) => (
               <div
                 key={i}
                 className={`w-2 h-2 rounded-full transition-all ${
@@ -466,7 +467,7 @@ export default function PlayerGamePage() {
               Ranking
             </h2>
             <p className="text-gray-500 text-center text-sm mb-4">
-              Pregunta {currentQ + 1} de {triviaQuestions.length}
+              Pregunta {currentQ + 1} de {QUESTIONS_PER_GAME}
             </p>
 
             {/* My position highlight */}
