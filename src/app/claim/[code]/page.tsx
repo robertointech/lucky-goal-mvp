@@ -81,12 +81,23 @@ export default function ClaimPage() {
       });
 
       await connect(async () => {
-        await wallet.connect({
-          client,
-          chain: avalancheFuji,
-          strategy: "passkey",
-          type: "sign-up",
-        });
+        try {
+          // Try sign-in first (returning users)
+          await wallet.connect({
+            client,
+            chain: avalancheFuji,
+            strategy: "passkey",
+            type: "sign-in",
+          });
+        } catch {
+          // Fallback to sign-up (new users)
+          await wallet.connect({
+            client,
+            chain: avalancheFuji,
+            strategy: "passkey",
+            type: "sign-up",
+          });
+        }
         return wallet;
       });
 
