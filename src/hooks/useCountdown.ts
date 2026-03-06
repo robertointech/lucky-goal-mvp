@@ -31,10 +31,14 @@ export function useCountdown(initialTime: number, autoStart = false) {
     setIsRunning(false);
   }, [initialTime]);
 
+  const stop = useCallback(() => {
+    setIsRunning(false);
+  }, []);
+
   const restart = useCallback((time?: number) => {
     setTimeLeft(time ?? initialTime);
     setIsRunning(true);
   }, [initialTime]);
 
-  return { timeLeft, isRunning, isFinished: timeLeft === 0, start, reset, restart };
+  return { timeLeft, isRunning, isFinished: timeLeft === 0, start, stop, reset, restart };
 }

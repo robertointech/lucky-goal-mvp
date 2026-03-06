@@ -5,6 +5,7 @@ interface PlayerCardProps {
   nickname: string;
   score?: number;
   rank?: number;
+  highlight?: boolean;
   isWinner?: boolean;
   compact?: boolean;
 }
@@ -14,6 +15,7 @@ export default function PlayerCard({
   nickname,
   score,
   rank,
+  highlight,
   isWinner,
   compact,
 }: PlayerCardProps) {
@@ -29,7 +31,7 @@ export default function PlayerCard({
   return (
     <div
       className={`flex items-center gap-3 rounded-xl px-4 py-3 border transition-all ${
-        isWinner
+        highlight || isWinner
           ? "bg-[#00FF88]/10 border-[#00FF88]"
           : "bg-[#1a1a2e] border-gray-800"
       }`}

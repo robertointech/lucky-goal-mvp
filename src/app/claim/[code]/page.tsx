@@ -7,6 +7,7 @@ import { useConnect } from "thirdweb/react";
 import { avalancheFuji } from "thirdweb/chains";
 import { client } from "@/lib/thirdweb";
 import { getTournament, getPlayers, setPlayerWallet } from "@/lib/gameLogic";
+import { getEscrowTournament } from "@/lib/escrow";
 import type { Tournament, Player } from "@/types/game";
 
 type ClaimStep = "loading" | "ready" | "creating" | "success" | "error" | "not-winner";
@@ -20,6 +21,7 @@ export default function ClaimPage() {
   const [winner, setWinner] = useState<Player | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
+  const [prizeReceived, setPrizeReceived] = useState(false);
 
   const { connect } = useConnect();
 
@@ -112,6 +114,22 @@ export default function ClaimPage() {
     }
   };
 
+  // Poll escrow contract to check if prize has been sent
+  useEffect(() => {
+    if (step !== "success" || prizeReceived) return;
+    const check = async () => {
+      try {
+        const escrow = await getEscrowTournament(code);
+        if (escrow.claimed) setPrizeReceived(true);
+      } catch {
+        // Contract not deployed yet — ignore
+      }
+    };
+    check();
+    const interval = setInterval(check, 5000);
+    return () => clearInterval(interval);
+  }, [step, prizeReceived, code]);
+
   // --- Render ---
 
   if (step === "loading") {
@@ -188,11 +206,17 @@ export default function ClaimPage() {
           `}</style>
         </div>
 
-        <div className="text-6xl mb-4">🎉</div>
-        <h2 className="text-2xl text-white font-bold mb-2">Wallet creada!</h2>
-        <p className="text-gray-400 mb-4">Tu premio esta en camino</p>
+        <div className="text-6xl mb-4">{prizeReceived ? "🎉" : "⏳"}</div>
+        <h2 className="text-2xl text-white font-bold mb-2">
+          {prizeReceived ? "Premio recibido!" : "Wallet creada!"}
+        </h2>
+        <p className="text-gray-400 mb-4">
+          {prizeReceived
+            ? "El AVAX ya esta en tu wallet"
+            : "Esperando a que el host envie el premio..."}
+        </p>
 
-        <div className="bg-[#0D1117] border border-[#00FF88] rounded-xl px-6 py-4 text-center mb-6">
+        <div className={`bg-[#0D1117] border ${prizeReceived ? "border-[#00FF88]" : "border-gray-800"} rounded-xl px-6 py-4 text-center mb-6`}>
           <p className="text-gray-400 text-sm mb-1">Tu wallet</p>
           <p className="text-[#00FF88] font-mono text-sm">{shortAddress}</p>
           {tournament && tournament.prize_amount > 0 && (
@@ -202,6 +226,9 @@ export default function ClaimPage() {
               <p className="text-[#00FF88] text-2xl font-bold">
                 {tournament.prize_amount} AVAX
               </p>
+              {prizeReceived && (
+                <p className="text-green-400 text-xs mt-1 font-semibold">Transferido</p>
+              )}
             </>
           )}
         </div>

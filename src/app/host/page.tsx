@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useActiveAccount, ConnectButton } from "thirdweb/react";
+import { useActiveAccount, useSendTransaction, ConnectButton } from "thirdweb/react";
 import { client } from "@/lib/thirdweb";
 import { avalancheFuji } from "thirdweb/chains";
 import { createTournament } from "@/lib/gameLogic";
+import { prepareCreateTournament } from "@/lib/escrow";
 
 export default function HostPage() {
   const account = useActiveAccount();
@@ -13,6 +14,7 @@ export default function HostPage() {
   const [prizeAmount, setPrizeAmount] = useState("0.1");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { mutateAsync: sendTx } = useSendTransaction();
 
   const handleCreate = async () => {
     if (!account) return;
@@ -20,10 +22,21 @@ export default function HostPage() {
     setError("");
 
     try {
+      // 1. Create tournament in DB to get the code
       const tournament = await createTournament(
         account.address,
         parseFloat(prizeAmount) || 0
       );
+
+      // 2. Deposit AVAX into escrow contract
+      try {
+        const tx = prepareCreateTournament(tournament.code, prizeAmount);
+        await sendTx(tx);
+      } catch (escrowErr) {
+        console.warn("Escrow deposit skipped (contract not deployed?):", escrowErr);
+        // Continue anyway — tournament works without escrow for testing
+      }
+
       router.push(`/host/lobby/${tournament.code}`);
     } catch (err) {
       setError("Error al crear torneo. Intenta de nuevo.");

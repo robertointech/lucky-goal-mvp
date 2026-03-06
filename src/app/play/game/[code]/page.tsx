@@ -7,19 +7,24 @@ import { getTournament, submitAnswer, recordGoal } from "@/lib/gameLogic";
 import { useGameSync } from "@/hooks/useGameSync";
 import { useCountdown } from "@/hooks/useCountdown";
 import { triviaQuestions } from "@/lib/questions";
-import Timer from "@/components/ui/Timer";
-import Leaderboard from "@/components/ui/Leaderboard";
-import WinnerBanner from "@/components/ui/WinnerBanner";
-import type { Tournament, Direction } from "@/types/game";
+import type { Tournament, Player, Direction } from "@/types/game";
 
 const PenaltyScene = dynamic(() => import("@/components/3d/PenaltyScene"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[350px] bg-[#0D1117] rounded-xl flex items-center justify-center">
+    <div className="w-full h-[300px] bg-[#0D1117] rounded-2xl flex items-center justify-center">
       <div className="text-[#00FF88] animate-pulse">Cargando 3D...</div>
     </div>
   ),
 });
+
+// Kahoot-style colors
+const OPT_COLORS = [
+  { bg: "#E21B3C", icon: "▲" }, // A red
+  { bg: "#1368CE", icon: "◆" }, // B blue
+  { bg: "#D89E00", icon: "●" }, // C yellow
+  { bg: "#26890C", icon: "■" }, // D green
+];
 
 export default function PlayerGamePage() {
   const params = useParams();
@@ -31,7 +36,10 @@ export default function PlayerGamePage() {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [answered, setAnswered] = useState(false);
   const [answerStartTime, setAnswerStartTime] = useState(0);
-  const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
+  const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null);
+
+  // Score popup
+  const [scorePopup, setScorePopup] = useState<string | null>(null);
 
   // Penalty state
   const [selectedDirection, setSelectedDirection] = useState<Direction | null>(null);
@@ -40,12 +48,16 @@ export default function PlayerGamePage() {
   const [penaltyResult, setPenaltyResult] = useState<"goal" | "saved" | null>(null);
   const [penaltyDone, setPenaltyDone] = useState(false);
 
-  const { timeLeft, restart } = useCountdown(20);
+  const { timeLeft, restart, stop: triviaStop } = useCountdown(20);
+  const {
+    timeLeft: penaltyTimeLeft,
+    restart: penaltyRestart,
+    stop: penaltyStop,
+  } = useCountdown(10);
 
   useEffect(() => {
     const pid = sessionStorage.getItem(`player_${code}`);
     setPlayerId(pid);
-
     const load = async () => {
       const t = await getTournament(code);
       setLocalTournament(t);
@@ -68,37 +80,62 @@ export default function PlayerGamePage() {
     if (status === "question") {
       setSelectedOption(null);
       setAnswered(false);
+      setLastAnswerCorrect(null);
       setAnswerStartTime(Date.now());
       setSelectedDirection(null);
       setKicked(false);
       setGoalkeeperDirection(null);
       setPenaltyResult(null);
       setPenaltyDone(false);
+      setScorePopup(null);
       restart(20);
+    } else {
+      triviaStop();
     }
-  }, [status, currentQ, restart]);
+  }, [status, currentQ, restart, triviaStop]);
 
-  // Auto-submit when timer runs out
+  useEffect(() => {
+    if (status === "penalty" && !kicked && !penaltyDone) {
+      penaltyRestart(10);
+    }
+  }, [status, penaltyRestart]);
+
   useEffect(() => {
     if (timeLeft === 0 && !answered && status === "question") {
       handleSubmitAnswer(-1);
     }
   }, [timeLeft, answered, status]);
 
+  useEffect(() => {
+    if (penaltyTimeLeft === 0 && !kicked && status === "penalty" && !penaltyDone) {
+      setKicked(true);
+      const directions: Direction[] = ["left", "center", "right"];
+      const randomDir = selectedDirection || directions[Math.floor(Math.random() * directions.length)];
+      if (!selectedDirection) setSelectedDirection(randomDir);
+      setGoalkeeperDirection(randomDir);
+      setPenaltyResult("saved");
+    }
+  }, [penaltyTimeLeft, kicked, status, penaltyDone, selectedDirection]);
+
   const handleSubmitAnswer = useCallback(
-    async (optionIndex: number) => {
+    (optionIndex: number) => {
       if (answered || !playerId || !currentTournament) return;
+
+      const q = triviaQuestions[currentQ];
+      const isCorrect = optionIndex >= 0 && optionIndex === q.correctIndex;
+      setLastAnswerCorrect(isCorrect);
+      setSelectedOption(optionIndex);
       setAnswered(true);
 
+      if (isCorrect) {
+        const timeMs = Date.now() - answerStartTime;
+        const timeBonus = Math.max(0, Math.round((1 - timeMs / 20000) * 100));
+        setScorePopup(`+${100 + timeBonus}`);
+        setTimeout(() => setScorePopup(null), 1500);
+      }
+
       const timeMs = Date.now() - answerStartTime;
-      const isCorrect = await submitAnswer(
-        currentTournament.id,
-        playerId,
-        currentQ,
-        optionIndex,
-        timeMs
-      );
-      setLastAnswerCorrect(isCorrect);
+      submitAnswer(currentTournament.id, playerId, currentQ, optionIndex, timeMs);
     },
     [answered, playerId, currentTournament, currentQ, answerStartTime]
   );
@@ -110,17 +147,19 @@ export default function PlayerGamePage() {
 
   const handleKick = () => {
     if (!selectedDirection || kicked) return;
+    penaltyStop();
     setKicked(true);
 
-    const directions: Direction[] = ["left", "center", "right"];
-    const gkDir = directions[Math.floor(Math.random() * directions.length)];
-    setGoalkeeperDirection(gkDir);
-
-    // Goal probability
-    const goalProb = lastAnswerCorrect ? 0.7 : 0.35;
-    const sameDir = selectedDirection === gkDir;
-    const scored = !sameDir || Math.random() < goalProb;
-    setPenaltyResult(scored ? "goal" : "saved");
+    if (!lastAnswerCorrect) {
+      setGoalkeeperDirection(selectedDirection);
+      setPenaltyResult("saved");
+    } else {
+      const directions: Direction[] = ["left", "center", "right"];
+      const gkDir = directions[Math.floor(Math.random() * directions.length)];
+      setGoalkeeperDirection(gkDir);
+      const scored = selectedDirection !== gkDir || Math.random() < 0.3;
+      setPenaltyResult(scored ? "goal" : "saved");
+    }
   };
 
   const handleKickComplete = async (scored: boolean) => {
@@ -130,25 +169,76 @@ export default function PlayerGamePage() {
     setPenaltyDone(true);
   };
 
-  // Redirect to claim if finished and winner
   const winner = players.find((p) => p.is_winner);
+  const sorted = [...players].sort((a, b) => b.score - a.score);
+  const myRank = sorted.findIndex((p) => p.id === playerId) + 1;
 
+  // ========== FINISHED ==========
   if (status === "finished" && winner) {
     const isSelf = winner.id === playerId;
-
     return (
-      <div className="min-h-screen flex flex-col bg-[#1a1a2e] px-4 py-6">
-        <WinnerBanner
-          nickname={winner.nickname}
-          avatar={winner.avatar}
-          score={winner.score}
-          prizeAmount={currentTournament?.prize_amount ?? 0}
-          isSelf={isSelf}
-          onClaim={isSelf ? () => router.push(`/claim/${code}`) : undefined}
-        />
-        <div className="mt-6">
-          <Leaderboard players={players} highlightId={winner.id} />
+      <div className="min-h-screen flex flex-col bg-[#1a1a2e] relative overflow-hidden">
+        {/* Confetti for winner */}
+        {isSelf && <MiniConfetti />}
+
+        <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 relative z-10">
+          {isSelf ? (
+            <>
+              <div className="text-5xl mb-1 animate-[crownDrop_0.8s_ease-out]">👑</div>
+              <div className="text-7xl mb-3 animate-[popIn_0.5s_ease-out_0.3s_backwards]">
+                {winner.avatar}
+              </div>
+              <h2 className="text-3xl font-black text-white mb-1">Ganaste!</h2>
+              <p className="text-[#00FF88] text-2xl font-bold mb-6">
+                {winner.score} puntos
+              </p>
+              {currentTournament && currentTournament.prize_amount > 0 && (
+                <div
+                  className="bg-[#0D1117] border-2 border-[#00FF88]/30 rounded-2xl px-8 py-5 text-center mb-6"
+                  style={{ boxShadow: "0 0 40px rgba(0, 255, 136, 0.15)" }}
+                >
+                  <p className="text-gray-400 text-sm mb-1">Tu premio</p>
+                  <p className="text-[#00FF88] text-4xl font-black">
+                    {currentTournament.prize_amount} AVAX
+                  </p>
+                </div>
+              )}
+              <button
+                onClick={() => router.push(`/claim/${code}`)}
+                className="bg-[#00FF88] text-black font-black py-4 px-8 rounded-2xl text-lg active:scale-95 transform"
+                style={{ boxShadow: "0 0 30px rgba(0, 255, 136, 0.4)" }}
+              >
+                Reclamar Premio
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="text-5xl mb-3">{winner.avatar}</div>
+              <h2 className="text-2xl font-bold text-white mb-1">
+                {winner.nickname} gano!
+              </h2>
+              <p className="text-[#00FF88] text-xl font-bold mb-6">
+                {winner.score} puntos
+              </p>
+              {myRank > 0 && (
+                <div className="bg-[#0D1117] border border-white/10 rounded-2xl px-6 py-4 text-center">
+                  <p className="text-gray-400 text-sm">Tu posicion</p>
+                  <p className="text-white text-3xl font-black">#{myRank}</p>
+                  <p className="text-gray-400 text-sm">
+                    {myPlayer?.score ?? 0} pts
+                  </p>
+                </div>
+              )}
+            </>
+          )}
         </div>
+
+        {/* Compact leaderboard */}
+        <div className="relative z-10 px-4 pb-4">
+          <CompactLeaderboard players={sorted} myId={playerId} />
+        </div>
+
+        <style>{ANIMATIONS_CSS}</style>
       </div>
     );
   }
@@ -156,147 +246,516 @@ export default function PlayerGamePage() {
   if (!currentTournament || !question) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#1a1a2e]">
-        <div className="text-[#00FF88] text-xl animate-pulse">Cargando...</div>
+        <div className="text-[#00FF88] text-xl animate-pulse font-bold">
+          Cargando...
+        </div>
       </div>
     );
   }
 
+  // Timer color
+  const timerColor =
+    timeLeft > 10 ? "#00FF88" : timeLeft > 5 ? "#FFD700" : "#FF4444";
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#1a1a2e] px-4 py-4">
+    <div className="min-h-screen flex flex-col bg-[#1a1a2e] relative overflow-hidden">
+      {/* Score popup */}
+      {scorePopup && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+          <span
+            className="text-[#00FF88] text-4xl font-black animate-[scoreFloat_1.5s_ease-out_forwards]"
+            style={{ textShadow: "0 0 20px rgba(0, 255, 136, 0.6)" }}
+          >
+            {scorePopup}
+          </span>
+        </div>
+      )}
+
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-gray-400 text-sm">
-          Pregunta {currentQ + 1}/{triviaQuestions.length}
-        </p>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+        <div className="flex items-center gap-2">
+          <span className="text-gray-500 text-sm">
+            {currentQ + 1}/{triviaQuestions.length}
+          </span>
+          {/* Progress dots */}
+          <div className="flex gap-1">
+            {triviaQuestions.map((_, i) => (
+              <div
+                key={i}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  i < currentQ
+                    ? "bg-[#00FF88]"
+                    : i === currentQ
+                      ? "bg-[#00FF88] animate-pulse"
+                      : "bg-gray-700"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
         {myPlayer && (
-          <p className="text-[#00FF88] font-bold">{myPlayer.score} pts</p>
+          <div className="flex items-center gap-1.5 bg-[#0D1117] rounded-lg px-3 py-1.5">
+            <span className="text-sm">{myPlayer.avatar}</span>
+            <span className="text-[#00FF88] font-bold text-sm tabular-nums">
+              {myPlayer.score}
+            </span>
+          </div>
         )}
       </div>
 
-      {/* Progress */}
-      <div className="w-full bg-gray-800 rounded-full h-1.5 mb-4">
-        <div
-          className="bg-[#00FF88] h-1.5 rounded-full transition-all duration-300"
-          style={{ width: `${((currentQ + 1) / triviaQuestions.length) * 100}%` }}
-        />
-      </div>
+      {/* Main content */}
+      <div className="flex-1 flex flex-col px-4 py-3">
+        {/* ========== QUESTION - NOT ANSWERED ========== */}
+        {status === "question" && !answered && (
+          <>
+            {/* Timer */}
+            <div className="mb-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <span
+                  className="text-3xl font-black tabular-nums transition-colors"
+                  style={{
+                    color: timerColor,
+                    textShadow: timeLeft <= 5 ? `0 0 15px ${timerColor}80` : "none",
+                  }}
+                >
+                  {timeLeft}
+                </span>
+                {timeLeft <= 5 && (
+                  <span className="text-red-400 text-xs font-bold animate-pulse uppercase tracking-wider">
+                    Rapido!
+                  </span>
+                )}
+              </div>
+              <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-1000 ease-linear"
+                  style={{
+                    width: `${(timeLeft / 20) * 100}%`,
+                    backgroundColor: timerColor,
+                    boxShadow: `0 0 10px ${timerColor}80`,
+                  }}
+                />
+              </div>
+            </div>
 
-      {/* Question Phase */}
-      {status === "question" && !answered && (
-        <>
-          <div className="flex justify-center mb-4">
-            <Timer timeLeft={timeLeft} totalTime={20} />
-          </div>
-          <div className="bg-[#0D1117] border border-gray-800 rounded-xl p-4 mb-4">
-            <h2 className="text-lg text-white font-semibold text-center">
-              {question.question}
+            {/* Question */}
+            <div className="bg-[#0D1117] border border-white/10 rounded-2xl px-5 py-4 mb-4">
+              <h2 className="text-xl text-white font-bold text-center leading-snug">
+                {question.question}
+              </h2>
+            </div>
+
+            {/* Options - Kahoot style */}
+            <div className="grid grid-cols-2 gap-2.5 flex-1">
+              {question.options.map((opt, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleSubmitAnswer(i)}
+                  className="rounded-2xl flex flex-col items-center justify-center gap-1 px-3 py-4 min-h-[80px] active:scale-[0.93] transition-transform"
+                  style={{
+                    backgroundColor: OPT_COLORS[i].bg,
+                    boxShadow: `0 4px 15px ${OPT_COLORS[i].bg}50`,
+                  }}
+                >
+                  <span className="text-white/60 text-xl font-bold">
+                    {OPT_COLORS[i].icon}
+                  </span>
+                  <span className="text-white font-bold text-sm text-center leading-tight">
+                    {opt}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* ========== QUESTION - ANSWERED (feedback) ========== */}
+        {status === "question" && answered && (
+          <div
+            className={`flex-1 flex flex-col items-center justify-center ${
+              lastAnswerCorrect
+                ? "animate-[flashGreen_0.5s_ease-out]"
+                : "animate-[shakeX_0.5s_ease-out]"
+            }`}
+          >
+            {/* Result icon */}
+            <div
+              className={`w-24 h-24 rounded-full flex items-center justify-center mb-4 animate-[popIn_0.4s_ease-out] ${
+                lastAnswerCorrect ? "bg-[#00FF88]/20" : "bg-red-500/20"
+              }`}
+              style={{
+                boxShadow: lastAnswerCorrect
+                  ? "0 0 40px rgba(0, 255, 136, 0.3)"
+                  : "0 0 40px rgba(255, 68, 68, 0.3)",
+              }}
+            >
+              <span className="text-5xl">
+                {lastAnswerCorrect ? "✅" : "❌"}
+              </span>
+            </div>
+
+            <h2
+              className={`text-2xl font-black mb-1 ${
+                lastAnswerCorrect ? "text-[#00FF88]" : "text-red-400"
+              }`}
+            >
+              {lastAnswerCorrect ? "Correcto!" : "Incorrecto"}
             </h2>
+
+            {/* Show correct answer if wrong */}
+            {!lastAnswerCorrect && (
+              <p className="text-gray-400 text-sm mt-2">
+                Respuesta: {question.options[question.correctIndex]}
+              </p>
+            )}
+
+            <div className="flex items-center gap-2 mt-6 text-gray-500 text-sm">
+              <div className="w-1.5 h-1.5 bg-gray-600 rounded-full animate-pulse" />
+              Esperando al penal...
+            </div>
           </div>
-          <div className="flex flex-col gap-2 flex-1">
-            {question.options.map((opt, i) => (
-              <button
-                key={i}
-                onClick={() => {
-                  setSelectedOption(i);
-                  handleSubmitAnswer(i);
-                }}
-                className={`w-full text-left bg-[#0D1117] border rounded-xl px-4 py-3 transition-all active:scale-95 ${
-                  selectedOption === i
-                    ? "border-[#00FF88] bg-[#00FF88]/10"
-                    : "border-gray-700 hover:border-gray-500"
+        )}
+
+        {/* ========== PENALTY - PLAYING ========== */}
+        {status === "penalty" && !penaltyDone && (
+          <div className="flex-1 flex flex-col">
+            {/* Header */}
+            <div className="text-center mb-2">
+              <h2 className="text-xl text-white font-black flex items-center justify-center gap-2">
+                <span>⚽</span> Patea el Penal!
+              </h2>
+              <p
+                className={`text-xs mt-1 font-semibold ${
+                  lastAnswerCorrect ? "text-[#00FF88]" : "text-red-400"
                 }`}
               >
-                <span className="text-[#00FF88] font-bold mr-2">
-                  {String.fromCharCode(65 + i)}
-                </span>
-                <span className="text-white">{opt}</span>
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-
-      {/* Waiting for answer result */}
-      {status === "question" && answered && (
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <div className="text-4xl mb-4">
-            {lastAnswerCorrect ? "✅" : "❌"}
-          </div>
-          <h2 className="text-xl text-white font-bold">
-            {lastAnswerCorrect ? "Correcto!" : "Incorrecto"}
-          </h2>
-          <p className="text-gray-400 text-sm mt-2">
-            Esperando al penal...
-          </p>
-        </div>
-      )}
-
-      {/* Penalty Phase */}
-      {status === "penalty" && !penaltyDone && (
-        <div className="flex-1 flex flex-col">
-          <div className="text-center mb-2">
-            <h2 className="text-xl text-white font-bold">Patea el Penal!</h2>
-            <p className="text-gray-400 text-xs mt-1">
-              {lastAnswerCorrect
-                ? "Respuesta correcta: 70% probabilidad"
-                : "Respuesta incorrecta: 35% probabilidad"}
-            </p>
-          </div>
-
-          <PenaltyScene
-            onDirectionSelect={handleDirectionSelect}
-            onKickComplete={handleKickComplete}
-            selectedDirection={selectedDirection}
-            kicked={kicked}
-            goalkeeperDirection={goalkeeperDirection}
-            result={penaltyResult}
-          />
-
-          {/* Kick button */}
-          {!kicked && (
-            <button
-              onClick={handleKick}
-              disabled={!selectedDirection}
-              className="mt-4 w-full bg-[#00FF88] text-black font-bold py-4 rounded-xl text-lg active:scale-95 transform disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              {selectedDirection ? "PATEAR!" : "Selecciona direccion"}
-            </button>
-          )}
-
-          {/* Result */}
-          {penaltyResult && (
-            <div className="text-center mt-4">
-              <div className="text-4xl mb-2">
-                {penaltyResult === "goal" ? "🎉" : "😔"}
-              </div>
-              <p className={`text-xl font-bold ${
-                penaltyResult === "goal" ? "text-[#00FF88]" : "text-red-500"
-              }`}>
-                {penaltyResult === "goal" ? "GOOOL!" : "Atajada!"}
+                {lastAnswerCorrect
+                  ? "Respuesta correcta — puedes meter gol!"
+                  : "Respuesta incorrecta — el arquero te ataja"}
               </p>
             </div>
-          )}
-        </div>
-      )}
 
-      {/* Penalty done, waiting */}
-      {status === "penalty" && penaltyDone && (
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <div className="text-[#00FF88] text-xl animate-pulse">
-            Esperando resultados...
+            {/* Timer bar */}
+            {!kicked && (
+              <div className="mb-2">
+                <div className="w-full h-2.5 bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-1000 ease-linear"
+                    style={{
+                      width: `${(penaltyTimeLeft / 10) * 100}%`,
+                      backgroundColor:
+                        penaltyTimeLeft > 5
+                          ? "#00FF88"
+                          : penaltyTimeLeft > 2
+                            ? "#FFD700"
+                            : "#FF4444",
+                      boxShadow:
+                        penaltyTimeLeft <= 3
+                          ? "0 0 12px rgba(255, 68, 68, 0.6)"
+                          : "0 0 8px rgba(0, 255, 136, 0.3)",
+                    }}
+                  />
+                </div>
+                <p
+                  className="text-right text-xs font-bold mt-1 tabular-nums"
+                  style={{
+                    color:
+                      penaltyTimeLeft > 5
+                        ? "#00FF88"
+                        : penaltyTimeLeft > 2
+                          ? "#FFD700"
+                          : "#FF4444",
+                  }}
+                >
+                  {penaltyTimeLeft}s
+                </p>
+              </div>
+            )}
+
+            {/* 3D Scene */}
+            <PenaltyScene
+              onDirectionSelect={handleDirectionSelect}
+              onKickComplete={handleKickComplete}
+              selectedDirection={selectedDirection}
+              kicked={kicked}
+              goalkeeperDirection={goalkeeperDirection}
+              result={penaltyResult}
+            />
+
+            {/* Direction buttons */}
+            {!kicked && (
+              <div className="mt-3 space-y-3">
+                <div className="grid grid-cols-3 gap-2">
+                  {(["left", "center", "right"] as Direction[]).map((dir) => {
+                    const isSelected = selectedDirection === dir;
+                    const labels = {
+                      left: { icon: "↙️", text: "IZQ" },
+                      center: { icon: "⬆️", text: "CENTRO" },
+                      right: { icon: "↘️", text: "DER" },
+                    };
+                    return (
+                      <button
+                        key={dir}
+                        onClick={() => handleDirectionSelect(dir)}
+                        className="flex flex-col items-center gap-1 py-4 rounded-2xl font-bold transition-all active:scale-90"
+                        style={{
+                          backgroundColor: isSelected
+                            ? "#00FF88"
+                            : "#0D1117",
+                          color: isSelected ? "#000" : "#9CA3AF",
+                          border: isSelected
+                            ? "2px solid #00FF88"
+                            : "2px solid rgba(255,255,255,0.1)",
+                          boxShadow: isSelected
+                            ? "0 0 20px rgba(0, 255, 136, 0.3)"
+                            : "none",
+                        }}
+                      >
+                        <span className="text-2xl">{labels[dir].icon}</span>
+                        <span className="text-xs tracking-wider">
+                          {labels[dir].text}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Kick button */}
+                <button
+                  onClick={handleKick}
+                  disabled={!selectedDirection}
+                  className="w-full font-black py-4 rounded-2xl text-lg active:scale-95 transform transition-all disabled:opacity-20"
+                  style={{
+                    backgroundColor: selectedDirection ? "#00FF88" : "#333",
+                    color: selectedDirection ? "#000" : "#666",
+                    boxShadow: selectedDirection
+                      ? "0 0 30px rgba(0, 255, 136, 0.3)"
+                      : "none",
+                  }}
+                >
+                  {selectedDirection ? "⚽ PATEAR!" : "Elige direccion"}
+                </button>
+              </div>
+            )}
+
+            {/* Penalty result */}
+            {penaltyResult && (
+              <div className="text-center mt-4 animate-[popIn_0.4s_ease-out]">
+                <div
+                  className="text-5xl mb-2"
+                  style={{
+                    filter:
+                      penaltyResult === "goal"
+                        ? "drop-shadow(0 0 15px rgba(0, 255, 136, 0.5))"
+                        : "none",
+                  }}
+                >
+                  {penaltyResult === "goal" ? "🎉" : "🧤"}
+                </div>
+                <p
+                  className={`text-2xl font-black ${
+                    penaltyResult === "goal" ? "text-[#00FF88]" : "text-red-400"
+                  }`}
+                >
+                  {penaltyResult === "goal" ? "GOOOL!" : "Atajada!"}
+                </p>
+                {penaltyResult === "goal" && (
+                  <p className="text-[#00FF88] text-sm font-bold mt-1 animate-[popIn_0.4s_ease-out_0.2s_backwards]">
+                    +50 pts
+                  </p>
+                )}
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Results Phase */}
-      {status === "results" && (
-        <div className="flex-1">
-          <h2 className="text-xl text-white font-bold text-center mb-4">
-            Resultados
-          </h2>
-          <Leaderboard players={players} highlightId={playerId ?? undefined} />
-        </div>
-      )}
+        {/* ========== PENALTY DONE - WAITING ========== */}
+        {status === "penalty" && penaltyDone && (
+          <div className="flex-1 flex flex-col items-center justify-center">
+            <div className="w-10 h-10 border-3 border-[#00FF88]/30 border-t-[#00FF88] rounded-full animate-spin mb-4" />
+            <p className="text-gray-400 font-semibold">
+              Esperando resultados...
+            </p>
+          </div>
+        )}
+
+        {/* ========== RESULTS ========== */}
+        {status === "results" && (
+          <div className="flex-1 flex flex-col">
+            <h2 className="text-xl text-white font-black text-center mb-1">
+              Ranking
+            </h2>
+            <p className="text-gray-500 text-center text-sm mb-4">
+              Pregunta {currentQ + 1} de {triviaQuestions.length}
+            </p>
+
+            {/* My position highlight */}
+            {myRank > 0 && (
+              <div
+                className="flex items-center justify-center gap-3 bg-[#00FF88]/10 border border-[#00FF88]/30 rounded-2xl px-4 py-3 mb-4 animate-[popIn_0.4s_ease-out]"
+                style={{ boxShadow: "0 0 20px rgba(0, 255, 136, 0.1)" }}
+              >
+                <span className="text-white font-black text-2xl">
+                  #{myRank}
+                </span>
+                <span className="text-lg">{myPlayer?.avatar}</span>
+                <span className="text-white font-bold flex-1">
+                  {myPlayer?.nickname}
+                </span>
+                <span className="text-[#00FF88] font-black text-xl">
+                  {myPlayer?.score}
+                </span>
+              </div>
+            )}
+
+            {/* Full leaderboard */}
+            <CompactLeaderboard players={sorted} myId={playerId} />
+          </div>
+        )}
+      </div>
+
+      <style>{ANIMATIONS_CSS}</style>
     </div>
   );
 }
+
+// ---- Compact mobile leaderboard ----
+function CompactLeaderboard({
+  players,
+  myId,
+}: {
+  players: Player[];
+  myId: string | null;
+}) {
+  const medals = ["🥇", "🥈", "🥉"];
+  return (
+    <div className="flex flex-col gap-1.5">
+      {players.map((p, i) => {
+        const isMe = p.id === myId;
+        return (
+          <div
+            key={p.id}
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5 animate-[slideIn_0.4s_ease-out]"
+            style={{
+              animationDelay: `${i * 0.06}s`,
+              animationFillMode: "backwards",
+              backgroundColor: isMe
+                ? "rgba(0, 255, 136, 0.1)"
+                : "rgba(13, 17, 23, 0.5)",
+              border: isMe
+                ? "1px solid rgba(0, 255, 136, 0.25)"
+                : "1px solid rgba(255, 255, 255, 0.04)",
+            }}
+          >
+            <span className="min-w-[28px] text-center">
+              {i < 3 ? (
+                <span className="text-lg">{medals[i]}</span>
+              ) : (
+                <span className="text-gray-600 font-bold text-sm">
+                  {i + 1}
+                </span>
+              )}
+            </span>
+            <span className="text-xl">{p.avatar}</span>
+            <span
+              className={`font-semibold text-sm flex-1 truncate ${
+                isMe ? "text-white" : "text-gray-300"
+              }`}
+            >
+              {p.nickname}
+              {isMe && (
+                <span className="text-[#00FF88] text-xs ml-1">(tu)</span>
+              )}
+            </span>
+            <span
+              className={`font-bold tabular-nums text-sm ${
+                isMe ? "text-[#00FF88]" : "text-gray-500"
+              }`}
+            >
+              {p.score}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ---- Mini confetti for winner ----
+function MiniConfetti() {
+  const [particles, setParticles] = useState<
+    { id: number; x: number; color: string; delay: number; size: number; dur: number }[]
+  >([]);
+  useEffect(() => {
+    const colors = ["#00FF88", "#FFD700", "#FF6B6B", "#4ECDC4", "#E21B3C", "#1368CE"];
+    setParticles(
+      Array.from({ length: 40 }, (_, i) => ({
+        id: i,
+        x: Math.random() * 100,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        delay: Math.random() * 2,
+        size: 4 + Math.random() * 7,
+        dur: 2 + Math.random() * 3,
+      }))
+    );
+  }, []);
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="absolute"
+          style={{
+            left: `${p.x}%`,
+            top: "-10px",
+            width: p.size,
+            height: p.size,
+            backgroundColor: p.color,
+            borderRadius: Math.random() > 0.5 ? "50%" : "2px",
+            animation: `confettiFall ${p.dur}s ${p.delay}s linear infinite`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ---- CSS Animations ----
+const ANIMATIONS_CSS = `
+  @keyframes popIn {
+    0% { opacity: 0; transform: scale(0.5); }
+    70% { transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes scoreFloat {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    50% { opacity: 1; transform: translateY(-30px) scale(1.2); }
+    100% { opacity: 0; transform: translateY(-60px) scale(0.8); }
+  }
+  @keyframes flashGreen {
+    0% { background-color: rgba(0, 255, 136, 0.15); }
+    100% { background-color: transparent; }
+  }
+  @keyframes shakeX {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-8px); }
+    30% { transform: translateX(8px); }
+    45% { transform: translateX(-6px); }
+    60% { transform: translateX(6px); }
+    75% { transform: translateX(-3px); }
+    90% { transform: translateX(3px); }
+  }
+  @keyframes crownDrop {
+    0% { opacity: 0; transform: translateY(-40px) rotate(-15deg); }
+    60% { transform: translateY(3px) rotate(3deg); }
+    100% { opacity: 1; transform: translateY(0) rotate(0deg); }
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+`;

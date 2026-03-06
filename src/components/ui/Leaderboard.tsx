@@ -6,9 +6,10 @@ import PlayerCard from "./PlayerCard";
 interface LeaderboardProps {
   players: Player[];
   highlightId?: string;
+  showCrown?: boolean;
 }
 
-export default function Leaderboard({ players, highlightId }: LeaderboardProps) {
+export default function Leaderboard({ players, highlightId, showCrown = false }: LeaderboardProps) {
   const sorted = [...players].sort((a, b) => b.score - a.score);
 
   return (
@@ -23,7 +24,8 @@ export default function Leaderboard({ players, highlightId }: LeaderboardProps) 
           nickname={player.nickname}
           score={player.score}
           rank={i + 1}
-          isWinner={player.id === highlightId}
+          highlight={player.id === highlightId}
+          isWinner={showCrown && player.id === highlightId}
         />
       ))}
       {sorted.length === 0 && (
