@@ -88,7 +88,18 @@ export function useGameSync({ tournamentId, playerId }: UseGameSyncOptions) {
           }
         }
       )
-      .subscribe();
+      .subscribe(async (status) => {
+        // Re-fetch tournament immediately after subscribing to close the
+        // race-condition window where status changes could be missed
+        if (status === "SUBSCRIBED") {
+          const { data } = await supabase
+            .from("tournaments")
+            .select()
+            .eq("id", tournamentId)
+            .single();
+          if (data) setTournament(data);
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);

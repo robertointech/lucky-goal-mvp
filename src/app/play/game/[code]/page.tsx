@@ -51,6 +51,7 @@ export default function PlayerGamePage() {
   const { timeLeft, restart, stop: triviaStop } = useCountdown(20);
   const {
     timeLeft: penaltyTimeLeft,
+    isRunning: penaltyIsRunning,
     restart: penaltyRestart,
     stop: penaltyStop,
   } = useCountdown(10);
@@ -94,11 +95,17 @@ export default function PlayerGamePage() {
     }
   }, [status, currentQ, restart, triviaStop]);
 
+  // Reset penalty state when entering penalty phase (covers missed "question" phase)
   useEffect(() => {
-    if (status === "penalty" && !kicked && !penaltyDone) {
+    if (status === "penalty") {
+      setSelectedDirection(null);
+      setKicked(false);
+      setGoalkeeperDirection(null);
+      setPenaltyResult(null);
+      setPenaltyDone(false);
       penaltyRestart(10);
     }
-  }, [status, penaltyRestart]);
+  }, [status, currentQ, penaltyRestart]);
 
   useEffect(() => {
     if (timeLeft === 0 && !answered && status === "question") {
@@ -106,8 +113,14 @@ export default function PlayerGamePage() {
     }
   }, [timeLeft, answered, status]);
 
+  // Auto-kick when penalty timer expires — only if timer was actually running
+  // (isFinished transitions from running to done, not initial idle state)
+  const penaltyTimerExpired = penaltyTimeLeft === 0 && !penaltyIsRunning;
   useEffect(() => {
-    if (penaltyTimeLeft === 0 && !kicked && status === "penalty" && !penaltyDone) {
+    if (penaltyTimerExpired && !kicked && status === "penalty" && !penaltyDone) {
+      // Only auto-kick if the timer was started (penalty phase reset sets it running)
+      // The countdown hook sets isRunning=false when it reaches 0, so
+      // penaltyTimerExpired is true only after the timer ran down
       setKicked(true);
       const directions: Direction[] = ["left", "center", "right"];
       const randomDir = selectedDirection || directions[Math.floor(Math.random() * directions.length)];
@@ -115,7 +128,7 @@ export default function PlayerGamePage() {
       setGoalkeeperDirection(randomDir);
       setPenaltyResult("saved");
     }
-  }, [penaltyTimeLeft, kicked, status, penaltyDone, selectedDirection]);
+  }, [penaltyTimerExpired, kicked, status, penaltyDone, selectedDirection]);
 
   const handleSubmitAnswer = useCallback(
     (optionIndex: number) => {
