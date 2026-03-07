@@ -105,7 +105,7 @@ export default function HostLobbyPage() {
       {/* Top bar */}
       <div className="relative z-10 flex items-center justify-between px-8 py-5 border-b border-white/5">
         <div className="flex items-center gap-3">
-          <span className="text-3xl">⚽</span>
+          <img src="/logo.jpeg" alt="Lucky Goal" className="w-10 h-10 rounded-lg object-cover" />
           <span className="text-white font-bold text-2xl tracking-tight">
             Lucky Goal
           </span>

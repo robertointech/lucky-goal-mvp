@@ -20,20 +20,38 @@ export default function HostPage() {
 
   const handleCreate = async () => {
     if (!account) return;
+
+    const prize = parseFloat(prizeAmount) || 0;
+    if (prize <= 0) {
+      setError("El premio debe ser mayor a 0 AVAX.");
+      return;
+    }
+
     setLoading(true);
     setError("");
 
     try {
       const tournament = await createTournament(
         account.address,
-        parseFloat(prizeAmount) || 0
+        prize
       );
 
       try {
         const tx = prepareCreateTournament(tournament.code, prizeAmount);
         await sendTx(tx);
-      } catch (escrowErr) {
-        console.warn("Escrow deposit skipped (contract not deployed?):", escrowErr);
+      } catch (escrowErr: unknown) {
+        const msg = escrowErr instanceof Error ? escrowErr.message : String(escrowErr);
+        if (msg.includes("insufficient") || msg.includes("exceeds balance")) {
+          setError(`Fondos insuficientes. Necesitas al menos ${prizeAmount} AVAX + gas.`);
+          setLoading(false);
+          return;
+        }
+        if (msg.includes("rejected") || msg.includes("denied")) {
+          setError("Transaccion rechazada. Intenta de nuevo.");
+          setLoading(false);
+          return;
+        }
+        console.warn("Escrow deposit skipped:", escrowErr);
       }
 
       router.push(`/host/lobby/${tournament.code}`);
