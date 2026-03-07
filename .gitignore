@@ -32,3 +32,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# hardhat
+/artifacts/
+/cache/
+
+# session notes
+SESSION-SUMMARY-*.md
