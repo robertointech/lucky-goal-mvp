@@ -69,6 +69,9 @@ export default function HostGamePage() {
   }, [currentTournament]);
 
   const { timeLeft, restart } = useCountdown(20);
+  // Guards against the stale timeLeft===0 firing penalty on phase change.
+  // Set to true only AFTER restart(20) runs; reset to false on any phase change.
+  const timerStartedRef = useRef(false);
 
   // Snapshot scores when entering results to show deltas
   useEffect(() => {
@@ -87,11 +90,14 @@ export default function HostGamePage() {
   useEffect(() => {
     if (phase === "question") {
       restart(20);
+      timerStartedRef.current = true;
+    } else {
+      timerStartedRef.current = false;
     }
   }, [phase, currentQ, restart]);
 
   useEffect(() => {
-    if (timeLeft === 0 && phase === "question") {
+    if (timeLeft === 0 && phase === "question" && timerStartedRef.current) {
       handleNextPhase("penalty");
     }
   }, [timeLeft, phase]);
