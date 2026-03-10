@@ -105,7 +105,7 @@ export default function HostGamePage() {
     if (next === "penalty") {
       setPhase("penalty");
       await updateTournamentStatus(t.id, "penalty" as GameStatus);
-      setTimeout(() => handleNextPhase("results"), 12000);
+      setTimeout(() => handleNextPhase("results"), 15000);
     } else if (next === "results") {
       setPhase("results");
       await updateTournamentStatus(t.id, "results" as GameStatus);
@@ -123,7 +123,7 @@ export default function HostGamePage() {
           setPhase("countdown");
           setTimeout(() => {
             setPhase("question");
-          }, 2000);
+          }, 3000);
         }
       }, 4000);
     } else if (next === "finished") {
