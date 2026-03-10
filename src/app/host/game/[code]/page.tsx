@@ -32,7 +32,7 @@ export default function HostGamePage() {
     null
   );
   const [phase, setPhase] = useState<
-    "question" | "penalty" | "results" | "finished"
+    "question" | "countdown" | "penalty" | "results" | "finished"
   >("question");
   const [prizeSent, setPrizeSent] = useState(false);
   const [sendingPrize, setSendingPrize] = useState(false);
@@ -117,8 +117,13 @@ export default function HostGamePage() {
         if (q + 1 >= totalQ) {
           handleNextPhase("finished");
         } else {
+          // Update DB first so Realtime delivers "question" to players
           await updateTournamentStatus(tid, "question" as GameStatus, q + 1);
-          setPhase("question");
+          // Show countdown screen while players receive the status update
+          setPhase("countdown");
+          setTimeout(() => {
+            setPhase("question");
+          }, 2000);
         }
       }, 4000);
     } else if (next === "finished") {
@@ -208,7 +213,7 @@ export default function HostGamePage() {
         <div className="relative z-10 w-full h-1 bg-white/5">
           <div
             className="h-full bg-[#00FF88] transition-all duration-500"
-            style={{ width: `${((currentQ + (phase !== "question" ? 1 : 0)) / totalQ) * 100}%` }}
+            style={{ width: `${((currentQ + (phase !== "question" && phase !== "countdown" ? 1 : 0)) / totalQ) * 100}%` }}
           />
         </div>
       )}
@@ -295,6 +300,21 @@ export default function HostGamePage() {
                   </span>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* ========== COUNTDOWN (buffer before question timer) ========== */}
+        {phase === "countdown" && question && (
+          <div className="flex-1 flex flex-col items-center justify-center px-8">
+            <p className="text-[#00FF88] text-xl font-bold uppercase tracking-widest mb-6 animate-pulse">
+              Pregunta {currentQ + 1} de {totalQ}
+            </p>
+            <div
+              className="text-9xl font-black text-white animate-[popIn_0.5s_ease-out]"
+              style={{ textShadow: "0 0 40px rgba(0, 255, 136, 0.4)" }}
+            >
+              Preparense!
             </div>
           </div>
         )}
