@@ -96,22 +96,34 @@ export default function PlayerGamePage() {
   }, [status, currentQ, restart, triviaStop]);
 
   // Initialize penalty phase exactly once per question round.
-  // Only resets direction/result — does NOT reset kicked/penaltyDone if already set
-  // (covers players who missed the "question" phase entirely).
+  // If the player missed the "question" status (Realtime coalesced the rapid
+  // results→question→penalty transitions), force-reset all round state so the
+  // player isn't stuck with stale kicked/penaltyDone from the previous round.
   useEffect(() => {
     if (status === "penalty" && penaltyInitRef.current !== currentQ) {
       penaltyInitRef.current = currentQ;
-      // Only reset if player hasn't already kicked this round
-      // (question reset already cleared these if they saw the question)
-      if (!kicked) {
+
+      // Missed the question phase for this round — force full reset
+      if (questionInitRef.current !== currentQ) {
+        questionInitRef.current = currentQ;
+        setSelectedOption(null);
+        setAnswered(true); // Mark as answered (missed = no answer)
+        setLastAnswerCorrect(false); // Missed question = incorrect
+        setScorePopup(null);
+      }
+
+      // Reset penalty state (always — either fresh from question or recovered)
+      if (!kickedRef.current) {
         setSelectedDirection(null);
+        setKicked(false);
+        kickedRef.current = false;
         setGoalkeeperDirection(null);
         setPenaltyResult(null);
         setPenaltyDone(false);
         penaltyRestart(10);
       }
     }
-  }, [status, currentQ, penaltyRestart, kicked]);
+  }, [status, currentQ, penaltyRestart]);
 
   useEffect(() => {
     if (timeLeft === 0 && !answered && status === "question") {
