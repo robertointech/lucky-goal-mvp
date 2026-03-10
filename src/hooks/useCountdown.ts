@@ -11,11 +11,10 @@ export function useCountdown(initialTime: number, autoStart = false) {
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev <= 1) {
-          setIsRunning(false);
-          return 0;
-        }
-        return prev - 1;
+        const next = prev <= 1 ? 0 : prev - 1;
+        console.log("[COUNTDOWN] tick:", prev, "→", next);
+        if (next === 0) setIsRunning(false);
+        return next;
       });
     }, 1000);
 

@@ -61,17 +61,19 @@ export default function HostGamePage() {
   // Refs to avoid stale closures in setTimeout callbacks
   const currentQRef = useRef(currentQ);
   const tournamentRef = useRef(currentTournament);
+  const phaseRef = useRef(phase);
   useEffect(() => {
     currentQRef.current = currentQ;
   }, [currentQ]);
   useEffect(() => {
     tournamentRef.current = currentTournament;
   }, [currentTournament]);
+  useEffect(() => {
+    phaseRef.current = phase;
+    console.log("[HOST] PHASE CHANGED TO:", phase, "timeLeft:", timeLeft);
+  }, [phase]);
 
   const { timeLeft, restart } = useCountdown(20);
-  // Guards against the stale timeLeft===0 firing penalty on phase change.
-  // Set to true only AFTER restart(20) runs; reset to false on any phase change.
-  const timerStartedRef = useRef(false);
 
   // Snapshot scores when entering results to show deltas
   useEffect(() => {
@@ -89,18 +91,21 @@ export default function HostGamePage() {
 
   useEffect(() => {
     if (phase === "question") {
+      console.log("[HOST] RESTART CALLED WITH: 20");
       restart(20);
-      timerStartedRef.current = true;
-    } else {
-      timerStartedRef.current = false;
     }
   }, [phase, currentQ, restart]);
 
+  // Only depends on timeLeft — does NOT re-run when phase changes.
+  // Reads phase from phaseRef to avoid firing on stale timeLeft===0
+  // when phase transitions to "question" (timeLeft hasn't updated yet).
   useEffect(() => {
-    if (timeLeft === 0 && phase === "question" && timerStartedRef.current) {
+    console.log("[HOST] TIMER TICK:", timeLeft, "phase:", phaseRef.current);
+    if (timeLeft === 0 && phaseRef.current === "question") {
+      console.log("[HOST] PENALTY TRIGGER! timeLeft=0, phase=question");
       handleNextPhase("penalty");
     }
-  }, [timeLeft, phase]);
+  }, [timeLeft]);
 
   const handleNextPhase = async (
     next: "penalty" | "results" | "question" | "finished"
