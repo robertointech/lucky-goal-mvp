@@ -34,6 +34,7 @@ export default function PlayerGamePage() {
   // Penalty state
   const [selectedDirection, setSelectedDirection] = useState<Direction | null>(null);
   const [kicked, setKicked] = useState(false);
+  const kickedRef = useRef(false); // Synchronous guard — prevents double-kick from rapid taps
   const [goalkeeperDirection, setGoalkeeperDirection] = useState<Direction | null>(null);
   const [penaltyResult, setPenaltyResult] = useState<"goal" | "saved" | null>(null);
   const [penaltyDone, setPenaltyDone] = useState(false);
@@ -83,6 +84,7 @@ export default function PlayerGamePage() {
       setAnswerStartTime(Date.now());
       setSelectedDirection(null);
       setKicked(false);
+      kickedRef.current = false;
       setGoalkeeperDirection(null);
       setPenaltyResult(null);
       setPenaltyDone(false);
@@ -124,11 +126,12 @@ export default function PlayerGamePage() {
     // Guard: only auto-kick if we initialized penalty for this round
     if (
       penaltyTimerExpired &&
-      !kicked &&
+      !kickedRef.current &&
       status === "penalty" &&
       !penaltyDone &&
       penaltyInitRef.current === currentQ
     ) {
+      kickedRef.current = true;
       setKicked(true);
       const directions: Direction[] = ["left", "center", "right"];
       const randomDir = selectedDirection || directions[Math.floor(Math.random() * directions.length)];
@@ -167,7 +170,8 @@ export default function PlayerGamePage() {
   };
 
   const handleKick = () => {
-    if (!selectedDirection || kicked) return;
+    if (!selectedDirection || kickedRef.current) return;
+    kickedRef.current = true;
     penaltyStop();
     setKicked(true);
 
