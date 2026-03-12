@@ -10,6 +10,7 @@
 
 | Hash | Description |
 |------|-------------|
+| `a9674a3` | feat: complete i18n adoption across all 10 screens |
 | `d6d19e2` | feat: host dashboard, play again buttons, and i18n system |
 | `a180fa1` | feat: add CSV format help text and download template button for custom questions |
 | `70fc3bb` | feat: improved penalty graphics, goalkeeper logo upload, and wallet registry |
@@ -94,10 +95,11 @@
 - "Play Again" button on player finished screen → `/play`
 
 ### Feature 14 — Internationalization (i18n)
-- `src/lib/i18n.ts` with ~150 translation keys in EN and ES
+- `src/lib/i18n.ts` with ~210 translation keys in EN and ES
 - `LanguageContext` provider wraps entire app via layout
 - Auto-detects browser language (navigator.language), persists in localStorage
 - 🇪🇸/🇺🇸 toggle button fixed top-right on all screens
+- **All 10 screens fully wired** with `useLanguage()` + `t()` — zero hardcoded strings remaining
 
 ---
 
@@ -105,18 +107,18 @@
 
 | Screen | Uses `t()` | Status |
 |--------|-----------|--------|
-| Host game (finished/dashboard) | ✅ Yes | Fully translated |
-| Landing page `/` | ❌ No | Hardcoded English |
-| Host page `/host` | ❌ No | Hardcoded English |
-| Play page `/play` | ❌ No | Hardcoded English |
-| Join page `/play/join/[code]` | ❌ No | Hardcoded English |
-| Player lobby `/play/lobby/[code]` | ❌ No | Hardcoded English |
-| Host lobby `/host/lobby/[code]` | ❌ No | Hardcoded English |
-| Player game `/play/game/[code]` | ❌ No | Hardcoded English |
-| Claim page `/claim/[code]` | ❌ No | Hardcoded English |
-| FAQ page `/faq` | ❌ No | Hardcoded English |
+| Landing page `/` | ✅ Yes | Fully translated |
+| Host page `/host` | ✅ Yes | Fully translated |
+| Host lobby `/host/lobby/[code]` | ✅ Yes | Fully translated |
+| Host game `/host/game/[code]` | ✅ Yes | Fully translated |
+| Play page `/play` | ✅ Yes | Fully translated |
+| Join page `/play/join/[code]` | ✅ Yes | Fully translated |
+| Player lobby `/play/lobby/[code]` | ✅ Yes | Fully translated |
+| Player game `/play/game/[code]` | ✅ Yes | Fully translated |
+| Claim page `/claim/[code]` | ✅ Yes | Fully translated |
+| FAQ page `/faq` | ✅ Yes | Fully translated |
 
-> All translation keys exist in `i18n.ts`. Pages need to import `useLanguage()` and replace hardcoded strings with `t("key")`.
+> **100% i18n coverage.** All ~210 translation keys wired across all screens. EN/ES toggle works globally.
 
 ---
 
@@ -152,13 +154,19 @@
 
 | File | Changes |
 |------|---------|
-| `src/app/page.tsx` | FAQ link in footer |
+| `src/app/page.tsx` | FAQ link in footer, i18n wired |
 | `src/app/layout.tsx` | LanguageProvider + LanguageToggle wrapper |
 | `src/app/globals.css` | Custom cursor styles |
-| `src/app/host/page.tsx` | Passkey toggle, goalkeeper logo upload, CSV template download |
-| `src/app/host/game/[code]/page.tsx` | Dashboard, CSV export, new tournament button, i18n |
-| `src/app/play/game/[code]/page.tsx` | JuggleBall, improved penalty arena, goalkeeper logo, play again button |
-| `src/app/claim/[code]/page.tsx` | Wallet choice (passkey/existing), wallet registry |
+| `src/app/host/page.tsx` | Passkey toggle, goalkeeper logo upload, CSV template download, i18n wired |
+| `src/app/host/lobby/[code]/page.tsx` | i18n wired |
+| `src/app/host/game/[code]/page.tsx` | Dashboard, CSV export, new tournament button, full i18n |
+| `src/app/play/page.tsx` | i18n wired |
+| `src/app/play/join/[code]/page.tsx` | i18n wired |
+| `src/app/play/lobby/[code]/page.tsx` | i18n wired |
+| `src/app/play/game/[code]/page.tsx` | JuggleBall, improved penalty arena, goalkeeper logo, play again button, i18n wired |
+| `src/app/claim/[code]/page.tsx` | Wallet choice (passkey/existing), wallet registry, i18n wired |
+| `src/app/faq/page.tsx` | i18n wired (FAQ Q&As translated) |
+| `src/lib/i18n.ts` | Expanded from ~150 to ~210 keys (FAQ Q&As, lobby tips, host lobby, extras) |
 | `src/types/game.ts` | passkey_on_join, goalkeeper_logo fields |
 | `src/lib/gameLogic.ts` | createTournament params, getCorrectAnswerCounts() |
 
@@ -172,13 +180,13 @@
 4. **Passkey type fallback** — tries sign-in then sign-up, may show double biometric prompt
 5. **Host setTimeout chains** — may have stale closure state for currentQ in edge cases
 6. **Goalkeeper logo as base64** — large logos stored directly in DB; should use Supabase Storage for production
-7. **i18n partial adoption** — only host dashboard uses `t()`; other screens still hardcoded English
+7. ~~**i18n partial adoption**~~ — **RESOLVED**: all 10 screens now use `t()` with full EN/ES support
 
 ---
 
 ## Pending Features / Roadmap
 
-1. **Complete i18n adoption** — Wire `useLanguage()` + `t()` into all remaining screens
+1. ~~**Complete i18n adoption**~~ — **DONE** (commit `a9674a3`)
 2. **Passkey on Join flow** — Actually trigger wallet creation during join when toggle is ON
 3. **Host dashboard (live)** — Show real-time player answers during active game
 4. **Supabase Storage for logos** — Replace base64 with file upload to Supabase Storage
