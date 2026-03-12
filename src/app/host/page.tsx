@@ -263,9 +263,29 @@ export default function HostPage() {
                 </h3>
               </div>
 
-              <p className="text-gray-500 text-sm mb-4">
-                Upload a CSV with your own questions. If you don't upload, defaults are used.
+              <p className="text-gray-500 text-sm mb-2">
+                Upload a CSV with your own questions. If you don&apos;t upload, defaults are used.
               </p>
+              <div className="flex items-center gap-3 mb-4">
+                <p className="text-gray-600 text-xs font-mono">
+                  CSV format: question, option1, option2, option3, option4, correct_answer (0-3)
+                </p>
+                <button
+                  onClick={() => {
+                    const csv = `question,option1,option2,option3,option4,correct_answer\nWhat is the capital of France?,London,Paris,Berlin,Madrid,1\nHow many players in a soccer team?,9,10,11,12,2\nWhich planet is closest to the Sun?,Venus,Mercury,Earth,Mars,1`;
+                    const blob = new Blob([csv], { type: "text/csv" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "lucky-goal-template.csv";
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="shrink-0 text-[#00FF88] text-xs font-semibold hover:underline"
+                >
+                  Download Template
+                </button>
+              </div>
 
               {/* Upload area */}
               <input
