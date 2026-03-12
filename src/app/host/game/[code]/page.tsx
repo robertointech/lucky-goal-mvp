@@ -8,6 +8,7 @@ import {
   determineWinner,
   getTotalQuestions,
 } from "@/lib/gameLogic";
+import { processPostTournament } from "@/lib/globalPlayers";
 import { useGameSync } from "@/hooks/useGameSync";
 import { useCountdown } from "@/hooks/useCountdown";
 import { useSendTransaction } from "thirdweb/react";
@@ -141,6 +142,8 @@ export default function HostGamePage() {
       setPhase("finished");
       await determineWinner(t.id);
       await refreshPlayers();
+      // Process global ranking + achievements
+      processPostTournament(t.id).catch(console.error);
     }
   };
 

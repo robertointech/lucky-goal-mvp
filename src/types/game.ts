@@ -52,4 +52,41 @@ export interface Question {
 export const AVATARS = ["⚽", "🏆", "🦁", "🐯", "🦅", "🐉", "🔥", "⭐"] as const;
 export type Avatar = (typeof AVATARS)[number];
 
+export interface GlobalPlayer {
+  id: string;
+  nickname: string;
+  avatar: string;
+  total_xp: number;
+  total_games: number;
+  total_wins: number;
+  total_goals: number;
+  wallet_address: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type AchievementType =
+  | "first_match"
+  | "first_win"
+  | "first_goal"
+  | "streak_3"
+  | "perfect_round"
+  | "five_games";
+
+export interface Achievement {
+  id: string;
+  player_id: string;
+  achievement_type: AchievementType;
+  earned_at: string;
+}
+
+export const ACHIEVEMENT_META: Record<AchievementType, { label: string; icon: string; description: string }> = {
+  first_match: { label: "Debutante", icon: "🎮", description: "Jugar tu primer torneo" },
+  first_win: { label: "Campeón", icon: "🏆", description: "Ganar tu primer torneo" },
+  first_goal: { label: "Goleador", icon: "⚽", description: "Meter tu primer gol" },
+  streak_3: { label: "En Racha", icon: "🔥", description: "3 respuestas correctas seguidas" },
+  perfect_round: { label: "Perfecto", icon: "💎", description: "Todas correctas en un torneo" },
+  five_games: { label: "Veterano", icon: "⭐", description: "Jugar 5 torneos" },
+};
+
 export const TOURNAMENT_CODE_LENGTH = 6;
