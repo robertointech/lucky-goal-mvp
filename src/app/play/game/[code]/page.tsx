@@ -7,6 +7,7 @@ import { useGameSync } from "@/hooks/useGameSync";
 import { useCountdown } from "@/hooks/useCountdown";
 import { getGameQuestions, QUESTIONS_PER_GAME } from "@/lib/questions";
 import type { Tournament, Player, Direction } from "@/types/game";
+import JuggleBall from "@/components/JuggleBall";
 
 // Kahoot-style colors
 const OPT_COLORS = [
@@ -446,9 +447,8 @@ export default function PlayerGamePage() {
               </p>
             )}
 
-            <div className="flex items-center gap-2 mt-6 text-gray-500 text-sm">
-              <div className="w-1.5 h-1.5 bg-gray-600 rounded-full animate-pulse" />
-              Waiting for penalty...
+            <div className="mt-6">
+              <JuggleBall />
             </div>
           </div>
         )}
@@ -469,8 +469,8 @@ export default function PlayerGamePage() {
         {/* ========== PENALTY DONE - WAITING ========== */}
         {status === "penalty" && penaltyDone && (
           <div className="flex-1 flex flex-col items-center justify-center">
-            <div className="w-10 h-10 border-3 border-[#00FF88]/30 border-t-[#00FF88] rounded-full animate-spin mb-4" />
-            <p className="text-gray-400 font-semibold">
+            <JuggleBall />
+            <p className="text-gray-400 font-semibold mt-4">
               Waiting for results...
             </p>
           </div>

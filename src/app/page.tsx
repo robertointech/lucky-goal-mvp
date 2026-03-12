@@ -190,7 +190,13 @@ export default function LandingPage() {
       </div>
 
       {/* Footer */}
-      <div className="relative z-10 text-center pb-6">
+      <div className="relative z-10 text-center pb-6 space-y-1">
+        <Link
+          href="/faq"
+          className="text-gray-500 text-xs hover:text-[#00FF88] transition-colors font-semibold"
+        >
+          FAQ
+        </Link>
         <p className="text-gray-600 text-xs">
           Built on Avalanche
         </p>
