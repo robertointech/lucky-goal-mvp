@@ -28,6 +28,10 @@ export default function HostPage() {
   // Passkey on join toggle
   const [passkeyOnJoin, setPasskeyOnJoin] = useState(false);
 
+  // Goalkeeper logo
+  const [goalkeeperLogo, setGoalkeeperLogo] = useState<string | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
   const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -83,6 +87,29 @@ export default function HostPage() {
     e.target.value = "";
   };
 
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 500 * 1024) {
+      setError("Logo must be under 500KB");
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setError("Logo must be a PNG or JPG image");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setGoalkeeperLogo(reader.result as string);
+      setError("");
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
   const handleCreate = async () => {
     if (!account) return;
 
@@ -100,7 +127,8 @@ export default function HostPage() {
         account.address,
         prize,
         customQuestions,
-        passkeyOnJoin
+        passkeyOnJoin,
+        goalkeeperLogo
       );
 
       try {
@@ -372,6 +400,57 @@ export default function HostPage() {
                   />
                 </button>
               </div>
+            </div>
+
+            {/* Goalkeeper Logo Upload */}
+            <div className="host-card p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-white font-semibold flex items-center gap-2">
+                  Goalkeeper Logo
+                  <span className="text-gray-500 text-xs font-normal bg-gray-800 px-2 py-0.5 rounded-full">Optional</span>
+                </h3>
+              </div>
+
+              <p className="text-gray-500 text-sm mb-4">
+                Upload your brand logo to display on the goalkeeper&apos;s jersey
+              </p>
+
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/png,image/jpeg"
+                onChange={handleLogoUpload}
+                className="hidden"
+              />
+
+              {!goalkeeperLogo ? (
+                <button
+                  onClick={() => logoInputRef.current?.click()}
+                  className="w-full border-2 border-dashed border-gray-700/50 rounded-xl py-6 px-4 text-center transition-all hover:border-[#00FF88]/50 hover:bg-[#00FF88]/5 group"
+                >
+                  <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">&#128085;</div>
+                  <p className="text-gray-400 text-sm font-medium group-hover:text-[#00FF88]">
+                    Upload logo (PNG/JPG)
+                  </p>
+                  <p className="text-gray-600 text-xs mt-1">Max 500KB</p>
+                </button>
+              ) : (
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-xl bg-[#1a1a2e] border border-gray-700/50 flex items-center justify-center overflow-hidden">
+                    <img src={goalkeeperLogo} alt="Logo" className="w-12 h-12 object-contain" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[#00FF88] text-sm font-bold">Logo uploaded</p>
+                    <p className="text-gray-500 text-xs">Will appear on the goalkeeper</p>
+                  </div>
+                  <button
+                    onClick={() => setGoalkeeperLogo(null)}
+                    className="text-gray-500 text-xs hover:text-red-400 transition-colors px-2 py-1 rounded-lg hover:bg-red-500/10"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Tournament Preview Card */}

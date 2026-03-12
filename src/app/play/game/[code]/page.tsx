@@ -459,7 +459,9 @@ export default function PlayerGamePage() {
             penaltyTimeLeft={penaltyTimeLeft}
             kicked={kicked}
             selectedDirection={selectedDirection}
+            goalkeeperDirection={goalkeeperDirection}
             penaltyResult={penaltyResult}
+            goalkeeperLogo={currentTournament?.goalkeeper_logo ?? null}
             onDirectionSelect={handleDirectionSelect}
             onKick={handleKick}
             onKickComplete={handleKickComplete}
@@ -521,7 +523,9 @@ function PenaltyArena({
   penaltyTimeLeft,
   kicked,
   selectedDirection,
+  goalkeeperDirection,
   penaltyResult,
+  goalkeeperLogo,
   onDirectionSelect,
   onKick,
   onKickComplete,
@@ -529,7 +533,9 @@ function PenaltyArena({
   penaltyTimeLeft: number;
   kicked: boolean;
   selectedDirection: Direction | null;
+  goalkeeperDirection: Direction | null;
   penaltyResult: "goal" | "saved" | null;
+  goalkeeperLogo: string | null;
   onDirectionSelect: (d: Direction) => void;
   onKick: () => void;
   onKickComplete: (scored: boolean) => void;
@@ -538,16 +544,14 @@ function PenaltyArena({
 
   useEffect(() => {
     if (penaltyResult && !resultShown) {
-      // Delay to let ball animation play, then call onKickComplete
       const t = setTimeout(() => {
         setResultShown(true);
         onKickComplete(penaltyResult === "goal");
-      }, 1200);
+      }, 1400);
       return () => clearTimeout(t);
     }
   }, [penaltyResult, resultShown, onKickComplete]);
 
-  // Reset resultShown when penalty resets
   useEffect(() => {
     if (!kicked) setResultShown(false);
   }, [kicked]);
@@ -556,12 +560,9 @@ function PenaltyArena({
   const timerColor =
     penaltyTimeLeft > 5 ? "#00FF88" : penaltyTimeLeft > 2 ? "#FFD700" : "#FF4444";
 
-  // Ball target position based on direction
-  const ballTarget: Record<Direction, { x: string; y: string }> = {
-    left: { x: "18%", y: "30%" },
-    center: { x: "50%", y: "20%" },
-    right: { x: "82%", y: "30%" },
-  };
+  // Goalkeeper dive position
+  const gkDiveX: Record<Direction, string> = { left: "-35%", center: "0%", right: "35%" };
+  const gkDiveRotate: Record<Direction, string> = { left: "-25deg", center: "0deg", right: "25deg" };
 
   return (
     <div className="flex-1 flex flex-col">
@@ -581,190 +582,163 @@ function PenaltyArena({
         <div className="relative w-full max-w-[340px] mx-auto">
           {/* Circular timer behind goal */}
           {!kicked && (
-            <svg
-              className="absolute -inset-3 z-0"
-              viewBox="0 0 200 140"
-              fill="none"
-            >
-              {/* Timer arc — semicircle above goal */}
-              <path
-                d="M 15 130 A 85 85 0 0 1 185 130"
-                stroke="rgba(255,255,255,0.08)"
-                strokeWidth="4"
-                strokeLinecap="round"
-                fill="none"
-              />
-              <path
-                d="M 15 130 A 85 85 0 0 1 185 130"
-                stroke={timerColor}
-                strokeWidth="4"
-                strokeLinecap="round"
-                fill="none"
+            <svg className="absolute -inset-3 z-0" viewBox="0 0 200 140" fill="none">
+              <path d="M 15 130 A 85 85 0 0 1 185 130" stroke="rgba(255,255,255,0.08)" strokeWidth="4" strokeLinecap="round" fill="none" />
+              <path d="M 15 130 A 85 85 0 0 1 185 130" stroke={timerColor} strokeWidth="4" strokeLinecap="round" fill="none"
                 strokeDasharray={`${timerPct * 268} 268`}
-                style={{
-                  transition: "stroke-dasharray 1s linear, stroke 0.3s",
-                  filter: `drop-shadow(0 0 6px ${timerColor}80)`,
-                }}
+                style={{ transition: "stroke-dasharray 1s linear, stroke 0.3s", filter: `drop-shadow(0 0 6px ${timerColor}80)` }}
               />
-              {/* Timer text */}
-              <text
-                x="100"
-                y="28"
-                textAnchor="middle"
-                fill={timerColor}
-                fontSize="18"
-                fontWeight="900"
-                fontFamily="monospace"
+              <text x="100" y="28" textAnchor="middle" fill={timerColor} fontSize="18" fontWeight="900" fontFamily="monospace"
                 style={{ filter: `drop-shadow(0 0 4px ${timerColor}60)` }}
-              >
-                {penaltyTimeLeft}
-              </text>
+              >{penaltyTimeLeft}</text>
             </svg>
           )}
 
           {/* Goal structure */}
-          <div
-            className="goal-frame relative"
-            style={{
-              aspectRatio: "16/10",
-              border: "4px solid rgba(255,255,255,0.6)",
-              borderBottom: "none",
-              borderRadius: "8px 8px 0 0",
-              background:
-                "linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(0,255,136,0.03) 100%)",
-            }}
-          >
+          <div className="goal-frame relative" style={{
+            aspectRatio: "16/10",
+            border: "4px solid rgba(255,255,255,0.7)",
+            borderBottom: "none",
+            borderRadius: "8px 8px 0 0",
+            background: "linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(0,255,136,0.03) 100%)",
+          }}>
             {/* Net pattern */}
-            <div
-              className="absolute inset-0 overflow-hidden rounded-t-[4px]"
-              style={{
-                backgroundImage: `
-                  linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px),
-                  linear-gradient(0deg, rgba(255,255,255,0.06) 1px, transparent 1px)
-                `,
-                backgroundSize: "20px 20px",
-              }}
-            />
+            <div className="absolute inset-0 overflow-hidden rounded-t-[4px]" style={{
+              backgroundImage: `
+                linear-gradient(45deg, rgba(255,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(-45deg, rgba(255,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px),
+                linear-gradient(0deg, rgba(255,255,255,0.06) 1px, transparent 1px)
+              `,
+              backgroundSize: "14px 14px, 14px 14px, 20px 20px, 20px 20px",
+            }} />
+
+            {/* Goal post depth effect */}
+            <div className="absolute -left-1 top-0 bottom-0 w-2 rounded-l" style={{ background: "linear-gradient(90deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1))" }} />
+            <div className="absolute -right-1 top-0 bottom-0 w-2 rounded-r" style={{ background: "linear-gradient(270deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1))" }} />
+            <div className="absolute -top-1 left-0 right-0 h-2 rounded-t" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1))" }} />
 
             {/* 3 clickable zones */}
             <div className="absolute inset-0 grid grid-cols-3 z-10">
               {(["left", "center", "right"] as Direction[]).map((dir) => {
                 const isSelected = selectedDirection === dir;
-                const isTarget = kicked && selectedDirection === dir;
-                const isGkHere = kicked && penaltyResult === "saved" && dir === selectedDirection;
                 return (
                   <button
                     key={dir}
                     onClick={() => !kicked && onDirectionSelect(dir)}
                     className="relative flex items-center justify-center transition-all duration-200"
                     style={{
-                      background: isSelected
-                        ? "rgba(0, 255, 136, 0.15)"
-                        : "transparent",
-                      borderLeft:
-                        dir !== "left"
-                          ? "1px dashed rgba(255,255,255,0.1)"
-                          : "none",
+                      background: isSelected ? "rgba(0, 255, 136, 0.15)" : "transparent",
+                      borderLeft: dir !== "left" ? "1px dashed rgba(255,255,255,0.1)" : "none",
                     }}
                   >
-                    {/* Zone label */}
                     {!kicked && (
-                      <span
-                        className="text-xs font-bold uppercase tracking-widest transition-all"
-                        style={{
-                          color: isSelected ? "#00FF88" : "rgba(255,255,255,0.2)",
-                          textShadow: isSelected
-                            ? "0 0 10px rgba(0,255,136,0.5)"
-                            : "none",
-                        }}
-                      >
+                      <span className="text-xs font-bold uppercase tracking-widest transition-all" style={{
+                        color: isSelected ? "#00FF88" : "rgba(255,255,255,0.2)",
+                        textShadow: isSelected ? "0 0 10px rgba(0,255,136,0.5)" : "none",
+                      }}>
                         {dir === "left" ? "LEFT" : dir === "center" ? "CENTER" : "RIGHT"}
                       </span>
                     )}
-
-                    {/* Selection ring */}
                     {isSelected && !kicked && (
-                      <div
-                        className="absolute inset-2 rounded-lg border-2 border-[#00FF88]/40 animate-pulse"
-                        style={{
-                          boxShadow:
-                            "inset 0 0 20px rgba(0,255,136,0.1), 0 0 15px rgba(0,255,136,0.1)",
-                        }}
-                      />
-                    )}
-
-                    {/* Goalkeeper gloves on save */}
-                    {isGkHere && (
-                      <div className="absolute inset-0 flex items-center justify-center animate-[gkDive_0.4s_ease-out]">
-                        <span
-                          className="text-5xl"
-                          style={{
-                            filter: "drop-shadow(0 0 12px rgba(255,68,68,0.6))",
-                          }}
-                        >
-                          &#129350;
-                        </span>
-                      </div>
+                      <div className="absolute inset-2 rounded-lg border-2 border-[#00FF88]/40 animate-pulse"
+                        style={{ boxShadow: "inset 0 0 20px rgba(0,255,136,0.1), 0 0 15px rgba(0,255,136,0.1)" }} />
                     )}
                   </button>
                 );
               })}
             </div>
 
-            {/* Ball animation */}
+            {/* Goalkeeper - visible at all times */}
+            <div
+              className="absolute z-30 flex flex-col items-center transition-all"
+              style={{
+                bottom: "2%",
+                left: "50%",
+                transform: kicked && goalkeeperDirection
+                  ? `translateX(calc(-50% + ${gkDiveX[goalkeeperDirection]})) rotate(${gkDiveRotate[goalkeeperDirection]}) ${penaltyResult === "saved" ? "scaleX(" + (goalkeeperDirection === "left" ? "-1" : "1") + ")" : ""}`
+                  : "translateX(-50%)",
+                transition: kicked ? "all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)" : "none",
+              }}
+            >
+              {/* Logo on jersey */}
+              {(goalkeeperLogo || true) && (
+                <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center mb-[-4px] z-10"
+                  style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.2)" }}>
+                  {goalkeeperLogo ? (
+                    <img src={goalkeeperLogo} alt="" className="w-5 h-5 object-contain" />
+                  ) : (
+                    <span className="text-[10px] font-black text-[#00FF88]">LG</span>
+                  )}
+                </div>
+              )}
+              {/* Goalkeeper body */}
+              <div className="text-4xl" style={{
+                filter: kicked && penaltyResult === "saved"
+                  ? "drop-shadow(0 0 15px rgba(255,68,68,0.6))"
+                  : "drop-shadow(0 0 8px rgba(255,255,255,0.3))",
+              }}>
+                🧤
+              </div>
+              {/* Goalkeeper hands spread on dive */}
+              {kicked && penaltyResult === "saved" && (
+                <div className="absolute -top-1 text-2xl animate-[gkGrab_0.3s_ease-out_0.5s_forwards]" style={{ opacity: 0 }}>
+                  🤲
+                </div>
+              )}
+            </div>
+
+            {/* Ball animation - arc trajectory */}
             {kicked && selectedDirection && (
-              <div
-                className="absolute z-20 text-3xl animate-[ballFly_0.6s_ease-out_forwards]"
-                style={{
-                  left: ballTarget[selectedDirection].x,
-                  top: "100%",
-                  transform: "translate(-50%, 0)",
-                  ["--target-x" as string]: ballTarget[selectedDirection].x,
-                  ["--target-y" as string]: ballTarget[selectedDirection].y,
-                }}
-              >
+              <div className="absolute z-20 text-3xl" style={{
+                left: "50%",
+                top: "100%",
+                transform: "translate(-50%, 0)",
+                animation: `ballArc_${selectedDirection} 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) forwards`,
+              }}>
                 &#9917;
               </div>
             )}
 
             {/* Net shake on goal */}
             {penaltyResult === "goal" && (
-              <div className="absolute inset-0 animate-[netShake_0.5s_ease-out] rounded-t-[4px] overflow-hidden">
-                <div
-                  className="w-full h-full"
-                  style={{
-                    backgroundImage: `
-                      linear-gradient(90deg, rgba(0,255,136,0.12) 1px, transparent 1px),
-                      linear-gradient(0deg, rgba(0,255,136,0.12) 1px, transparent 1px)
-                    `,
-                    backgroundSize: "20px 20px",
-                  }}
-                />
+              <div className="absolute inset-0 animate-[netShake_0.5s_ease-out_0.4s] rounded-t-[4px] overflow-hidden">
+                <div className="w-full h-full" style={{
+                  backgroundImage: `
+                    linear-gradient(90deg, rgba(0,255,136,0.15) 1px, transparent 1px),
+                    linear-gradient(0deg, rgba(0,255,136,0.15) 1px, transparent 1px)
+                  `,
+                  backgroundSize: "20px 20px",
+                }} />
               </div>
             )}
           </div>
 
-          {/* Goal line (grass) */}
-          <div
-            className="h-2 rounded-b-sm"
-            style={{
-              background:
-                "linear-gradient(90deg, #1a5c2a, #2d8a4e, #1a5c2a)",
-              boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
-            }}
-          />
+          {/* Realistic grass field */}
+          <div className="relative h-10 rounded-b-lg overflow-hidden" style={{
+            background: "linear-gradient(180deg, #1a5c2a 0%, #2d8a4e 30%, #1f6b35 60%, #1a5c2a 100%)",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.1)",
+          }}>
+            {/* Grass stripes */}
+            <div className="absolute inset-0" style={{
+              backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(255,255,255,0.03) 20px, rgba(255,255,255,0.03) 40px)",
+            }} />
+            {/* Penalty spot */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white/30" />
+            {/* Goal line */}
+            <div className="absolute top-0 left-0 right-0 h-[3px]" style={{
+              background: "linear-gradient(90deg, rgba(255,255,255,0.3), rgba(255,255,255,0.6), rgba(255,255,255,0.3))",
+            }} />
+          </div>
 
           {/* Ball at bottom before kick */}
           {!kicked && (
             <div className="flex justify-center mt-3">
-              <div
-                className="text-4xl animate-[ballReady_2s_ease-in-out_infinite]"
-                style={{
-                  filter: selectedDirection
-                    ? "drop-shadow(0 0 12px rgba(0,255,136,0.5))"
-                    : "drop-shadow(0 0 6px rgba(255,255,255,0.2))",
-                }}
-              >
+              <div className="text-4xl animate-[ballReady_2s_ease-in-out_infinite]" style={{
+                filter: selectedDirection
+                  ? "drop-shadow(0 0 12px rgba(0,255,136,0.5))"
+                  : "drop-shadow(0 0 6px rgba(255,255,255,0.2))",
+              }}>
                 &#9917;
               </div>
             </div>
@@ -773,30 +747,19 @@ function PenaltyArena({
 
         {/* Result overlay */}
         {penaltyResult && (
-          <div
-            className={`mt-4 text-center ${
-              penaltyResult === "goal"
-                ? "animate-[goalCelebrate_0.6s_ease-out]"
-                : "animate-[shakeX_0.5s_ease-out]"
-            }`}
-          >
-            <p
-              className={`text-3xl font-black ${
-                penaltyResult === "goal" ? "text-[#00FF88]" : "text-red-400"
-              }`}
+          <div className={`mt-4 text-center ${
+            penaltyResult === "goal" ? "animate-[goalCelebrate_0.6s_ease-out]" : "animate-[shakeX_0.5s_ease-out]"
+          }`}>
+            <p className={`text-3xl font-black ${penaltyResult === "goal" ? "text-[#00FF88]" : "text-red-400"}`}
               style={{
-                textShadow:
-                  penaltyResult === "goal"
-                    ? "0 0 30px rgba(0,255,136,0.5), 0 0 60px rgba(0,255,136,0.2)"
-                    : "0 0 20px rgba(255,68,68,0.4)",
-              }}
-            >
+                textShadow: penaltyResult === "goal"
+                  ? "0 0 30px rgba(0,255,136,0.5), 0 0 60px rgba(0,255,136,0.2)"
+                  : "0 0 20px rgba(255,68,68,0.4)",
+              }}>
               {penaltyResult === "goal" ? "GOAAL!" : "Saved!"}
             </p>
             {penaltyResult === "goal" && (
-              <p className="text-[#00FF88] text-lg font-bold mt-1 animate-[scoreFloat_1.5s_ease-out_forwards]">
-                +50 pts
-              </p>
+              <p className="text-[#00FF88] text-lg font-bold mt-1 animate-[scoreFloat_1.5s_ease-out_forwards]">+50 pts</p>
             )}
           </div>
         )}
@@ -810,13 +773,9 @@ function PenaltyArena({
             disabled={!selectedDirection}
             className="w-full font-black py-5 rounded-2xl text-xl active:scale-[0.95] transform transition-all disabled:opacity-20"
             style={{
-              background: selectedDirection
-                ? "linear-gradient(135deg, #00FF88, #00CC6A)"
-                : "#222",
+              background: selectedDirection ? "linear-gradient(135deg, #00FF88, #00CC6A)" : "#222",
               color: selectedDirection ? "#000" : "#555",
-              boxShadow: selectedDirection
-                ? "0 0 30px rgba(0,255,136,0.35), 0 4px 15px rgba(0,0,0,0.3)"
-                : "none",
+              boxShadow: selectedDirection ? "0 0 30px rgba(0,255,136,0.35), 0 4px 15px rgba(0,0,0,0.3)" : "none",
             }}
           >
             {selectedDirection ? (
@@ -980,19 +939,51 @@ const ANIMATIONS_CSS = `
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-6px); }
   }
-  @keyframes ballFly {
+  @keyframes ballArc_left {
     0% {
-      left: 50%;
-      top: 100%;
-      opacity: 1;
-      transform: translate(-50%, 0) scale(1);
+      left: 50%; top: 100%;
+      transform: translate(-50%, 0) scale(1) rotate(0deg);
+    }
+    40% {
+      left: 35%; top: 40%;
+      transform: translate(-50%, -50%) scale(0.85) rotate(-180deg);
     }
     100% {
-      left: var(--target-x);
-      top: var(--target-y);
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(0.7);
+      left: 18%; top: 28%;
+      transform: translate(-50%, -50%) scale(0.7) rotate(-360deg);
     }
+  }
+  @keyframes ballArc_center {
+    0% {
+      left: 50%; top: 100%;
+      transform: translate(-50%, 0) scale(1) rotate(0deg);
+    }
+    40% {
+      left: 50%; top: 45%;
+      transform: translate(-50%, -50%) scale(0.9) rotate(-180deg);
+    }
+    100% {
+      left: 50%; top: 18%;
+      transform: translate(-50%, -50%) scale(0.7) rotate(-360deg);
+    }
+  }
+  @keyframes ballArc_right {
+    0% {
+      left: 50%; top: 100%;
+      transform: translate(-50%, 0) scale(1) rotate(0deg);
+    }
+    40% {
+      left: 65%; top: 40%;
+      transform: translate(-50%, -50%) scale(0.85) rotate(180deg);
+    }
+    100% {
+      left: 82%; top: 28%;
+      transform: translate(-50%, -50%) scale(0.7) rotate(360deg);
+    }
+  }
+  @keyframes gkGrab {
+    0% { opacity: 0; transform: scale(0.5); }
+    100% { opacity: 1; transform: scale(1.2); }
   }
   @keyframes netShake {
     0% { transform: translateX(0); }

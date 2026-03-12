@@ -18,6 +18,7 @@ export interface Tournament {
   winner_id: string | null;
   custom_questions: Question[] | null;
   passkey_on_join: boolean;
+  goalkeeper_logo: string | null;
   created_at: string;
 }
 

@@ -16,7 +16,8 @@ export async function createTournament(
   hostWallet: string,
   prizeAmount: number,
   customQuestions?: Question[] | null,
-  passkeyOnJoin?: boolean
+  passkeyOnJoin?: boolean,
+  goalkeeperLogo?: string | null
 ): Promise<Tournament> {
   const code = generateCode();
   const insert: Record<string, unknown> = {
@@ -27,6 +28,9 @@ export async function createTournament(
   };
   if (customQuestions && customQuestions.length > 0) {
     insert.custom_questions = customQuestions;
+  }
+  if (goalkeeperLogo) {
+    insert.goalkeeper_logo = goalkeeperLogo;
   }
 
   const { data, error } = await supabase

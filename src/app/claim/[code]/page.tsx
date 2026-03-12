@@ -8,6 +8,7 @@ import { avalancheFuji } from "thirdweb/chains";
 import { client } from "@/lib/thirdweb";
 import { getTournament, getPlayers, setPlayerWallet } from "@/lib/gameLogic";
 import { getEscrowTournament } from "@/lib/escrow";
+import { registerWallet } from "@/lib/walletRegistry";
 import type { Tournament, Player } from "@/types/game";
 
 type ClaimStep = "loading" | "ready" | "creating" | "success" | "error" | "not-winner";
@@ -108,6 +109,7 @@ export default function ClaimPage() {
 
       if (account?.address) {
         await setPlayerWallet(winner.id, account.address);
+        registerWallet(account.address, winner.nickname, winner.avatar, "passkey", code);
         setWalletAddress(account.address);
         setStep("success");
       } else {
@@ -131,6 +133,7 @@ export default function ClaimPage() {
       setStep("creating");
       try {
         await setPlayerWallet(winner.id, activeAccount.address);
+        registerWallet(activeAccount.address, winner.nickname, winner.avatar, "external", code);
         setWalletAddress(activeAccount.address);
         setStep("success");
       } catch (err) {
