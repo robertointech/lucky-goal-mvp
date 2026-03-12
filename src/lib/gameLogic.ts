@@ -171,3 +171,17 @@ export async function setPlayerWallet(playerId: string, walletAddress: string) {
 export function getTotalQuestions(): number {
   return QUESTIONS_PER_GAME;
 }
+
+export async function getCorrectAnswerCounts(tournamentId: string): Promise<Record<string, number>> {
+  const { data } = await supabase
+    .from("answers")
+    .select("player_id")
+    .eq("tournament_id", tournamentId)
+    .eq("is_correct", true);
+
+  const counts: Record<string, number> = {};
+  (data || []).forEach((a) => {
+    counts[a.player_id] = (counts[a.player_id] || 0) + 1;
+  });
+  return counts;
+}

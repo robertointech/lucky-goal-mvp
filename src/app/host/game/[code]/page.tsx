@@ -7,7 +7,9 @@ import {
   updateTournamentStatus,
   determineWinner,
   getTotalQuestions,
+  getCorrectAnswerCounts,
 } from "@/lib/gameLogic";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { processPostTournament } from "@/lib/globalPlayers";
 import { useGameSync } from "@/hooks/useGameSync";
 import { useCountdown } from "@/hooks/useCountdown";
@@ -39,7 +41,9 @@ export default function HostGamePage() {
   const [sendingPrize, setSendingPrize] = useState(false);
   const [prizeError, setPrizeError] = useState("");
   const [prevScores, setPrevScores] = useState<Record<string, number>>({});
+  const [correctCounts, setCorrectCounts] = useState<Record<string, number>>({});
   const { mutateAsync: sendTx } = useSendTransaction();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const load = async () => {
@@ -144,6 +148,8 @@ export default function HostGamePage() {
       await refreshPlayers();
       // Process global ranking + achievements
       processPostTournament(t.id).catch(console.error);
+      // Load correct answer counts for dashboard
+      getCorrectAnswerCounts(t.id).then(setCorrectCounts).catch(console.error);
     }
   };
 
@@ -588,35 +594,94 @@ export default function HostGamePage() {
                 </div>
               )}
 
-              {/* Final leaderboard - compact */}
-              <div className="w-full max-w-2xl">
-                <div className="flex gap-3 justify-center flex-wrap">
-                  {sorted.slice(0, 5).map((p, i) => {
-                    const medals = ["🥇", "🥈", "🥉"];
-                    return (
-                      <div
-                        key={p.id}
-                        className="flex items-center gap-2 bg-[#0D1117]/80 border border-white/10 rounded-xl px-5 py-3 animate-[slideUp_0.4s_ease-out]"
-                        style={{
-                          animationDelay: `${1.2 + i * 0.1}s`,
-                          animationFillMode: "backwards",
-                          border:
-                            p.id === winner.id
-                              ? "1px solid rgba(0, 255, 136, 0.3)"
-                              : "1px solid rgba(255, 255, 255, 0.05)",
-                        }}
-                      >
-                        <span className="text-lg">
-                          {i < 3 ? medals[i] : `#${i + 1}`}
-                        </span>
-                        <span className="text-xl">{p.avatar}</span>
-                        <span className="text-white font-bold">{p.nickname}</span>
-                        <span className="text-[#00FF88] font-bold ml-1">
-                          {p.score}
-                        </span>
-                      </div>
-                    );
-                  })}
+              {/* ─── Tournament Dashboard ─── */}
+              <div className="w-full max-w-4xl mt-4">
+                <h3 className="text-2xl text-white font-black text-center mb-6">{t("hostGame.dashboard")}</h3>
+
+                {/* Stats cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                  {[
+                    { label: t("hostGame.totalPlayers"), value: sorted.length, color: "#00FF88" },
+                    { label: t("hostGame.avgScore"), value: sorted.length ? Math.round(sorted.reduce((s, p) => s + p.score, 0) / sorted.length) : 0, color: "#FFD700" },
+                    { label: t("hostGame.totalGoals"), value: sorted.reduce((s, p) => s + p.goals, 0), color: "#4ECDC4" },
+                    { label: t("hostGame.highestScore"), value: sorted[0]?.score ?? 0, color: "#A855F7" },
+                  ].map((stat, i) => (
+                    <div key={i} className="bg-[#0D1117] border border-white/8 rounded-xl p-4 text-center">
+                      <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">{stat.label}</p>
+                      <p className="text-3xl font-black" style={{ color: stat.color }}>{stat.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Player table */}
+                <div className="bg-[#0D1117] border border-white/8 rounded-xl overflow-hidden mb-4">
+                  <div className="flex items-center justify-between px-5 py-3 border-b border-white/5">
+                    <h4 className="text-white font-bold">{t("hostGame.playerTable")}</h4>
+                    <button
+                      onClick={() => {
+                        const header = "rank,nickname,avatar,score,goals,correct_answers,wallet_address\n";
+                        const rows = sorted.map((p, i) =>
+                          `${i + 1},"${p.nickname}","${p.avatar}",${p.score},${p.goals},${correctCounts[p.id] || 0},"${p.wallet_address || ""}"`
+                        ).join("\n");
+                        const blob = new Blob([header + rows], { type: "text/csv" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `lucky-goal-${code}-results.csv`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                      }}
+                      className="text-[#00FF88] text-xs font-semibold hover:underline flex items-center gap-1"
+                    >
+                      📥 {t("hostGame.exportCsv")}
+                    </button>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-gray-500 text-xs uppercase tracking-wider border-b border-white/5">
+                          <th className="px-4 py-3 text-left">#</th>
+                          <th className="px-4 py-3 text-left">{t("hostGame.nickname")}</th>
+                          <th className="px-4 py-3 text-right">{t("hostGame.score")}</th>
+                          <th className="px-4 py-3 text-right">{t("hostGame.goals")}</th>
+                          <th className="px-4 py-3 text-right">{t("hostGame.correct")}</th>
+                          <th className="px-4 py-3 text-left">{t("hostGame.wallet")}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sorted.map((p, i) => (
+                          <tr key={p.id} className="border-b border-white/3 hover:bg-white/3 transition-colors"
+                            style={p.id === winner.id ? { backgroundColor: "rgba(0,255,136,0.06)" } : {}}>
+                            <td className="px-4 py-3 text-gray-500 font-bold">{i + 1}</td>
+                            <td className="px-4 py-3">
+                              <span className="flex items-center gap-2">
+                                <span className="text-lg">{p.avatar}</span>
+                                <span className="text-white font-semibold">{p.nickname}</span>
+                                {p.id === winner.id && <span className="text-xs">👑</span>}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-right text-[#00FF88] font-bold tabular-nums">{p.score}</td>
+                            <td className="px-4 py-3 text-right text-white tabular-nums">{p.goals}</td>
+                            <td className="px-4 py-3 text-right text-white tabular-nums">{correctCounts[p.id] || 0}</td>
+                            <td className="px-4 py-3 text-gray-500 font-mono text-xs">
+                              {p.wallet_address ? `${p.wallet_address.slice(0, 6)}...${p.wallet_address.slice(-4)}` : t("hostGame.noWallet")}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* New Tournament button */}
+                <div className="text-center mt-6">
+                  <button
+                    onClick={() => router.push("/host")}
+                    className="bg-[#00FF88] text-black font-black py-4 px-10 rounded-2xl text-lg active:scale-95 transform transition-transform"
+                    style={{ boxShadow: "0 0 30px rgba(0,255,136,0.3)" }}
+                  >
+                    {t("host.createNew")} ⚡
+                  </button>
                 </div>
               </div>
             </div>

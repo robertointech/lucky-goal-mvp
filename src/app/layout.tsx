@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { ThirdwebProvider } from "thirdweb/react";
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import LanguageToggle from "@/components/LanguageToggle";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,7 +24,10 @@ export default function RootLayout({
     <html lang="en">
       <body className="min-h-screen bg-lucky-dark">
         <ThirdwebProvider>
-          {children}
+          <LanguageProvider>
+            <LanguageToggle />
+            {children}
+          </LanguageProvider>
         </ThirdwebProvider>
       </body>
     </html>

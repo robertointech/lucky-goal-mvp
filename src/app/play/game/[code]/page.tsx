@@ -272,8 +272,18 @@ export default function PlayerGamePage() {
         </div>
 
         {/* Compact leaderboard */}
-        <div className="relative z-10 px-4 pb-4">
+        <div className="relative z-10 px-4 pb-2">
           <CompactLeaderboard players={sorted} myId={playerId} />
+        </div>
+
+        {/* Play Again */}
+        <div className="relative z-10 px-4 pb-4 text-center">
+          <button
+            onClick={() => router.push("/play")}
+            className="mt-2 border border-white/20 text-white font-bold py-3 px-8 rounded-2xl text-base active:scale-95 transform hover:border-[#00FF88]/50 hover:text-[#00FF88] transition-all"
+          >
+            Play Again
+          </button>
         </div>
 
         <style>{ANIMATIONS_CSS}</style>
