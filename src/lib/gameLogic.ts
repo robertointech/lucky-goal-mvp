@@ -15,13 +15,15 @@ function generateCode(): string {
 export async function createTournament(
   hostWallet: string,
   prizeAmount: number,
-  customQuestions?: Question[] | null
+  customQuestions?: Question[] | null,
+  passkeyOnJoin?: boolean
 ): Promise<Tournament> {
   const code = generateCode();
   const insert: Record<string, unknown> = {
     code,
     host_wallet: hostWallet,
     prize_amount: prizeAmount,
+    passkey_on_join: passkeyOnJoin ?? false,
   };
   if (customQuestions && customQuestions.length > 0) {
     insert.custom_questions = customQuestions;

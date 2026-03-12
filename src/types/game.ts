@@ -17,6 +17,7 @@ export interface Tournament {
   current_question: number;
   winner_id: string | null;
   custom_questions: Question[] | null;
+  passkey_on_join: boolean;
   created_at: string;
 }
 

@@ -25,6 +25,9 @@ export default function HostPage() {
   const [csvError, setCsvError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Passkey on join toggle
+  const [passkeyOnJoin, setPasskeyOnJoin] = useState(false);
+
   const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -96,7 +99,8 @@ export default function HostPage() {
       const tournament = await createTournament(
         account.address,
         prize,
-        customQuestions
+        customQuestions,
+        passkeyOnJoin
       );
 
       try {
@@ -336,6 +340,38 @@ export default function HostPage() {
                   <p className="text-red-400 text-xs">{csvError}</p>
                 </div>
               )}
+            </div>
+
+            {/* Passkey on Join Toggle */}
+            <div className="host-card p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-white font-semibold flex items-center gap-2">
+                    Enable Passkey on Join
+                    <span className="text-gray-500 text-xs font-normal bg-gray-800 px-2 py-0.5 rounded-full">Optional</span>
+                  </h3>
+                  <p className="text-gray-500 text-sm mt-1">
+                    {passkeyOnJoin
+                      ? "Players create a wallet when joining the tournament"
+                      : "Only the winner creates a wallet to claim the prize"}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setPasskeyOnJoin(!passkeyOnJoin)}
+                  className="relative shrink-0 w-14 h-8 rounded-full transition-all duration-300"
+                  style={{
+                    backgroundColor: passkeyOnJoin ? "#00FF88" : "#374151",
+                    boxShadow: passkeyOnJoin ? "0 0 15px rgba(0,255,136,0.3)" : "none",
+                  }}
+                >
+                  <span
+                    className="absolute top-1 w-6 h-6 rounded-full bg-white transition-all duration-300 shadow-md"
+                    style={{
+                      left: passkeyOnJoin ? "calc(100% - 28px)" : "4px",
+                    }}
+                  />
+                </button>
+              </div>
             </div>
 
             {/* Tournament Preview Card */}

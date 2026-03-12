@@ -12,6 +12,11 @@ body {
   background-color: var(--lucky-dark);
   color: white;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  cursor: url('/custom-cursor.svg') 16 2, auto;
+}
+
+a, button, [role="button"], input[type="submit"], .cursor-pointer {
+  cursor: url('/custom-cursor-pointer.svg') 16 2, pointer;
 }
 
 /* Mobile-first responsive */

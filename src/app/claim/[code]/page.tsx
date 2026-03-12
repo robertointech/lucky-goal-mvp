@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { inAppWallet } from "thirdweb/wallets";
-import { useConnect } from "thirdweb/react";
+import { useConnect, useActiveAccount, ConnectButton } from "thirdweb/react";
 import { avalancheFuji } from "thirdweb/chains";
 import { client } from "@/lib/thirdweb";
 import { getTournament, getPlayers, setPlayerWallet } from "@/lib/gameLogic";
@@ -11,6 +11,7 @@ import { getEscrowTournament } from "@/lib/escrow";
 import type { Tournament, Player } from "@/types/game";
 
 type ClaimStep = "loading" | "ready" | "creating" | "success" | "error" | "not-winner";
+type WalletMode = "choose" | "passkey" | "existing";
 
 export default function ClaimPage() {
   const params = useParams();
@@ -22,8 +23,10 @@ export default function ClaimPage() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [prizeReceived, setPrizeReceived] = useState(false);
+  const [walletMode, setWalletMode] = useState<WalletMode>("choose");
 
   const { connect } = useConnect();
+  const activeAccount = useActiveAccount();
 
   useEffect(() => {
     const load = async () => {
@@ -120,6 +123,24 @@ export default function ClaimPage() {
       setStep("ready");
     }
   };
+
+  // When external wallet connects, save it and advance
+  useEffect(() => {
+    if (walletMode !== "existing" || !activeAccount?.address || !winner || step !== "ready") return;
+    const save = async () => {
+      setStep("creating");
+      try {
+        await setPlayerWallet(winner.id, activeAccount.address);
+        setWalletAddress(activeAccount.address);
+        setStep("success");
+      } catch (err) {
+        console.error("Save wallet error:", err);
+        setErrorMsg("Error saving wallet. Try again.");
+        setStep("ready");
+      }
+    };
+    save();
+  }, [activeAccount?.address, walletMode, winner, step]);
 
   useEffect(() => {
     if (step !== "success" || prizeReceived) return;
@@ -356,27 +377,96 @@ export default function ClaimPage() {
           </div>
         )}
 
-        {/* Claim Button */}
+        {/* Claim Buttons */}
         {(step === "ready" || step === "creating") && (
           <>
-            <button
-              onClick={handleCreateWallet}
-              disabled={step === "creating"}
-              className="claim-btn w-full py-4 px-6 rounded-xl text-lg font-bold transition-all active:scale-95 transform disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {step === "creating" ? (
-                <span className="flex items-center justify-center gap-3">
-                  <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                  Creating wallet...
-                </span>
-              ) : (
-                "Create wallet and receive prize"
-              )}
-            </button>
-            <p className="text-gray-500 text-xs text-center mt-4 max-w-xs mx-auto leading-relaxed">
-              You'll use Face ID, fingerprint, or your device's passkey.
-              No need to remember any secret phrase.
-            </p>
+            {walletMode === "choose" && (
+              <div className="space-y-3">
+                <button
+                  onClick={() => { setWalletMode("passkey"); handleCreateWallet(); }}
+                  className="claim-btn w-full py-4 px-6 rounded-xl text-lg font-bold transition-all active:scale-95 transform"
+                >
+                  Create wallet with Passkey
+                </button>
+                <button
+                  onClick={() => setWalletMode("existing")}
+                  className="w-full py-4 px-6 rounded-xl text-lg font-bold border border-gray-700 text-white transition-all active:scale-95 hover:border-[#00FF88]/50 hover:text-[#00FF88]"
+                  style={{ backgroundColor: "rgba(13, 17, 23, 0.6)" }}
+                >
+                  I already have a wallet
+                </button>
+                <p className="text-gray-500 text-xs text-center mt-2 max-w-xs mx-auto leading-relaxed">
+                  Create a new Passkey wallet or connect an existing one (MetaMask, WalletConnect, etc.)
+                </p>
+              </div>
+            )}
+
+            {walletMode === "passkey" && (
+              <>
+                <button
+                  onClick={handleCreateWallet}
+                  disabled={step === "creating"}
+                  className="claim-btn w-full py-4 px-6 rounded-xl text-lg font-bold transition-all active:scale-95 transform disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {step === "creating" ? (
+                    <span className="flex items-center justify-center gap-3">
+                      <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                      Creating wallet...
+                    </span>
+                  ) : (
+                    "Create wallet with Passkey"
+                  )}
+                </button>
+                <button
+                  onClick={() => setWalletMode("choose")}
+                  className="text-gray-500 text-xs text-center mt-3 hover:text-[#00FF88] transition-colors block mx-auto"
+                >
+                  &larr; Back to options
+                </button>
+              </>
+            )}
+
+            {walletMode === "existing" && (
+              <div className="space-y-3">
+                {step === "creating" ? (
+                  <div className="flex items-center justify-center gap-3 py-4">
+                    <div className="w-5 h-5 border-2 border-[#00FF88]/30 border-t-[#00FF88] rounded-full animate-spin" />
+                    <p className="text-gray-400 font-semibold">Saving wallet...</p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-gray-400 text-sm text-center mb-2">
+                      Connect your wallet to receive the prize
+                    </p>
+                    <div className="flex justify-center">
+                      <ConnectButton
+                        client={client}
+                        chain={avalancheFuji}
+                        connectButton={{
+                          label: "Connect Wallet",
+                          style: {
+                            background: "linear-gradient(135deg, #00FF88, #00CC6A)",
+                            color: "#000",
+                            fontWeight: "bold",
+                            padding: "14px 28px",
+                            borderRadius: "12px",
+                            fontSize: "16px",
+                            boxShadow: "0 0 20px rgba(0,255,136,0.3)",
+                            border: "none",
+                          },
+                        }}
+                      />
+                    </div>
+                  </>
+                )}
+                <button
+                  onClick={() => setWalletMode("choose")}
+                  className="text-gray-500 text-xs text-center mt-3 hover:text-[#00FF88] transition-colors block mx-auto"
+                >
+                  &larr; Back to options
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>
