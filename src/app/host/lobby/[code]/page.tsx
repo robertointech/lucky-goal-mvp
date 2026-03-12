@@ -64,7 +64,7 @@ export default function HostLobbyPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#1a1a2e]">
         <div className="text-[#00FF88] text-2xl animate-pulse font-bold">
-          Cargando torneo...
+          Loading tournament...
         </div>
       </div>
     );
@@ -74,7 +74,7 @@ export default function HostLobbyPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#1a1a2e]">
         <div className="text-red-500 text-2xl font-bold">
-          Torneo no encontrado
+          Tournament not found
         </div>
       </div>
     );
@@ -126,10 +126,10 @@ export default function HostLobbyPage() {
         <div className="flex-1 flex flex-col items-center justify-center px-8">
           {/* Title */}
           <h1 className="text-white text-3xl font-bold mb-2 text-center">
-            Escanea para unirte
+            Scan to join
           </h1>
           <p className="text-gray-400 text-lg mb-8 text-center">
-            Usa tu celular para jugar
+            Use your phone to play
           </p>
 
           {/* QR Code - large */}
@@ -151,7 +151,7 @@ export default function HostLobbyPage() {
 
           {/* Code display - copiable */}
           <p className="text-gray-500 text-sm mb-2 uppercase tracking-widest">
-            O ingresa el codigo
+            Or enter the code
           </p>
           <button
             onClick={handleCopyCode}
@@ -167,7 +167,7 @@ export default function HostLobbyPage() {
                   : "opacity-0 group-hover:opacity-100 bg-gray-800 text-gray-300"
               }`}
             >
-              {copied ? "Copiado!" : "Click para copiar"}
+              {copied ? "Copied!" : "Click to copy"}
             </span>
           </button>
 
@@ -198,12 +198,12 @@ export default function HostLobbyPage() {
               </div>
               <div>
                 <h2 className="text-white font-bold text-xl">
-                  Jugadores
+                  Players
                 </h2>
                 <div className="flex items-center gap-2 mt-0.5">
                   <div className="w-2 h-2 bg-[#00FF88] rounded-full animate-pulse" />
                   <span className="text-gray-400 text-sm">
-                    Sala abierta
+                    Room open
                   </span>
                 </div>
               </div>
@@ -216,10 +216,10 @@ export default function HostLobbyPage() {
               <div className="flex flex-col items-center justify-center h-full text-center px-4">
                 <div className="text-5xl mb-4 opacity-30">📱</div>
                 <p className="text-gray-500 text-lg">
-                  Esperando jugadores...
+                  Waiting for players...
                 </p>
                 <p className="text-gray-600 text-sm mt-2">
-                  Los jugadores aparecen aqui al escanear el QR
+                  Players appear here when they scan the QR
                 </p>
               </div>
             ) : (
@@ -258,7 +258,7 @@ export default function HostLobbyPage() {
                 }}
               >
                 <span className="relative z-10">
-                  Iniciar Juego
+                  Start Game
                 </span>
                 {/* Shimmer effect */}
                 <div className="absolute inset-0 animate-[shimmer_2s_ease-in-out_infinite]">
@@ -268,7 +268,7 @@ export default function HostLobbyPage() {
             ) : (
               <div className="text-center py-4">
                 <p className="text-gray-500 text-sm">
-                  Minimo 2 jugadores para iniciar
+                  Minimum 2 players to start
                 </p>
                 <div className="flex justify-center gap-1 mt-3">
                   {[0, 1].map((i) => (

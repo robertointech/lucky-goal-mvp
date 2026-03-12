@@ -25,7 +25,7 @@ export default function JoinPage() {
       const t = await getTournament(code);
       setTournament(t);
       setLoading(false);
-      if (!t) setError("Torneo no encontrado");
+      if (!t) setError("Tournament not found");
     };
     load();
   }, [code]);
@@ -42,7 +42,7 @@ export default function JoinPage() {
       sessionStorage.setItem(`player_avatar_${code}`, player.avatar);
       router.push(`/play/lobby/${code}`);
     } catch (err) {
-      setError("Error al unirse. Intenta de nuevo.");
+      setError("Error joining. Try again.");
       console.error(err);
     } finally {
       setJoining(false);
@@ -54,7 +54,7 @@ export default function JoinPage() {
       <div className="min-h-screen flex items-center justify-center bg-[#1a1a2e]">
         <div className="text-center">
           <div className="text-5xl mb-4 animate-spin" style={{ animationDuration: "2s" }}>&#9917;</div>
-          <div className="text-[#00FF88] text-lg font-bold animate-pulse">Buscando torneo...</div>
+          <div className="text-[#00FF88] text-lg font-bold animate-pulse">Finding tournament...</div>
         </div>
       </div>
     );
@@ -64,14 +64,14 @@ export default function JoinPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#1a1a2e] px-4">
         <div className="text-6xl mb-4">&#128533;</div>
-        <h2 className="text-2xl text-white font-black mb-2">Torneo no encontrado</h2>
-        <p className="text-gray-400 mb-6">El codigo &quot;{code}&quot; no existe</p>
+        <h2 className="text-2xl text-white font-black mb-2">Tournament not found</h2>
+        <p className="text-gray-400 mb-6">Code &quot;{code}&quot; does not exist</p>
         <button
           onClick={() => router.push("/play")}
           className="bg-[#00FF88] text-black font-bold py-3 px-8 rounded-2xl text-lg"
           style={{ boxShadow: "0 0 20px rgba(0,255,136,0.3)" }}
         >
-          Intentar otro codigo
+          Try another code
         </button>
       </div>
     );
@@ -91,12 +91,12 @@ export default function JoinPage() {
             <span className="text-[#00FF88] font-mono text-sm font-bold">{code}</span>
           </div>
           <h1 className="text-2xl font-black text-white">
-            {step === "avatar" ? "Elige tu avatar" : "Tu nombre"}
+            {step === "avatar" ? "Choose your avatar" : "Your name"}
           </h1>
           {tournament.prize_amount > 0 && (
             <div className="mt-2 inline-flex items-center gap-1.5 bg-[#00FF88]/10 text-[#00FF88] px-4 py-1.5 rounded-full text-sm font-bold border border-[#00FF88]/30"
               style={{ boxShadow: "0 0 15px rgba(0,255,136,0.1)" }}>
-              <span>&#127942;</span> Premio: {tournament.prize_amount} AVAX
+              <span>&#127942;</span> Prize: {tournament.prize_amount} AVAX
             </div>
           )}
         </div>
@@ -150,7 +150,7 @@ export default function JoinPage() {
                   boxShadow: avatar ? "0 0 25px rgba(0,255,136,0.3)" : "none",
                 }}
               >
-                Siguiente
+                Next
               </button>
             </div>
           </div>
@@ -166,7 +166,7 @@ export default function JoinPage() {
                 className="flex items-center gap-2 bg-[#0D1117] border border-gray-800 rounded-2xl px-5 py-3 transition-all hover:border-gray-600"
               >
                 <span className="text-4xl">{avatar}</span>
-                <span className="text-gray-500 text-sm">&#9998; cambiar</span>
+                <span className="text-gray-500 text-sm">&#9998; change</span>
               </button>
             </div>
 
@@ -176,7 +176,7 @@ export default function JoinPage() {
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleJoin()}
-                placeholder="Tu nombre de jugador"
+                placeholder="Your player name"
                 maxLength={20}
                 className="w-full bg-[#0D1117] border-2 rounded-2xl px-5 py-4 text-white text-xl text-center font-bold focus:outline-none transition-all duration-300"
                 style={{
@@ -186,7 +186,7 @@ export default function JoinPage() {
                 autoFocus
                 autoComplete="off"
               />
-              <p className="text-gray-600 text-xs text-center mt-2">Max 20 caracteres</p>
+              <p className="text-gray-600 text-xs text-center mt-2">Max 20 characters</p>
             </div>
 
             {/* Live preview card */}
@@ -196,7 +196,7 @@ export default function JoinPage() {
                 <span className="text-4xl">{avatar}</span>
                 <div>
                   <p className="text-white font-bold text-lg">{nickname}</p>
-                  <p className="text-[#00FF88] text-xs font-medium">Listo para jugar</p>
+                  <p className="text-[#00FF88] text-xs font-medium">Ready to play</p>
                 </div>
               </div>
             )}
@@ -228,7 +228,7 @@ export default function JoinPage() {
                   </div>
                 )}
                 <span className="relative z-10">
-                  {joining ? "Entrando..." : "ENTRAR AL TORNEO"}
+                  {joining ? "Joining..." : "JOIN TOURNAMENT"}
                 </span>
               </button>
             </div>

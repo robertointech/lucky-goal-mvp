@@ -29,7 +29,7 @@ export default function ClaimPage() {
     const load = async () => {
       const t = await getTournament(code);
       if (!t) {
-        setErrorMsg("Torneo no encontrado");
+        setErrorMsg("Tournament not found");
         setStep("error");
         return;
       }
@@ -108,14 +108,14 @@ export default function ClaimPage() {
         setWalletAddress(account.address);
         setStep("success");
       } else {
-        throw new Error("No se pudo obtener la direccion de la wallet");
+        throw new Error("Could not get wallet address");
       }
     } catch (err) {
       console.error("Passkey wallet error:", err);
       setErrorMsg(
         err instanceof Error
           ? err.message
-          : "Error al crear la wallet. Intenta de nuevo."
+          : "Error creating wallet. Try again."
       );
       setStep("ready");
     }
@@ -151,7 +151,7 @@ export default function ClaimPage() {
         <style>{styles}</style>
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-[#00FF88]/30 border-t-[#00FF88] rounded-full animate-spin" />
-          <p className="text-[#00FF88] text-lg font-medium animate-pulse">Cargando premio...</p>
+          <p className="text-[#00FF88] text-lg font-medium animate-pulse">Loading prize...</p>
         </div>
       </div>
     );
@@ -178,13 +178,13 @@ export default function ClaimPage() {
         <style>{styles}</style>
         <div className="claim-card p-8 text-center max-w-sm w-full">
           <div className="text-5xl mb-4">&#9917;</div>
-          <h2 className="text-xl text-white font-bold mb-2">Buen intento!</h2>
+          <h2 className="text-xl text-white font-bold mb-2">Nice try!</h2>
           <p className="text-gray-400 text-sm mb-6">
-            Solo el ganador del torneo puede reclamar el premio.
+            Only the tournament winner can claim the prize.
           </p>
           {winner && (
             <div className="bg-[#1a1a2e] rounded-xl p-4 border border-gray-700/50">
-              <p className="text-gray-500 text-xs uppercase tracking-wider mb-2">Ganador</p>
+              <p className="text-gray-500 text-xs uppercase tracking-wider mb-2">Winner</p>
               <div className="text-3xl mb-1">{winner.avatar}</div>
               <p className="text-white font-bold">{winner.nickname}</p>
               <p className="text-[#00FF88] text-sm font-medium">{winner.score} pts</p>
@@ -245,24 +245,24 @@ export default function ClaimPage() {
           )}
           <h1 className="text-2xl font-bold text-white mb-1">
             {prizeReceived
-              ? "Premio recibido!"
+              ? "Prize received!"
               : step === "success"
-              ? "Esperando premio..."
-              : "Felicidades!"}
+              ? "Waiting for prize..."
+              : "Congratulations!"}
           </h1>
           <p className="text-gray-400 text-sm">
             {prizeReceived
-              ? "El AVAX ya esta en tu wallet"
+              ? "The AVAX is now in your wallet"
               : step === "success"
-              ? "El host esta enviando tu premio"
-              : "Tienes un premio esperandote"}
+              ? "The host is sending your prize"
+              : "You have a prize waiting for you"}
           </p>
         </div>
 
         {/* Prize card */}
         {tournament && tournament.prize_amount > 0 && (
           <div className={`claim-card p-5 text-center mb-5 ${prizeReceived ? "border-[#00FF88] glow-border" : ""}`}>
-            <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Premio</p>
+            <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Prize</p>
             <p className={`text-4xl font-black ${prizeReceived ? "text-[#00FF88]" : "text-white"}`}>
               {tournament.prize_amount} AVAX
             </p>
@@ -270,7 +270,7 @@ export default function ClaimPage() {
             {prizeReceived && (
               <div className="mt-3 inline-flex items-center gap-1.5 bg-[#00FF88]/10 text-[#00FF88] text-xs font-semibold px-3 py-1 rounded-full">
                 <span className="w-2 h-2 rounded-full bg-[#00FF88] animate-pulse" />
-                Transferido
+                Transferred
               </div>
             )}
           </div>
@@ -281,9 +281,9 @@ export default function ClaimPage() {
           <div className="claim-card p-5 mb-5">
             <div className="space-y-0">
               {[
-                { label: "Crear wallet", desc: "Passkey (Face ID / huella)", icon: "\uD83D\uDD10" },
-                { label: "Esperando premio", desc: "El host envia el AVAX", icon: "\uD83D\uDCE8" },
-                { label: "Premio recibido", desc: "AVAX en tu wallet", icon: "\u2705" },
+                { label: "Create wallet", desc: "Passkey (Face ID / fingerprint)", icon: "\uD83D\uDD10" },
+                { label: "Waiting for prize", desc: "The host sends the AVAX", icon: "\uD83D\uDCE8" },
+                { label: "Prize received", desc: "AVAX in your wallet", icon: "\u2705" },
               ].map((s, i) => {
                 const isDone = i < activeStep;
                 const isCurrent = i === activeStep;
@@ -336,7 +336,7 @@ export default function ClaimPage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white font-bold truncate">{winner.nickname}</p>
-              <p className="text-[#00FF88] text-sm font-medium">{winner.score} puntos</p>
+              <p className="text-[#00FF88] text-sm font-medium">{winner.score} points</p>
             </div>
             <div className="text-2xl crown-float">&#128081;</div>
           </div>
@@ -345,7 +345,7 @@ export default function ClaimPage() {
         {/* Wallet address (when created) */}
         {walletAddress && (
           <div className="claim-card p-4 mb-5">
-            <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Tu wallet</p>
+            <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Your wallet</p>
             <p className="text-[#00FF88] font-mono text-sm">{shortAddress}</p>
           </div>
         )}
@@ -367,15 +367,15 @@ export default function ClaimPage() {
               {step === "creating" ? (
                 <span className="flex items-center justify-center gap-3">
                   <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                  Creando wallet...
+                  Creating wallet...
                 </span>
               ) : (
-                "Crear wallet y recibir premio"
+                "Create wallet and receive prize"
               )}
             </button>
             <p className="text-gray-500 text-xs text-center mt-4 max-w-xs mx-auto leading-relaxed">
-              Usaras Face ID, huella digital o passkey de tu dispositivo.
-              No necesitas recordar ninguna frase secreta.
+              You'll use Face ID, fingerprint, or your device's passkey.
+              No need to remember any secret phrase.
             </p>
           </>
         )}

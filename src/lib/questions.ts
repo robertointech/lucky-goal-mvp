@@ -48,103 +48,103 @@ export function getGameQuestions(tournamentCode: string, customQuestions?: Quest
 }
 
 export const triviaQuestions: Question[] = [
-  // --- Deportes ---
+  // --- Sports ---
   {
     id: 1,
-    question: "¿Cuántos jugadores tiene un equipo de fútbol en el campo?",
+    question: "How many players does a soccer team have on the field?",
     options: ["9", "10", "11", "12"],
     correctIndex: 2,
   },
   {
     id: 2,
-    question: "¿En qué país se celebró el Mundial 2022?",
-    options: ["Rusia", "Brasil", "Qatar", "Japón"],
+    question: "In which country was the 2022 World Cup held?",
+    options: ["Russia", "Brazil", "Qatar", "Japan"],
     correctIndex: 2,
   },
   {
     id: 3,
-    question: "¿Cuánto dura un partido de fútbol reglamentario?",
-    options: ["80 minutos", "90 minutos", "100 minutos", "120 minutos"],
+    question: "How long is a regulation soccer match?",
+    options: ["80 minutes", "90 minutes", "100 minutes", "120 minutes"],
     correctIndex: 1,
   },
   {
     id: 4,
-    question: "¿Qué jugador ha ganado más Balones de Oro?",
-    options: ["Cristiano Ronaldo", "Lionel Messi", "Pelé", "Maradona"],
+    question: "Which player has won the most Ballon d'Or awards?",
+    options: ["Cristiano Ronaldo", "Lionel Messi", "Pele", "Maradona"],
     correctIndex: 1,
   },
   {
     id: 5,
-    question: "¿Desde qué distancia se cobra un penalti?",
-    options: ["9 metros", "11 metros", "12 metros", "15 metros"],
+    question: "From what distance is a penalty kick taken?",
+    options: ["9 meters", "11 meters", "12 meters", "15 meters"],
     correctIndex: 1,
   },
   {
     id: 6,
-    question: "¿Qué selección ha ganado más Copas del Mundo?",
-    options: ["Alemania", "Argentina", "Brasil", "Italia"],
+    question: "Which national team has won the most World Cups?",
+    options: ["Germany", "Argentina", "Brazil", "Italy"],
     correctIndex: 2,
   },
   {
     id: 7,
-    question: "¿En qué deporte se usa un shuttlecock (gallito)?",
-    options: ["Tenis de mesa", "Bádminton", "Squash", "Voleibol"],
+    question: "In which sport is a shuttlecock used?",
+    options: ["Table Tennis", "Badminton", "Squash", "Volleyball"],
     correctIndex: 1,
   },
-  // --- Cultura general ---
+  // --- General Knowledge ---
   {
     id: 8,
-    question: "¿Cuál es el océano más grande del mundo?",
-    options: ["Atlántico", "Índico", "Pacífico", "Ártico"],
+    question: "What is the largest ocean in the world?",
+    options: ["Atlantic", "Indian", "Pacific", "Arctic"],
     correctIndex: 2,
   },
   {
     id: 9,
-    question: "¿En qué año llegó el hombre a la Luna?",
+    question: "In what year did man first walk on the Moon?",
     options: ["1965", "1969", "1972", "1975"],
     correctIndex: 1,
   },
   {
     id: 10,
-    question: "¿Quién pintó la Mona Lisa?",
-    options: ["Miguel Ángel", "Rafael", "Leonardo da Vinci", "Botticelli"],
+    question: "Who painted the Mona Lisa?",
+    options: ["Michelangelo", "Raphael", "Leonardo da Vinci", "Botticelli"],
     correctIndex: 2,
   },
-  // --- Ciencia ---
+  // --- Science ---
   {
     id: 11,
-    question: "¿Cuál es el planeta más grande del sistema solar?",
-    options: ["Saturno", "Neptuno", "Júpiter", "Urano"],
+    question: "What is the largest planet in the solar system?",
+    options: ["Saturn", "Neptune", "Jupiter", "Uranus"],
     correctIndex: 2,
   },
   {
     id: 12,
-    question: "¿Qué gas necesitan las plantas para la fotosíntesis?",
-    options: ["Oxígeno", "Nitrógeno", "Dióxido de carbono", "Hidrógeno"],
+    question: "What gas do plants need for photosynthesis?",
+    options: ["Oxygen", "Nitrogen", "Carbon dioxide", "Hydrogen"],
     correctIndex: 2,
   },
   {
     id: 13,
-    question: "¿Cuántos huesos tiene el cuerpo humano adulto?",
+    question: "How many bones does the adult human body have?",
     options: ["186", "206", "226", "256"],
     correctIndex: 1,
   },
   {
     id: 14,
-    question: "¿Cuál es el elemento químico más abundante en el universo?",
-    options: ["Oxígeno", "Helio", "Hidrógeno", "Carbono"],
+    question: "What is the most abundant chemical element in the universe?",
+    options: ["Oxygen", "Helium", "Hydrogen", "Carbon"],
     correctIndex: 2,
   },
-  // --- Tecnología ---
+  // --- Technology ---
   {
     id: 15,
-    question: "¿En qué año se lanzó el primer iPhone?",
+    question: "In what year was the first iPhone released?",
     options: ["2005", "2006", "2007", "2008"],
     correctIndex: 2,
   },
   {
     id: 16,
-    question: "¿Qué significa 'HTTP' en internet?",
+    question: "What does 'HTTP' stand for?",
     options: [
       "HyperText Transfer Protocol",
       "High Tech Transfer Program",
@@ -155,27 +155,27 @@ export const triviaQuestions: Question[] = [
   },
   {
     id: 17,
-    question: "¿Quién es considerado el padre de la computación?",
+    question: "Who is considered the father of computing?",
     options: ["Steve Jobs", "Bill Gates", "Alan Turing", "Tim Berners-Lee"],
     correctIndex: 2,
   },
-  // --- Geografía ---
+  // --- Geography ---
   {
     id: 18,
-    question: "¿Cuál es el país más pequeño del mundo?",
-    options: ["Mónaco", "Vaticano", "San Marino", "Liechtenstein"],
+    question: "What is the smallest country in the world?",
+    options: ["Monaco", "Vatican City", "San Marino", "Liechtenstein"],
     correctIndex: 1,
   },
   {
     id: 19,
-    question: "¿En qué continente está Egipto?",
-    options: ["Asia", "Europa", "África", "Oceanía"],
+    question: "On which continent is Egypt?",
+    options: ["Asia", "Europe", "Africa", "Oceania"],
     correctIndex: 2,
   },
   {
     id: 20,
-    question: "¿Cuál es el río más largo del mundo?",
-    options: ["Misisipi", "Amazonas", "Nilo", "Yangtsé"],
+    question: "What is the longest river in the world?",
+    options: ["Mississippi", "Amazon", "Nile", "Yangtze"],
     correctIndex: 2,
   },
 ];

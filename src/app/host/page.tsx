@@ -37,22 +37,22 @@ export default function HostPage() {
         try {
           const rows = results.data as string[][];
           // Skip header if it looks like one
-          const startIdx = rows[0]?.[0]?.toLowerCase().includes("pregunta") ? 1 : 0;
+          const startIdx = rows[0]?.[0]?.toLowerCase().includes("question") ? 1 : 0;
           const dataRows = rows.slice(startIdx);
 
           if (dataRows.length < 5) {
-            setCsvError("Se necesitan al menos 5 preguntas. Encontradas: " + dataRows.length);
+            setCsvError("At least 5 questions required. Found: " + dataRows.length);
             return;
           }
 
           const questions: Question[] = dataRows.map((row, i) => {
             if (row.length < 6) {
-              throw new Error(`Fila ${i + 1 + startIdx}: necesita 6 columnas (pregunta, 4 opciones, respuesta)`);
+              throw new Error(`Row ${i + 1 + startIdx}: needs 6 columns (question, 4 options, answer)`);
             }
 
             const correctIndex = parseInt(row[5].trim(), 10);
             if (isNaN(correctIndex) || correctIndex < 0 || correctIndex > 3) {
-              throw new Error(`Fila ${i + 1 + startIdx}: respuesta_correcta debe ser 0-3, recibido "${row[5].trim()}"`);
+              throw new Error(`Row ${i + 1 + startIdx}: correct_answer must be 0-3, received "${row[5].trim()}"`);
             }
 
             return {
@@ -67,12 +67,12 @@ export default function HostPage() {
           setCustomQuestions(questions);
           setCsvError("");
         } catch (err) {
-          setCsvError(err instanceof Error ? err.message : "Error al parsear CSV");
+          setCsvError(err instanceof Error ? err.message : "Error parsing CSV");
           setCustomQuestions(null);
         }
       },
       error: () => {
-        setCsvError("Error al leer el archivo CSV");
+        setCsvError("Error reading CSV file");
       },
     });
 
@@ -85,7 +85,7 @@ export default function HostPage() {
 
     const prize = parseFloat(prizeAmount) || 0;
     if (prize <= 0) {
-      setError("El premio debe ser mayor a 0 AVAX.");
+      setError("Prize must be greater than 0 AVAX.");
       return;
     }
 
@@ -105,12 +105,12 @@ export default function HostPage() {
       } catch (escrowErr: unknown) {
         const msg = escrowErr instanceof Error ? escrowErr.message : String(escrowErr);
         if (msg.includes("insufficient") || msg.includes("exceeds balance")) {
-          setError(`Fondos insuficientes. Necesitas al menos ${prizeAmount} AVAX + gas.`);
+          setError(`Insufficient funds. You need at least ${prizeAmount} AVAX + gas.`);
           setLoading(false);
           return;
         }
         if (msg.includes("rejected") || msg.includes("denied")) {
-          setError("Transaccion rechazada. Intenta de nuevo.");
+          setError("Transaction rejected. Try again.");
           setLoading(false);
           return;
         }
@@ -119,7 +119,7 @@ export default function HostPage() {
 
       router.push(`/host/lobby/${tournament.code}`);
     } catch (err) {
-      setError("Error al crear torneo. Intenta de nuevo.");
+      setError("Error creating tournament. Try again.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -145,10 +145,10 @@ export default function HostPage() {
             LUCKY GOAL
           </div>
           <h1 className="text-4xl font-black text-white mb-2 tracking-tight">
-            Crear Torneo
+            Create Tournament
           </h1>
           <p className="text-gray-400">
-            Configura y lanza tu torneo de trivia + penales
+            Set up and launch your trivia + penalty kicks tournament
           </p>
         </div>
 
@@ -158,16 +158,16 @@ export default function HostPage() {
             <div className="w-20 h-20 rounded-2xl bg-[#1a1a2e] border border-gray-700/50 flex items-center justify-center mx-auto mb-5">
               <span className="text-4xl">&#128274;</span>
             </div>
-            <h2 className="text-lg text-white font-bold mb-2">Conecta tu wallet</h2>
+            <h2 className="text-lg text-white font-bold mb-2">Connect your wallet</h2>
             <p className="text-gray-400 text-sm mb-6">
-              Necesitas una wallet para depositar el premio del torneo
+              You need a wallet to deposit the tournament prize
             </p>
             <div className="flex justify-center">
               <ConnectButton
                 client={client}
                 chain={avalancheFuji}
                 connectButton={{
-                  label: "Conectar Wallet",
+                  label: "Connect Wallet",
                   style: {
                     background: "linear-gradient(135deg, #00FF88, #00CC6A)",
                     color: "#000",
@@ -187,7 +187,7 @@ export default function HostPage() {
             {/* Prize Amount */}
             <div className="host-card p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-white font-semibold">Premio</h3>
+                <h3 className="text-white font-semibold">Prize</h3>
                 <span className="text-gray-500 text-xs">AVAX</span>
               </div>
 
@@ -226,13 +226,13 @@ export default function HostPage() {
             <div className="host-card p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-white font-semibold flex items-center gap-2">
-                  Preguntas Custom
-                  <span className="text-gray-500 text-xs font-normal bg-gray-800 px-2 py-0.5 rounded-full">Opcional</span>
+                  Custom Questions
+                  <span className="text-gray-500 text-xs font-normal bg-gray-800 px-2 py-0.5 rounded-full">Optional</span>
                 </h3>
               </div>
 
               <p className="text-gray-500 text-sm mb-4">
-                Sube un CSV con tus propias preguntas. Si no subes, se usan las default.
+                Upload a CSV with your own questions. If you don't upload, defaults are used.
               </p>
 
               {/* Upload area */}
@@ -251,10 +251,10 @@ export default function HostPage() {
                 >
                   <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">&#128196;</div>
                   <p className="text-gray-400 text-sm font-medium group-hover:text-[#00FF88]">
-                    Subir archivo CSV
+                    Upload CSV file
                   </p>
                   <p className="text-gray-600 text-xs mt-1">
-                    pregunta, opcion1, opcion2, opcion3, opcion4, respuesta (0-3)
+                    question, option1, option2, option3, option4, answer (0-3)
                   </p>
                 </button>
               ) : (
@@ -264,14 +264,14 @@ export default function HostPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-[#00FF88] text-lg">&#9989;</span>
                       <span className="text-[#00FF88] text-sm font-bold">
-                        {customQuestions.length} preguntas cargadas
+                        {customQuestions.length} questions loaded
                       </span>
                     </div>
                     <button
                       onClick={() => { setCustomQuestions(null); setCsvError(""); }}
                       className="text-gray-500 text-xs hover:text-red-400 transition-colors px-2 py-1 rounded-lg hover:bg-red-500/10"
                     >
-                      Quitar
+                      Remove
                     </button>
                   </div>
 
@@ -316,7 +316,7 @@ export default function HostPage() {
                     ))}
                     {customQuestions.length > 5 && (
                       <p className="text-gray-600 text-xs text-center py-1">
-                        +{customQuestions.length - 5} preguntas mas (se usan las primeras 5)
+                        +{customQuestions.length - 5} more questions (first 5 will be used)
                       </p>
                     )}
                   </div>
@@ -326,7 +326,7 @@ export default function HostPage() {
                     onClick={() => fileInputRef.current?.click()}
                     className="mt-3 text-gray-500 text-xs hover:text-[#00FF88] transition-colors"
                   >
-                    Cambiar archivo
+                    Change file
                   </button>
                 </div>
               )}
@@ -344,27 +344,27 @@ export default function HostPage() {
 
               <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
                 <span className="text-[#00FF88]">&#9889;</span>
-                Preview del torneo
+                Tournament Preview
               </h3>
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between py-2 border-b border-gray-800/50">
                   <div className="flex items-center gap-2">
                     <span className="w-7 h-7 rounded-lg bg-red-500/15 flex items-center justify-center text-xs">&#127918;</span>
-                    <span className="text-gray-400 text-sm">Formato</span>
+                    <span className="text-gray-400 text-sm">Format</span>
                   </div>
-                  <span className="text-white text-sm font-medium">Trivia + Penales</span>
+                  <span className="text-white text-sm font-medium">Trivia + Penalties</span>
                 </div>
 
                 <div className="flex items-center justify-between py-2 border-b border-gray-800/50">
                   <div className="flex items-center gap-2">
                     <span className="w-7 h-7 rounded-lg bg-blue-500/15 flex items-center justify-center text-xs">&#10067;</span>
-                    <span className="text-gray-400 text-sm">Preguntas</span>
+                    <span className="text-gray-400 text-sm">Questions</span>
                   </div>
                   <span className="text-white text-sm font-medium">
                     {customQuestions
                       ? <span className="text-[#00FF88]">{questionCount} custom</span>
-                      : "5 trivia de futbol"
+                      : "5 trivia questions"
                     }
                   </span>
                 </div>
@@ -372,32 +372,32 @@ export default function HostPage() {
                 <div className="flex items-center justify-between py-2 border-b border-gray-800/50">
                   <div className="flex items-center gap-2">
                     <span className="w-7 h-7 rounded-lg bg-yellow-500/15 flex items-center justify-center text-xs">&#9201;</span>
-                    <span className="text-gray-400 text-sm">Tiempo</span>
+                    <span className="text-gray-400 text-sm">Time</span>
                   </div>
-                  <span className="text-white text-sm font-medium">20s por pregunta</span>
+                  <span className="text-white text-sm font-medium">20s per question</span>
                 </div>
 
                 <div className="flex items-center justify-between py-2 border-b border-gray-800/50">
                   <div className="flex items-center gap-2">
                     <span className="w-7 h-7 rounded-lg bg-green-500/15 flex items-center justify-center text-xs">&#9917;</span>
-                    <span className="text-gray-400 text-sm">Penales</span>
+                    <span className="text-gray-400 text-sm">Penalties</span>
                   </div>
-                  <span className="text-white text-sm font-medium">1 por ronda</span>
+                  <span className="text-white text-sm font-medium">1 per round</span>
                 </div>
 
                 <div className="flex items-center justify-between py-2">
                   <div className="flex items-center gap-2">
                     <span className="w-7 h-7 rounded-lg bg-purple-500/15 flex items-center justify-center text-xs">&#11088;</span>
-                    <span className="text-gray-400 text-sm">Puntuacion</span>
+                    <span className="text-gray-400 text-sm">Scoring</span>
                   </div>
-                  <span className="text-white text-sm font-medium">100 + bonus + 50 gol</span>
+                  <span className="text-white text-sm font-medium">100 + bonus + 50 goal</span>
                 </div>
               </div>
 
               {/* Prize highlight at bottom */}
               {prizeNum > 0 && (
                 <div className="mt-4 pt-4 border-t border-gray-800/50 flex items-center justify-between">
-                  <span className="text-gray-400 text-sm">Premio total</span>
+                  <span className="text-gray-400 text-sm">Total Prize</span>
                   <span className="text-[#00FF88] text-xl font-black">{prizeAmount} AVAX</span>
                 </div>
               )}
@@ -418,11 +418,11 @@ export default function HostPage() {
               {loading ? (
                 <span className="flex items-center justify-center gap-3">
                   <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                  Creando torneo...
+                  Creating tournament...
                 </span>
               ) : (
                 <span className="flex items-center justify-center gap-2">
-                  Crear Torneo
+                  Create Tournament
                   <span className="text-xl">&#9889;</span>
                 </span>
               )}
@@ -431,7 +431,7 @@ export default function HostPage() {
             {/* Connected wallet info */}
             <div className="text-center">
               <p className="text-gray-500 text-xs">
-                Conectado: {account.address.slice(0, 6)}...{account.address.slice(-4)}
+                Connected: {account.address.slice(0, 6)}...{account.address.slice(-4)}
               </p>
             </div>
           </div>

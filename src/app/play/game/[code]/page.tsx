@@ -225,16 +225,16 @@ export default function PlayerGamePage() {
               <div className="text-7xl mb-3 animate-[popIn_0.5s_ease-out_0.3s_backwards]">
                 {winner.avatar}
               </div>
-              <h2 className="text-3xl font-black text-white mb-1">Ganaste!</h2>
+              <h2 className="text-3xl font-black text-white mb-1">You Won!</h2>
               <p className="text-[#00FF88] text-2xl font-bold mb-6">
-                {winner.score} puntos
+                {winner.score} points
               </p>
               {currentTournament && currentTournament.prize_amount > 0 && (
                 <div
                   className="bg-[#0D1117] border-2 border-[#00FF88]/30 rounded-2xl px-8 py-5 text-center mb-6"
                   style={{ boxShadow: "0 0 40px rgba(0, 255, 136, 0.15)" }}
                 >
-                  <p className="text-gray-400 text-sm mb-1">Tu premio</p>
+                  <p className="text-gray-400 text-sm mb-1">Your prize</p>
                   <p className="text-[#00FF88] text-4xl font-black">
                     {currentTournament.prize_amount} AVAX
                   </p>
@@ -245,21 +245,21 @@ export default function PlayerGamePage() {
                 className="bg-[#00FF88] text-black font-black py-4 px-8 rounded-2xl text-lg active:scale-95 transform"
                 style={{ boxShadow: "0 0 30px rgba(0, 255, 136, 0.4)" }}
               >
-                Reclamar Premio
+                Claim Prize
               </button>
             </>
           ) : (
             <>
               <div className="text-5xl mb-3">{winner.avatar}</div>
               <h2 className="text-2xl font-bold text-white mb-1">
-                {winner.nickname} gano!
+                {winner.nickname} won!
               </h2>
               <p className="text-[#00FF88] text-xl font-bold mb-6">
-                {winner.score} puntos
+                {winner.score} points
               </p>
               {myRank > 0 && (
                 <div className="bg-[#0D1117] border border-white/10 rounded-2xl px-6 py-4 text-center">
-                  <p className="text-gray-400 text-sm">Tu posicion</p>
+                  <p className="text-gray-400 text-sm">Your position</p>
                   <p className="text-white text-3xl font-black">#{myRank}</p>
                   <p className="text-gray-400 text-sm">
                     {myPlayer?.score ?? 0} pts
@@ -284,7 +284,7 @@ export default function PlayerGamePage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#1a1a2e]">
         <div className="text-[#00FF88] text-xl animate-pulse font-bold">
-          Cargando...
+          Loading...
         </div>
       </div>
     );
@@ -359,7 +359,7 @@ export default function PlayerGamePage() {
                 </span>
                 {timeLeft <= 5 && (
                   <span className="text-red-400 text-xs font-bold animate-pulse uppercase tracking-wider">
-                    Rapido!
+                    Hurry!
                   </span>
                 )}
               </div>
@@ -436,19 +436,19 @@ export default function PlayerGamePage() {
                 lastAnswerCorrect ? "text-[#00FF88]" : "text-red-400"
               }`}
             >
-              {lastAnswerCorrect ? "Correcto!" : "Incorrecto"}
+              {lastAnswerCorrect ? "Correct!" : "Incorrect"}
             </h2>
 
             {/* Show correct answer if wrong */}
             {!lastAnswerCorrect && (
               <p className="text-gray-400 text-sm mt-2">
-                Respuesta: {question.options[question.correctIndex]}
+                Answer: {question.options[question.correctIndex]}
               </p>
             )}
 
             <div className="flex items-center gap-2 mt-6 text-gray-500 text-sm">
               <div className="w-1.5 h-1.5 bg-gray-600 rounded-full animate-pulse" />
-              Esperando al penal...
+              Waiting for penalty...
             </div>
           </div>
         )}
@@ -471,7 +471,7 @@ export default function PlayerGamePage() {
           <div className="flex-1 flex flex-col items-center justify-center">
             <div className="w-10 h-10 border-3 border-[#00FF88]/30 border-t-[#00FF88] rounded-full animate-spin mb-4" />
             <p className="text-gray-400 font-semibold">
-              Esperando resultados...
+              Waiting for results...
             </p>
           </div>
         )}
@@ -483,7 +483,7 @@ export default function PlayerGamePage() {
               Ranking
             </h2>
             <p className="text-gray-500 text-center text-sm mb-4">
-              Pregunta {currentQ + 1} de {QUESTIONS_PER_GAME}
+              Question {currentQ + 1} of {QUESTIONS_PER_GAME}
             </p>
 
             {/* My position highlight */}
@@ -569,10 +569,10 @@ function PenaltyArena({
       <div className="text-center mb-2">
         <h2 className="text-xl text-white font-black flex items-center justify-center gap-2">
           <span className="animate-[ballSpin_1s_linear_infinite]">&#9917;</span>
-          Patea el Penal!
+          Take the Penalty!
         </h2>
         <p className="text-xs mt-1 font-semibold text-gray-400">
-          Elige una esquina y patea!
+          Pick a corner and kick!
         </p>
       </div>
 
@@ -678,7 +678,7 @@ function PenaltyArena({
                             : "none",
                         }}
                       >
-                        {dir === "left" ? "IZQ" : dir === "center" ? "CENTRO" : "DER"}
+                        {dir === "left" ? "LEFT" : dir === "center" ? "CENTER" : "RIGHT"}
                       </span>
                     )}
 
@@ -791,7 +791,7 @@ function PenaltyArena({
                     : "0 0 20px rgba(255,68,68,0.4)",
               }}
             >
-              {penaltyResult === "goal" ? "GOOOL!" : "Atajada!"}
+              {penaltyResult === "goal" ? "GOAAL!" : "Saved!"}
             </p>
             {penaltyResult === "goal" && (
               <p className="text-[#00FF88] text-lg font-bold mt-1 animate-[scoreFloat_1.5s_ease-out_forwards]">
@@ -821,10 +821,10 @@ function PenaltyArena({
           >
             {selectedDirection ? (
               <span className="flex items-center justify-center gap-2">
-                <span className="text-2xl">&#9917;</span> PATEAR!
+                <span className="text-2xl">&#9917;</span> KICK!
               </span>
             ) : (
-              "Elige donde patear"
+              "Choose where to kick"
             )}
           </button>
         </div>
@@ -878,7 +878,7 @@ function CompactLeaderboard({
             >
               {p.nickname}
               {isMe && (
-                <span className="text-[#00FF88] text-xs ml-1">(tu)</span>
+                <span className="text-[#00FF88] text-xs ml-1">(you)</span>
               )}
             </span>
             <span

@@ -157,7 +157,7 @@ export default function HostGamePage() {
       setPrizeSent(true);
     } catch (err) {
       console.error("Prize transfer error:", err);
-      setPrizeError("Error al enviar premio. Intenta de nuevo.");
+      setPrizeError("Error sending prize. Try again.");
     } finally {
       setSendingPrize(false);
     }
@@ -170,7 +170,7 @@ export default function HostGamePage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#1a1a2e]">
         <div className="text-[#00FF88] text-3xl animate-pulse font-bold">
-          Cargando...
+          Loading...
         </div>
       </div>
     );
@@ -206,13 +206,13 @@ export default function HostGamePage() {
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-[#00FF88] rounded-full animate-pulse" />
             <span className="text-gray-400 text-sm">
-              {players.length} jugadores
+              {players.length} players
             </span>
           </div>
           {phase !== "finished" && (
             <div className="bg-white/5 rounded-lg px-3 py-1.5">
               <span className="text-gray-400 text-sm">
-                Pregunta{" "}
+                Question{" "}
                 <span className="text-white font-bold">
                   {currentQ + 1}/{totalQ}
                 </span>
@@ -286,7 +286,7 @@ export default function HostGamePage() {
               }}
             >
               <p className="text-[#00FF88] text-sm font-bold uppercase tracking-widest mb-3">
-                Pregunta {currentQ + 1} de {totalQ}
+                Question {currentQ + 1} of {totalQ}
               </p>
               <h2 className="text-4xl text-white font-bold leading-tight">
                 {question.question}
@@ -322,13 +322,13 @@ export default function HostGamePage() {
         {phase === "countdown" && question && (
           <div className="flex-1 flex flex-col items-center justify-center px-8">
             <p className="text-[#00FF88] text-xl font-bold uppercase tracking-widest mb-6 animate-pulse">
-              Pregunta {currentQ + 1} de {totalQ}
+              Question {currentQ + 1} of {totalQ}
             </p>
             <div
               className="text-9xl font-black text-white animate-[popIn_0.5s_ease-out]"
               style={{ textShadow: "0 0 40px rgba(0, 255, 136, 0.4)" }}
             >
-              Preparense!
+              Get Ready!
             </div>
           </div>
         )}
@@ -356,10 +356,10 @@ export default function HostGamePage() {
             </div>
 
             <h2 className="text-5xl text-white font-black mb-4 text-center">
-              Hora del Penal!
+              Penalty Time!
             </h2>
             <div className="flex items-center gap-2 text-gray-400 text-2xl">
-              <span>Los jugadores estan pateando</span>
+              <span>Players are kicking</span>
               <span className="inline-flex">
                 <span className="animate-[dotBounce_1.4s_ease-in-out_infinite]">
                   .
@@ -397,10 +397,10 @@ export default function HostGamePage() {
         {phase === "results" && (
           <div className="flex-1 flex flex-col px-8 py-6">
             <h2 className="text-3xl text-white font-black text-center mb-2">
-              Resultados
+              Results
             </h2>
             <p className="text-gray-500 text-center mb-8 text-lg">
-              Pregunta {currentQ + 1} de {totalQ}
+              Question {currentQ + 1} of {totalQ}
             </p>
 
             {/* Scoreboard */}
@@ -508,7 +508,7 @@ export default function HostGamePage() {
 
               {/* Score */}
               <p className="text-[#00FF88] text-4xl font-bold mb-8 animate-[fadeIn_0.5s_ease-out_0.7s_backwards]">
-                {winner.score} puntos
+                {winner.score} points
               </p>
 
               {/* Prize card */}
@@ -519,7 +519,7 @@ export default function HostGamePage() {
                     boxShadow: "0 0 60px rgba(0, 255, 136, 0.15)",
                   }}
                 >
-                  <p className="text-gray-400 text-lg mb-1">Premio</p>
+                  <p className="text-gray-400 text-lg mb-1">Prize</p>
                   <p className="text-[#00FF88] text-5xl font-black">
                     {currentTournament.prize_amount} AVAX
                   </p>
@@ -532,7 +532,7 @@ export default function HostGamePage() {
                           <span className="text-3xl">✅</span>
                           <div>
                             <p className="text-[#00FF88] font-bold text-xl">
-                              Premio enviado!
+                              Prize sent!
                             </p>
                             <p className="text-gray-400 text-sm">
                               {winner.wallet_address.slice(0, 8)}...
@@ -559,10 +559,10 @@ export default function HostGamePage() {
                             {sendingPrize ? (
                               <span className="flex items-center gap-2">
                                 <span className="animate-spin">⏳</span>{" "}
-                                Enviando...
+                                Sending...
                               </span>
                             ) : (
-                              `Enviar ${currentTournament.prize_amount} AVAX`
+                              `Send ${currentTournament.prize_amount} AVAX`
                             )}
                           </button>
                           <p className="text-gray-600 text-xs mt-3 font-mono">
@@ -574,13 +574,13 @@ export default function HostGamePage() {
                     ) : (
                       <div>
                         <p className="text-gray-400 animate-pulse text-lg">
-                          Esperando wallet del ganador...
+                          Waiting for winner's wallet...
                         </p>
                         <button
                           onClick={refreshPlayers}
                           className="mt-3 text-[#00FF88] text-sm underline hover:no-underline"
                         >
-                          Actualizar
+                          Refresh
                         </button>
                       </div>
                     )}

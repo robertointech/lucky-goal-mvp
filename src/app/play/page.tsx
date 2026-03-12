@@ -12,7 +12,7 @@ export default function PlayPage() {
   const handleJoin = () => {
     const code = pin.toUpperCase().trim();
     if (code.length < 4) {
-      setError("Codigo muy corto");
+      setError("Code too short");
       setShaking(true);
       setTimeout(() => setShaking(false), 500);
       return;
@@ -37,7 +37,7 @@ export default function PlayPage() {
           <h1 className="text-4xl font-black text-white tracking-tight">
             Lucky <span className="text-[#00FF88] drop-shadow-[0_0_10px_rgba(0,255,136,0.5)]">Goal</span>
           </h1>
-          <p className="text-gray-400 mt-2 text-sm">Ingresa el codigo del torneo</p>
+          <p className="text-gray-400 mt-2 text-sm">Enter the tournament code</p>
         </div>
 
         {/* PIN Input - Big and glowing */}
@@ -107,12 +107,12 @@ export default function PlayPage() {
             </div>
           )}
           <span className="relative z-10">
-            {pin.length >= 4 ? "UNIRSE" : "Ingresa el codigo"}
+            {pin.length >= 4 ? "JOIN" : "Enter the code"}
           </span>
         </button>
 
         <p className="text-gray-600 text-xs text-center mt-8">
-          Pide el codigo al organizador del torneo
+          Ask the tournament host for the code
         </p>
       </div>
 

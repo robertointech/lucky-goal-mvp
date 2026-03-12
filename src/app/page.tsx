@@ -46,7 +46,7 @@ export default function LandingPage() {
           Lucky Goal
         </h1>
         <p className="text-gray-300 text-lg md:text-xl text-center max-w-md mb-10">
-          Trivia + Penales en vivo. Compite por premios en AVAX.
+          Live Trivia + Penalty Kicks. Compete for AVAX prizes.
         </p>
 
         {/* CTA buttons */}
@@ -60,13 +60,13 @@ export default function LandingPage() {
               boxShadow: "0 0 25px rgba(0,255,136,0.3)",
             }}
           >
-            Crear Torneo
+            Create Tournament
           </Link>
           <Link
             href="/play"
             className="flex-1 text-center py-4 px-6 rounded-xl text-lg font-bold border-2 border-white/20 text-white transition-all active:scale-95 hover:border-[#00FF88]/50 hover:text-[#00FF88]"
           >
-            Unirse
+            Join
           </Link>
         </div>
 
@@ -75,18 +75,18 @@ export default function LandingPage() {
           <div className="flex items-center justify-center gap-3 mb-6">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent to-[#00FF88]/30" />
             <h2 className="text-2xl md:text-3xl font-black text-white text-center tracking-tight">
-              Ranking Global
+              Global Ranking
             </h2>
             <div className="h-px flex-1 bg-gradient-to-l from-transparent to-[#00FF88]/30" />
           </div>
 
           {loading ? (
             <div className="text-center py-12">
-              <div className="text-[#00FF88] text-xl animate-pulse font-bold">Cargando...</div>
+              <div className="text-[#00FF88] text-xl animate-pulse font-bold">Loading...</div>
             </div>
           ) : leaderboard.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">Aun no hay jugadores. Se el primero!</p>
+              <p className="text-gray-500 text-lg">No players yet. Be the first!</p>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
@@ -156,7 +156,7 @@ export default function LandingPage() {
                     {/* Stats */}
                     <div className="flex items-center gap-3 md:gap-4 shrink-0">
                       <div className="hidden md:flex flex-col items-center">
-                        <span className="text-gray-500 text-xs uppercase">Juegos</span>
+                        <span className="text-gray-500 text-xs uppercase">Games</span>
                         <span className="text-white font-bold">{player.total_games}</span>
                       </div>
                       <div className="hidden md:flex flex-col items-center">

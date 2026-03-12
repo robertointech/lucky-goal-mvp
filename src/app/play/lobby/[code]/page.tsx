@@ -16,11 +16,11 @@ export default function PlayerLobbyPage() {
   const [showTip, setShowTip] = useState(0);
 
   const tips = [
-    "Responde rapido para ganar mas puntos",
-    "El portero se mueve al azar... o no?",
-    "Primer lugar se lleva el premio AVAX",
-    "Concentrate, cada segundo cuenta",
-    "Suerte en los penales!",
+    "Answer fast to earn more points",
+    "The goalkeeper moves randomly... or does he?",
+    "First place wins the AVAX prize",
+    "Focus, every second counts",
+    "Good luck on penalties!",
   ];
 
   useEffect(() => {
@@ -114,8 +114,8 @@ export default function PlayerLobbyPage() {
               />
             ))}
           </div>
-          <p className="text-white font-bold text-lg">Esperando al Host...</p>
-          <p className="text-gray-500 text-sm mt-1">El torneo comenzara pronto</p>
+          <p className="text-white font-bold text-lg">Waiting for Host...</p>
+          <p className="text-gray-500 text-sm mt-1">The tournament will start soon</p>
         </div>
 
         {/* Tips Carousel */}
@@ -132,12 +132,12 @@ export default function PlayerLobbyPage() {
         <div className="flex-1">
           <div className="flex items-center justify-between mb-3">
             <p className="text-gray-500 text-xs uppercase tracking-widest font-bold">
-              Jugadores
+              Players
             </p>
             <div className="flex items-center gap-1.5 bg-[#00FF88]/10 border border-[#00FF88]/30 rounded-full px-3 py-1"
               style={{ boxShadow: "0 0 10px rgba(0,255,136,0.1)" }}>
               <span className="text-[#00FF88] font-black text-sm">{players.length}</span>
-              <span className="text-[#00FF88]/60 text-xs">conectados</span>
+              <span className="text-[#00FF88]/60 text-xs">online</span>
             </div>
           </div>
 
@@ -164,7 +164,7 @@ export default function PlayerLobbyPage() {
                 <span className={`text-[10px] font-bold truncate max-w-[56px] text-center ${
                   player.id === playerId ? "text-[#00FF88]" : "text-gray-400"
                 }`}>
-                  {player.id === playerId ? "Tu" : player.nickname}
+                  {player.id === playerId ? "You" : player.nickname}
                 </span>
               </div>
             ))}
@@ -186,7 +186,7 @@ export default function PlayerLobbyPage() {
           <div className="flex items-center justify-center gap-2">
             <div className="w-2 h-2 bg-[#00FF88] rounded-full"
               style={{ boxShadow: "0 0 6px rgba(0,255,136,0.5)", animation: "pulse-glow 2s ease-in-out infinite" }} />
-            <span className="text-gray-500 text-xs font-medium">Conexion activa</span>
+            <span className="text-gray-500 text-xs font-medium">Connection active</span>
           </div>
         </div>
       </div>

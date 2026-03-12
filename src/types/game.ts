@@ -82,12 +82,12 @@ export interface Achievement {
 }
 
 export const ACHIEVEMENT_META: Record<AchievementType, { label: string; icon: string; description: string }> = {
-  first_match: { label: "Debutante", icon: "🎮", description: "Jugar tu primer torneo" },
-  first_win: { label: "Campeón", icon: "🏆", description: "Ganar tu primer torneo" },
-  first_goal: { label: "Goleador", icon: "⚽", description: "Meter tu primer gol" },
-  streak_3: { label: "En Racha", icon: "🔥", description: "3 respuestas correctas seguidas" },
-  perfect_round: { label: "Perfecto", icon: "💎", description: "Todas correctas en un torneo" },
-  five_games: { label: "Veterano", icon: "⭐", description: "Jugar 5 torneos" },
+  first_match: { label: "Rookie", icon: "🎮", description: "Play your first tournament" },
+  first_win: { label: "Champion", icon: "🏆", description: "Win your first tournament" },
+  first_goal: { label: "Scorer", icon: "⚽", description: "Score your first goal" },
+  streak_3: { label: "On Fire", icon: "🔥", description: "3 correct answers in a row" },
+  perfect_round: { label: "Perfect", icon: "💎", description: "All correct in a tournament" },
+  five_games: { label: "Veteran", icon: "⭐", description: "Play 5 tournaments" },
 };
 
 export const TOURNAMENT_CODE_LENGTH = 6;
