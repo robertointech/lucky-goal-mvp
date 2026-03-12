@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useActiveAccount, useSendTransaction, ConnectButton } from "thirdweb/react";
 import { client } from "@/lib/thirdweb";
 import { avalancheFuji } from "thirdweb/chains";
 import { createTournament } from "@/lib/gameLogic";
 import { prepareCreateTournament } from "@/lib/escrow";
+import Papa from "papaparse";
+import type { Question } from "@/types/game";
 
 const PRIZE_PRESETS = ["0.05", "0.1", "0.25", "0.5", "1"];
 
@@ -17,6 +19,66 @@ export default function HostPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { mutateAsync: sendTx } = useSendTransaction();
+
+  // Custom questions state
+  const [customQuestions, setCustomQuestions] = useState<Question[] | null>(null);
+  const [csvError, setCsvError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setCsvError("");
+
+    Papa.parse(file, {
+      skipEmptyLines: true,
+      complete: (results) => {
+        try {
+          const rows = results.data as string[][];
+          // Skip header if it looks like one
+          const startIdx = rows[0]?.[0]?.toLowerCase().includes("pregunta") ? 1 : 0;
+          const dataRows = rows.slice(startIdx);
+
+          if (dataRows.length < 5) {
+            setCsvError("Se necesitan al menos 5 preguntas. Encontradas: " + dataRows.length);
+            return;
+          }
+
+          const questions: Question[] = dataRows.map((row, i) => {
+            if (row.length < 6) {
+              throw new Error(`Fila ${i + 1 + startIdx}: necesita 6 columnas (pregunta, 4 opciones, respuesta)`);
+            }
+
+            const correctIndex = parseInt(row[5].trim(), 10);
+            if (isNaN(correctIndex) || correctIndex < 0 || correctIndex > 3) {
+              throw new Error(`Fila ${i + 1 + startIdx}: respuesta_correcta debe ser 0-3, recibido "${row[5].trim()}"`);
+            }
+
+            return {
+              id: i + 1,
+              question: row[0].trim(),
+              options: [row[1].trim(), row[2].trim(), row[3].trim(), row[4].trim()],
+              correctIndex,
+              timeLimit: 20,
+            };
+          });
+
+          setCustomQuestions(questions);
+          setCsvError("");
+        } catch (err) {
+          setCsvError(err instanceof Error ? err.message : "Error al parsear CSV");
+          setCustomQuestions(null);
+        }
+      },
+      error: () => {
+        setCsvError("Error al leer el archivo CSV");
+      },
+    });
+
+    // Reset input so same file can be re-uploaded
+    e.target.value = "";
+  };
 
   const handleCreate = async () => {
     if (!account) return;
@@ -33,7 +95,8 @@ export default function HostPage() {
     try {
       const tournament = await createTournament(
         account.address,
-        prize
+        prize,
+        customQuestions
       );
 
       try {
@@ -64,6 +127,7 @@ export default function HostPage() {
   };
 
   const prizeNum = parseFloat(prizeAmount) || 0;
+  const questionCount = customQuestions ? Math.min(customQuestions.length, 5) : 5;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-[#1a1a2e] relative overflow-hidden">
@@ -158,6 +222,122 @@ export default function HostPage() {
               </div>
             </div>
 
+            {/* Custom Questions Upload */}
+            <div className="host-card p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-white font-semibold flex items-center gap-2">
+                  Preguntas Custom
+                  <span className="text-gray-500 text-xs font-normal bg-gray-800 px-2 py-0.5 rounded-full">Opcional</span>
+                </h3>
+              </div>
+
+              <p className="text-gray-500 text-sm mb-4">
+                Sube un CSV con tus propias preguntas. Si no subes, se usan las default.
+              </p>
+
+              {/* Upload area */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                onChange={handleCsvUpload}
+                className="hidden"
+              />
+
+              {!customQuestions ? (
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full border-2 border-dashed border-gray-700/50 rounded-xl py-6 px-4 text-center transition-all hover:border-[#00FF88]/50 hover:bg-[#00FF88]/5 group"
+                >
+                  <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">&#128196;</div>
+                  <p className="text-gray-400 text-sm font-medium group-hover:text-[#00FF88]">
+                    Subir archivo CSV
+                  </p>
+                  <p className="text-gray-600 text-xs mt-1">
+                    pregunta, opcion1, opcion2, opcion3, opcion4, respuesta (0-3)
+                  </p>
+                </button>
+              ) : (
+                <div>
+                  {/* Success header */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[#00FF88] text-lg">&#9989;</span>
+                      <span className="text-[#00FF88] text-sm font-bold">
+                        {customQuestions.length} preguntas cargadas
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => { setCustomQuestions(null); setCsvError(""); }}
+                      className="text-gray-500 text-xs hover:text-red-400 transition-colors px-2 py-1 rounded-lg hover:bg-red-500/10"
+                    >
+                      Quitar
+                    </button>
+                  </div>
+
+                  {/* Questions preview */}
+                  <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1 custom-scrollbar">
+                    {customQuestions.slice(0, 5).map((q, i) => (
+                      <div
+                        key={i}
+                        className="bg-[#1a1a2e] border border-gray-800/50 rounded-lg px-4 py-3"
+                      >
+                        <div className="flex items-start gap-3">
+                          <span
+                            className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mt-0.5"
+                            style={{
+                              background: "rgba(0, 255, 136, 0.15)",
+                              color: "#00FF88",
+                            }}
+                          >
+                            {i + 1}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white text-sm font-medium truncate">
+                              {q.question}
+                            </p>
+                            <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5">
+                              {q.options.map((opt, j) => (
+                                <span
+                                  key={j}
+                                  className={`text-xs ${
+                                    j === q.correctIndex
+                                      ? "text-[#00FF88] font-bold"
+                                      : "text-gray-500"
+                                  }`}
+                                >
+                                  {j === q.correctIndex ? "* " : ""}{opt}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {customQuestions.length > 5 && (
+                      <p className="text-gray-600 text-xs text-center py-1">
+                        +{customQuestions.length - 5} preguntas mas (se usan las primeras 5)
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Change file button */}
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mt-3 text-gray-500 text-xs hover:text-[#00FF88] transition-colors"
+                  >
+                    Cambiar archivo
+                  </button>
+                </div>
+              )}
+
+              {csvError && (
+                <div className="mt-3 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">
+                  <p className="text-red-400 text-xs">{csvError}</p>
+                </div>
+              )}
+            </div>
+
             {/* Tournament Preview Card */}
             <div className="host-card p-6 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 bg-[#00FF88]/5 rounded-full blur-[40px] pointer-events-none" />
@@ -181,7 +361,12 @@ export default function HostPage() {
                     <span className="w-7 h-7 rounded-lg bg-blue-500/15 flex items-center justify-center text-xs">&#10067;</span>
                     <span className="text-gray-400 text-sm">Preguntas</span>
                   </div>
-                  <span className="text-white text-sm font-medium">5 trivia de futbol</span>
+                  <span className="text-white text-sm font-medium">
+                    {customQuestions
+                      ? <span className="text-[#00FF88]">{questionCount} custom</span>
+                      : "5 trivia de futbol"
+                    }
+                  </span>
                 </div>
 
                 <div className="flex items-center justify-between py-2 border-b border-gray-800/50">
@@ -271,5 +456,16 @@ const styles = `
   .host-btn:hover:not(:disabled) {
     box-shadow: 0 0 35px rgba(0,255,136,0.5), 0 4px 20px rgba(0,0,0,0.3);
     transform: translateY(-1px);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 136, 0.2);
+    border-radius: 2px;
   }
 `;

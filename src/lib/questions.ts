@@ -1,9 +1,6 @@
-export interface Question {
-  id: number;
-  question: string;
-  options: string[];
-  correctIndex: number;
-}
+// Re-export Question from the canonical type definition
+import type { Question } from "@/types/game";
+export type { Question };
 
 export const QUESTIONS_PER_GAME = 5;
 
@@ -28,8 +25,18 @@ function hashCode(str: string): number {
 /**
  * Get the questions for a specific tournament. Uses the tournament code
  * as seed so host and all players get the same set in the same order.
+ * If customQuestions are provided, uses those instead of defaults.
  */
-export function getGameQuestions(tournamentCode: string): Question[] {
+export function getGameQuestions(tournamentCode: string, customQuestions?: Question[] | null): Question[] {
+  // If custom questions exist, use them (take first QUESTIONS_PER_GAME)
+  if (customQuestions && customQuestions.length > 0) {
+    return customQuestions.slice(0, QUESTIONS_PER_GAME).map((q, i) => ({
+      ...q,
+      id: q.id ?? i + 1,
+      timeLimit: q.timeLimit ?? 20,
+    }));
+  }
+
   const rng = seededRng(hashCode(tournamentCode));
   const indices = triviaQuestions.map((_, i) => i);
   // Fisher-Yates shuffle with seeded RNG

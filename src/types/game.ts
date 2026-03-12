@@ -16,6 +16,7 @@ export interface Tournament {
   status: GameStatus;
   current_question: number;
   winner_id: string | null;
+  custom_questions: Question[] | null;
   created_at: string;
 }
 
@@ -46,7 +47,7 @@ export interface Question {
   question: string;
   options: string[];
   correctIndex: number;
-  timeLimit: number; // seconds
+  timeLimit?: number; // seconds (default 20)
 }
 
 export const AVATARS = ["⚽", "🏆", "🦁", "🐯", "🦅", "🐉", "🔥", "⭐"] as const;

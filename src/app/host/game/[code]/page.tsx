@@ -56,7 +56,7 @@ export default function HostGamePage() {
   const currentTournament = tournament || localTournament;
   const currentQ = currentTournament?.current_question ?? 0;
   const totalQ = getTotalQuestions();
-  const gameQuestions = getGameQuestions(code);
+  const gameQuestions = getGameQuestions(code, currentTournament?.custom_questions);
   const question = gameQuestions[currentQ];
 
   // Refs to avoid stale closures in setTimeout callbacks

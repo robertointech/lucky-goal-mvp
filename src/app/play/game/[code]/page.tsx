@@ -65,7 +65,7 @@ export default function PlayerGamePage() {
   const currentTournament = tournament || localTournament;
   const status = currentTournament?.status;
   const currentQ = currentTournament?.current_question ?? 0;
-  const gameQuestions = getGameQuestions(code);
+  const gameQuestions = getGameQuestions(code, currentTournament?.custom_questions);
   const question = gameQuestions[currentQ];
 
   // Guards to ensure each phase initializes exactly once per question round.

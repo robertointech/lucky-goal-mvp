@@ -1,6 +1,6 @@
 import { supabase } from "./supabase";
 import { QUESTIONS_PER_GAME } from "./questions";
-import type { Tournament, Player, GameStatus } from "@/types/game";
+import type { Tournament, Player, GameStatus, Question } from "@/types/game";
 import { TOURNAMENT_CODE_LENGTH } from "@/types/game";
 
 function generateCode(): string {
@@ -12,11 +12,24 @@ function generateCode(): string {
   return code;
 }
 
-export async function createTournament(hostWallet: string, prizeAmount: number): Promise<Tournament> {
+export async function createTournament(
+  hostWallet: string,
+  prizeAmount: number,
+  customQuestions?: Question[] | null
+): Promise<Tournament> {
   const code = generateCode();
+  const insert: Record<string, unknown> = {
+    code,
+    host_wallet: hostWallet,
+    prize_amount: prizeAmount,
+  };
+  if (customQuestions && customQuestions.length > 0) {
+    insert.custom_questions = customQuestions;
+  }
+
   const { data, error } = await supabase
     .from("tournaments")
-    .insert({ code, host_wallet: hostWallet, prize_amount: prizeAmount })
+    .insert(insert)
     .select()
     .single();
 
