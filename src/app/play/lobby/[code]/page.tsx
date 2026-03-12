@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getTournament } from "@/lib/gameLogic";
 import { useGameSync } from "@/hooks/useGameSync";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { Tournament } from "@/types/game";
 
 export default function PlayerLobbyPage() {
@@ -14,13 +15,14 @@ export default function PlayerLobbyPage() {
   const [localTournament, setLocalTournament] = useState<Tournament | null>(null);
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [showTip, setShowTip] = useState(0);
+  const { t } = useLanguage();
 
   const tips = [
-    "Answer fast to earn more points",
-    "The goalkeeper moves randomly... or does he?",
-    "First place wins the AVAX prize",
-    "Focus, every second counts",
-    "Good luck on penalties!",
+    t("lobby.tip1"),
+    t("lobby.tip2"),
+    t("lobby.tip3"),
+    t("lobby.tip4"),
+    t("lobby.tip5"),
   ];
 
   useEffect(() => {
@@ -114,14 +116,14 @@ export default function PlayerLobbyPage() {
               />
             ))}
           </div>
-          <p className="text-white font-bold text-lg">Waiting for Host...</p>
-          <p className="text-gray-500 text-sm mt-1">The tournament will start soon</p>
+          <p className="text-white font-bold text-lg">{t("lobby.waitingForHostLong")}</p>
+          <p className="text-gray-500 text-sm mt-1">{t("lobby.startSoon")}</p>
         </div>
 
         {/* Tips Carousel */}
         <div className="bg-[#0D1117] border border-gray-800 rounded-2xl px-5 py-4 mb-6 min-h-[72px] flex items-center justify-center">
           <div className="text-center">
-            <p className="text-gray-500 text-[10px] uppercase tracking-widest mb-1 font-bold">Tip</p>
+            <p className="text-gray-500 text-[10px] uppercase tracking-widest mb-1 font-bold">{t("lobby.tip")}</p>
             <p className="text-gray-300 text-sm transition-opacity duration-500" key={showTip}>
               {tips[showTip]}
             </p>
@@ -132,12 +134,12 @@ export default function PlayerLobbyPage() {
         <div className="flex-1">
           <div className="flex items-center justify-between mb-3">
             <p className="text-gray-500 text-xs uppercase tracking-widest font-bold">
-              Players
+              {t("lobby.players")}
             </p>
             <div className="flex items-center gap-1.5 bg-[#00FF88]/10 border border-[#00FF88]/30 rounded-full px-3 py-1"
               style={{ boxShadow: "0 0 10px rgba(0,255,136,0.1)" }}>
               <span className="text-[#00FF88] font-black text-sm">{players.length}</span>
-              <span className="text-[#00FF88]/60 text-xs">online</span>
+              <span className="text-[#00FF88]/60 text-xs">{t("lobby.online")}</span>
             </div>
           </div>
 
@@ -164,7 +166,7 @@ export default function PlayerLobbyPage() {
                 <span className={`text-[10px] font-bold truncate max-w-[56px] text-center ${
                   player.id === playerId ? "text-[#00FF88]" : "text-gray-400"
                 }`}>
-                  {player.id === playerId ? "You" : player.nickname}
+                  {player.id === playerId ? t("lobby.you") : player.nickname}
                 </span>
               </div>
             ))}
@@ -186,7 +188,7 @@ export default function PlayerLobbyPage() {
           <div className="flex items-center justify-center gap-2">
             <div className="w-2 h-2 bg-[#00FF88] rounded-full"
               style={{ boxShadow: "0 0 6px rgba(0,255,136,0.5)", animation: "pulse-glow 2s ease-in-out infinite" }} />
-            <span className="text-gray-500 text-xs font-medium">Connection active</span>
+            <span className="text-gray-500 text-xs font-medium">{t("lobby.connectionActive")}</span>
           </div>
         </div>
       </div>

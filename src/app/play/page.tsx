@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function PlayPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [shaking, setShaking] = useState(false);
@@ -12,7 +14,7 @@ export default function PlayPage() {
   const handleJoin = () => {
     const code = pin.toUpperCase().trim();
     if (code.length < 4) {
-      setError("Code too short");
+      setError(t("play.codeTooShort"));
       setShaking(true);
       setTimeout(() => setShaking(false), 500);
       return;
@@ -37,7 +39,7 @@ export default function PlayPage() {
           <h1 className="text-4xl font-black text-white tracking-tight">
             Lucky <span className="text-[#00FF88] drop-shadow-[0_0_10px_rgba(0,255,136,0.5)]">Goal</span>
           </h1>
-          <p className="text-gray-400 mt-2 text-sm">Enter the tournament code</p>
+          <p className="text-gray-400 mt-2 text-sm">{t("play.enterCode")}</p>
         </div>
 
         {/* PIN Input - Big and glowing */}
@@ -107,12 +109,12 @@ export default function PlayPage() {
             </div>
           )}
           <span className="relative z-10">
-            {pin.length >= 4 ? "JOIN" : "Enter the code"}
+            {pin.length >= 4 ? t("play.joinBtn") : t("play.enterTheCode")}
           </span>
         </button>
 
         <p className="text-gray-600 text-xs text-center mt-8">
-          Ask the tournament host for the code
+          {t("play.askHost")}
         </p>
       </div>
 

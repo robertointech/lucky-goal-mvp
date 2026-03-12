@@ -161,6 +161,66 @@ const translations = {
     "faq.title": "FAQ",
     "faq.subtitle": "Everything you need to know about Lucky Goal",
     "faq.back": "Back",
+    "faq.q1": "What is Lucky Goal?",
+    "faq.a1": "Lucky Goal is a live trivia and penalty kick game where players compete in real-time tournaments. Answer trivia questions correctly to earn penalty kick attempts, score goals, and climb the leaderboard — all while competing for AVAX crypto prizes.",
+    "faq.q2": "How do I join a tournament?",
+    "faq.a2": "Tap 'Join' on the home screen, enter the 6-character game code shared by the host, choose a nickname and avatar, and you're in! Wait in the lobby until the host starts the tournament.",
+    "faq.q3": "Do I need a wallet?",
+    "faq.a3": "No! Lucky Goal uses Passkey wallets powered by Thirdweb. A wallet is automatically created for you using your device's biometric authentication (Face ID, fingerprint, etc.). No seed phrases, no extensions — just play.",
+    "faq.q4": "How do prizes work?",
+    "faq.a4": "The host sets an AVAX prize pool when creating a tournament. The winner at the end of all rounds can claim the prize directly to their Passkey wallet. Prizes are paid on the Avalanche blockchain.",
+    "faq.q5": "What is a Passkey wallet?",
+    "faq.a5": "A Passkey wallet is a crypto wallet secured by your device's biometrics (fingerprint or face scan) instead of a traditional seed phrase. It's created automatically when you play, making Web3 completely frictionless.",
+    "faq.q6": "Is it free to play?",
+    "faq.a6": "Yes! Joining and playing tournaments is completely free. Only the host needs AVAX to fund the prize pool. Players never pay gas fees or entry costs.",
+    "faq.q7": "How does the penalty kick work?",
+    "faq.a7": "After each trivia question, you take a penalty kick. If you answered correctly, you get to shoot — pick a direction (left, center, or right) and try to beat the goalkeeper. If you answered wrong, the goalkeeper automatically saves your shot. There's always a 30% chance the keeper dives the same direction you kick!",
+    "faq.q8": "What blockchain does it use?",
+    "faq.a8": "Lucky Goal runs on Avalanche (AVAX), a fast and low-cost blockchain. Tournaments and prize claims happen on the Avalanche Fuji testnet, with plans to move to mainnet.",
+
+    // Play page extras
+    "play.codeTooShort": "Code too short",
+    "play.enterTheCode": "Enter the code",
+    "play.askHost": "Ask the tournament host for the code",
+
+    // Join page extras
+    "join.errorJoining": "Error joining. Try again.",
+
+    // Player Lobby extras
+    "lobby.waitingForHostLong": "Waiting for Host...",
+    "lobby.startSoon": "The tournament will start soon",
+    "lobby.tip": "Tip",
+    "lobby.you": "You",
+    "lobby.online": "online",
+    "lobby.connectionActive": "Connection active",
+    "lobby.tip1": "Answer fast to earn more points",
+    "lobby.tip2": "The goalkeeper moves randomly... or does he?",
+    "lobby.tip3": "First place wins the AVAX prize",
+    "lobby.tip4": "Focus, every second counts",
+    "lobby.tip5": "Good luck on penalties!",
+
+    // Host Lobby
+    "hostLobby.loading": "Loading tournament...",
+    "hostLobby.notFound": "Tournament not found",
+    "hostLobby.scanToJoin": "Scan to join",
+    "hostLobby.usePhone": "Use your phone to play",
+    "hostLobby.orEnterCode": "Or enter the code",
+    "hostLobby.copied": "Copied!",
+    "hostLobby.clickToCopy": "Click to copy",
+    "hostLobby.players": "Players",
+    "hostLobby.roomOpen": "Room open",
+    "hostLobby.waitingPlayers": "Waiting for players...",
+    "hostLobby.playersAppear": "Players appear here when they scan the QR",
+    "hostLobby.startGame": "Start Game",
+    "hostLobby.minPlayers": "Minimum 2 players to start",
+
+    // Host Game extras
+    "hostGame.loading": "Loading...",
+    "hostGame.points": "points",
+
+    // Player Game extras
+    "game.loading": "Loading...",
+    "game.you": "(you)",
   },
   es: {
     // Landing page
@@ -324,6 +384,66 @@ const translations = {
     "faq.title": "Preguntas Frecuentes",
     "faq.subtitle": "Todo lo que necesitas saber sobre Lucky Goal",
     "faq.back": "Volver",
+    "faq.q1": "¿Qué es Lucky Goal?",
+    "faq.a1": "Lucky Goal es un juego de trivia en vivo y penales donde los jugadores compiten en torneos en tiempo real. Responde preguntas correctamente para ganar tiros de penal, mete goles y sube en el ranking — todo mientras compites por premios en AVAX.",
+    "faq.q2": "¿Cómo me uno a un torneo?",
+    "faq.a2": "Toca 'Unirse' en la pantalla principal, ingresa el código de 6 caracteres compartido por el host, elige un apodo y avatar, ¡y listo! Espera en el lobby hasta que el host inicie el torneo.",
+    "faq.q3": "¿Necesito una wallet?",
+    "faq.a3": "¡No! Lucky Goal usa wallets Passkey de Thirdweb. Se crea automáticamente usando la autenticación biométrica de tu dispositivo (Face ID, huella digital, etc.). Sin frases semilla, sin extensiones — solo juega.",
+    "faq.q4": "¿Cómo funcionan los premios?",
+    "faq.a4": "El host establece un premio en AVAX al crear un torneo. El ganador al final de todas las rondas puede reclamar el premio directamente en su wallet Passkey. Los premios se pagan en la blockchain de Avalanche.",
+    "faq.q5": "¿Qué es una wallet Passkey?",
+    "faq.a5": "Una wallet Passkey es una wallet crypto asegurada por la biometría de tu dispositivo (huella digital o escaneo facial) en lugar de una frase semilla tradicional. Se crea automáticamente cuando juegas, haciendo Web3 completamente simple.",
+    "faq.q6": "¿Es gratis jugar?",
+    "faq.a6": "¡Sí! Unirse y jugar torneos es completamente gratis. Solo el host necesita AVAX para fondear el premio. Los jugadores nunca pagan gas ni costos de entrada.",
+    "faq.q7": "¿Cómo funciona el penal?",
+    "faq.a7": "Después de cada pregunta de trivia, tiras un penal. Si respondiste correctamente, puedes disparar — elige una dirección (izquierda, centro o derecha) e intenta vencer al arquero. Si respondiste mal, el arquero automáticamente ataja tu tiro. ¡Siempre hay un 30% de probabilidad de que el arquero se tire en la misma dirección que pateas!",
+    "faq.q8": "¿Qué blockchain usa?",
+    "faq.a8": "Lucky Goal corre en Avalanche (AVAX), una blockchain rápida y de bajo costo. Los torneos y reclamos de premios ocurren en la testnet Avalanche Fuji, con planes de migrar a mainnet.",
+
+    // Play page extras
+    "play.codeTooShort": "Código muy corto",
+    "play.enterTheCode": "Ingresa el código",
+    "play.askHost": "Pide el código al host del torneo",
+
+    // Join page extras
+    "join.errorJoining": "Error al unirse. Intenta de nuevo.",
+
+    // Player Lobby extras
+    "lobby.waitingForHostLong": "Esperando al Host...",
+    "lobby.startSoon": "El torneo comenzará pronto",
+    "lobby.tip": "Consejo",
+    "lobby.you": "Tú",
+    "lobby.online": "en línea",
+    "lobby.connectionActive": "Conexión activa",
+    "lobby.tip1": "Responde rápido para ganar más puntos",
+    "lobby.tip2": "El arquero se mueve al azar... ¿o no?",
+    "lobby.tip3": "El primer lugar gana el premio en AVAX",
+    "lobby.tip4": "Concéntrate, cada segundo cuenta",
+    "lobby.tip5": "¡Buena suerte en los penales!",
+
+    // Host Lobby
+    "hostLobby.loading": "Cargando torneo...",
+    "hostLobby.notFound": "Torneo no encontrado",
+    "hostLobby.scanToJoin": "Escanea para unirte",
+    "hostLobby.usePhone": "Usa tu teléfono para jugar",
+    "hostLobby.orEnterCode": "O ingresa el código",
+    "hostLobby.copied": "¡Copiado!",
+    "hostLobby.clickToCopy": "Click para copiar",
+    "hostLobby.players": "Jugadores",
+    "hostLobby.roomOpen": "Sala abierta",
+    "hostLobby.waitingPlayers": "Esperando jugadores...",
+    "hostLobby.playersAppear": "Los jugadores aparecen aquí al escanear el QR",
+    "hostLobby.startGame": "Iniciar Juego",
+    "hostLobby.minPlayers": "Mínimo 2 jugadores para iniciar",
+
+    // Host Game extras
+    "hostGame.loading": "Cargando...",
+    "hostGame.points": "puntos",
+
+    // Player Game extras
+    "game.loading": "Cargando...",
+    "game.you": "(tú)",
   },
 } as const;
 

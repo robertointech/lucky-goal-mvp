@@ -5,10 +5,12 @@ import { useEffect, useState } from "react";
 import { getLeaderboard } from "@/lib/globalPlayers";
 import { ACHIEVEMENT_META } from "@/types/game";
 import type { GlobalPlayer, Achievement } from "@/types/game";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type LeaderboardEntry = GlobalPlayer & { achievements: Achievement[] };
 
 export default function LandingPage() {
+  const { t } = useLanguage();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -46,7 +48,7 @@ export default function LandingPage() {
           Lucky Goal
         </h1>
         <p className="text-gray-300 text-lg md:text-xl text-center max-w-md mb-10">
-          Live Trivia + Penalty Kicks. Compete for AVAX prizes.
+          {t("landing.subtitle")}
         </p>
 
         {/* CTA buttons */}
@@ -60,13 +62,13 @@ export default function LandingPage() {
               boxShadow: "0 0 25px rgba(0,255,136,0.3)",
             }}
           >
-            Create Tournament
+            {t("landing.createTournament")}
           </Link>
           <Link
             href="/play"
             className="flex-1 text-center py-4 px-6 rounded-xl text-lg font-bold border-2 border-white/20 text-white transition-all active:scale-95 hover:border-[#00FF88]/50 hover:text-[#00FF88]"
           >
-            Join
+            {t("landing.join")}
           </Link>
         </div>
 
@@ -75,18 +77,18 @@ export default function LandingPage() {
           <div className="flex items-center justify-center gap-3 mb-6">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent to-[#00FF88]/30" />
             <h2 className="text-2xl md:text-3xl font-black text-white text-center tracking-tight">
-              Global Ranking
+              {t("landing.globalRanking")}
             </h2>
             <div className="h-px flex-1 bg-gradient-to-l from-transparent to-[#00FF88]/30" />
           </div>
 
           {loading ? (
             <div className="text-center py-12">
-              <div className="text-[#00FF88] text-xl animate-pulse font-bold">Loading...</div>
+              <div className="text-[#00FF88] text-xl animate-pulse font-bold">{t("landing.loading")}</div>
             </div>
           ) : leaderboard.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No players yet. Be the first!</p>
+              <p className="text-gray-500 text-lg">{t("landing.noPlayers")}</p>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
@@ -156,11 +158,11 @@ export default function LandingPage() {
                     {/* Stats */}
                     <div className="flex items-center gap-3 md:gap-4 shrink-0">
                       <div className="hidden md:flex flex-col items-center">
-                        <span className="text-gray-500 text-xs uppercase">Games</span>
+                        <span className="text-gray-500 text-xs uppercase">{t("landing.games")}</span>
                         <span className="text-white font-bold">{player.total_games}</span>
                       </div>
                       <div className="hidden md:flex flex-col items-center">
-                        <span className="text-gray-500 text-xs uppercase">Wins</span>
+                        <span className="text-gray-500 text-xs uppercase">{t("landing.wins")}</span>
                         <span className="text-[#FFD700] font-bold">{player.total_wins}</span>
                       </div>
 
@@ -198,7 +200,7 @@ export default function LandingPage() {
           FAQ
         </Link>
         <p className="text-gray-600 text-xs">
-          Built on Avalanche
+          {t("landing.builtOn")}
         </p>
       </div>
     </div>

@@ -6,10 +6,12 @@ import { getTournament, joinTournament } from "@/lib/gameLogic";
 import type { Avatar } from "@/types/game";
 import type { Tournament } from "@/types/game";
 import { AVATARS } from "@/types/game";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function JoinPage() {
   const params = useParams();
   const router = useRouter();
+  const { t } = useLanguage();
   const code = (params.code as string).toUpperCase();
 
   const [tournament, setTournament] = useState<Tournament | null>(null);
@@ -22,13 +24,13 @@ export default function JoinPage() {
 
   useEffect(() => {
     const load = async () => {
-      const t = await getTournament(code);
-      setTournament(t);
+      const data = await getTournament(code);
+      setTournament(data);
       setLoading(false);
-      if (!t) setError("Tournament not found");
+      if (!data) setError(t("join.notFound"));
     };
     load();
-  }, [code]);
+  }, [code, t]);
 
   const handleJoin = async () => {
     if (!tournament || !nickname.trim() || !avatar) return;
@@ -42,7 +44,7 @@ export default function JoinPage() {
       sessionStorage.setItem(`player_avatar_${code}`, player.avatar);
       router.push(`/play/lobby/${code}`);
     } catch (err) {
-      setError("Error joining. Try again.");
+      setError(t("join.errorJoining"));
       console.error(err);
     } finally {
       setJoining(false);
@@ -54,7 +56,7 @@ export default function JoinPage() {
       <div className="min-h-screen flex items-center justify-center bg-[#1a1a2e]">
         <div className="text-center">
           <div className="text-5xl mb-4 animate-spin" style={{ animationDuration: "2s" }}>&#9917;</div>
-          <div className="text-[#00FF88] text-lg font-bold animate-pulse">Finding tournament...</div>
+          <div className="text-[#00FF88] text-lg font-bold animate-pulse">{t("join.finding")}</div>
         </div>
       </div>
     );
@@ -64,14 +66,14 @@ export default function JoinPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#1a1a2e] px-4">
         <div className="text-6xl mb-4">&#128533;</div>
-        <h2 className="text-2xl text-white font-black mb-2">Tournament not found</h2>
-        <p className="text-gray-400 mb-6">Code &quot;{code}&quot; does not exist</p>
+        <h2 className="text-2xl text-white font-black mb-2">{t("join.notFound")}</h2>
+        <p className="text-gray-400 mb-6">{t("join.notFoundDesc")}</p>
         <button
           onClick={() => router.push("/play")}
           className="bg-[#00FF88] text-black font-bold py-3 px-8 rounded-2xl text-lg"
           style={{ boxShadow: "0 0 20px rgba(0,255,136,0.3)" }}
         >
-          Try another code
+          {t("join.tryAnother")}
         </button>
       </div>
     );
@@ -91,7 +93,7 @@ export default function JoinPage() {
             <span className="text-[#00FF88] font-mono text-sm font-bold">{code}</span>
           </div>
           <h1 className="text-2xl font-black text-white">
-            {step === "avatar" ? "Choose your avatar" : "Your name"}
+            {step === "avatar" ? t("join.chooseAvatar") : t("join.yourName")}
           </h1>
           {tournament.prize_amount > 0 && (
             <div className="mt-2 inline-flex items-center gap-1.5 bg-[#00FF88]/10 text-[#00FF88] px-4 py-1.5 rounded-full text-sm font-bold border border-[#00FF88]/30"
@@ -150,7 +152,7 @@ export default function JoinPage() {
                   boxShadow: avatar ? "0 0 25px rgba(0,255,136,0.3)" : "none",
                 }}
               >
-                Next
+                {t("join.next")}
               </button>
             </div>
           </div>
@@ -166,7 +168,7 @@ export default function JoinPage() {
                 className="flex items-center gap-2 bg-[#0D1117] border border-gray-800 rounded-2xl px-5 py-3 transition-all hover:border-gray-600"
               >
                 <span className="text-4xl">{avatar}</span>
-                <span className="text-gray-500 text-sm">&#9998; change</span>
+                <span className="text-gray-500 text-sm">&#9998; {t("join.change")}</span>
               </button>
             </div>
 
@@ -176,7 +178,7 @@ export default function JoinPage() {
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleJoin()}
-                placeholder="Your player name"
+                placeholder={t("join.playerName")}
                 maxLength={20}
                 className="w-full bg-[#0D1117] border-2 rounded-2xl px-5 py-4 text-white text-xl text-center font-bold focus:outline-none transition-all duration-300"
                 style={{
@@ -186,7 +188,7 @@ export default function JoinPage() {
                 autoFocus
                 autoComplete="off"
               />
-              <p className="text-gray-600 text-xs text-center mt-2">Max 20 characters</p>
+              <p className="text-gray-600 text-xs text-center mt-2">{t("join.maxChars")}</p>
             </div>
 
             {/* Live preview card */}
@@ -196,7 +198,7 @@ export default function JoinPage() {
                 <span className="text-4xl">{avatar}</span>
                 <div>
                   <p className="text-white font-bold text-lg">{nickname}</p>
-                  <p className="text-[#00FF88] text-xs font-medium">Ready to play</p>
+                  <p className="text-[#00FF88] text-xs font-medium">{t("join.readyToPlay")}</p>
                 </div>
               </div>
             )}
@@ -228,7 +230,7 @@ export default function JoinPage() {
                   </div>
                 )}
                 <span className="relative z-10">
-                  {joining ? "Joining..." : "JOIN TOURNAMENT"}
+                  {joining ? t("join.joining") : t("join.joinTournament")}
                 </span>
               </button>
             </div>

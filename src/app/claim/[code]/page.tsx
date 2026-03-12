@@ -9,6 +9,7 @@ import { client } from "@/lib/thirdweb";
 import { getTournament, getPlayers, setPlayerWallet } from "@/lib/gameLogic";
 import { getEscrowTournament } from "@/lib/escrow";
 import { registerWallet } from "@/lib/walletRegistry";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { Tournament, Player } from "@/types/game";
 
 type ClaimStep = "loading" | "ready" | "creating" | "success" | "error" | "not-winner";
@@ -28,18 +29,19 @@ export default function ClaimPage() {
 
   const { connect } = useConnect();
   const activeAccount = useActiveAccount();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const load = async () => {
-      const t = await getTournament(code);
-      if (!t) {
+      const tourney = await getTournament(code);
+      if (!tourney) {
         setErrorMsg("Tournament not found");
         setStep("error");
         return;
       }
-      setTournament(t);
+      setTournament(tourney);
 
-      const players = await getPlayers(t.id);
+      const players = await getPlayers(tourney.id);
       const w = players.find((p) => p.is_winner);
 
       if (!w) {
@@ -175,7 +177,7 @@ export default function ClaimPage() {
         <style>{styles}</style>
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-[#00FF88]/30 border-t-[#00FF88] rounded-full animate-spin" />
-          <p className="text-[#00FF88] text-lg font-medium animate-pulse">Loading prize...</p>
+          <p className="text-[#00FF88] text-lg font-medium animate-pulse">{t("claim.loading")}</p>
         </div>
       </div>
     );
@@ -189,7 +191,7 @@ export default function ClaimPage() {
           <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
             <span className="text-3xl">!</span>
           </div>
-          <h2 className="text-xl text-white font-bold mb-2">Error</h2>
+          <h2 className="text-xl text-white font-bold mb-2">{t("claim.error")}</h2>
           <p className="text-gray-400">{errorMsg}</p>
         </div>
       </div>
@@ -202,13 +204,13 @@ export default function ClaimPage() {
         <style>{styles}</style>
         <div className="claim-card p-8 text-center max-w-sm w-full">
           <div className="text-5xl mb-4">&#9917;</div>
-          <h2 className="text-xl text-white font-bold mb-2">Nice try!</h2>
+          <h2 className="text-xl text-white font-bold mb-2">{t("claim.niceTry")}</h2>
           <p className="text-gray-400 text-sm mb-6">
-            Only the tournament winner can claim the prize.
+            {t("claim.onlyWinner")}
           </p>
           {winner && (
             <div className="bg-[#1a1a2e] rounded-xl p-4 border border-gray-700/50">
-              <p className="text-gray-500 text-xs uppercase tracking-wider mb-2">Winner</p>
+              <p className="text-gray-500 text-xs uppercase tracking-wider mb-2">{t("claim.winner")}</p>
               <div className="text-3xl mb-1">{winner.avatar}</div>
               <p className="text-white font-bold">{winner.nickname}</p>
               <p className="text-[#00FF88] text-sm font-medium">{winner.score} pts</p>
@@ -269,17 +271,17 @@ export default function ClaimPage() {
           )}
           <h1 className="text-2xl font-bold text-white mb-1">
             {prizeReceived
-              ? "Prize received!"
+              ? t("claim.prizeReceived")
               : step === "success"
-              ? "Waiting for prize..."
-              : "Congratulations!"}
+              ? t("claim.waitingPrize")
+              : t("claim.congrats")}
           </h1>
           <p className="text-gray-400 text-sm">
             {prizeReceived
-              ? "The AVAX is now in your wallet"
+              ? t("claim.avaxInWallet")
               : step === "success"
-              ? "The host is sending your prize"
-              : "You have a prize waiting for you"}
+              ? t("claim.hostSending")
+              : t("claim.prizeWaiting")}
           </p>
         </div>
 
@@ -294,7 +296,7 @@ export default function ClaimPage() {
             {prizeReceived && (
               <div className="mt-3 inline-flex items-center gap-1.5 bg-[#00FF88]/10 text-[#00FF88] text-xs font-semibold px-3 py-1 rounded-full">
                 <span className="w-2 h-2 rounded-full bg-[#00FF88] animate-pulse" />
-                Transferred
+                {t("claim.transferred")}
               </div>
             )}
           </div>
@@ -305,9 +307,9 @@ export default function ClaimPage() {
           <div className="claim-card p-5 mb-5">
             <div className="space-y-0">
               {[
-                { label: "Create wallet", desc: "Passkey (Face ID / fingerprint)", icon: "\uD83D\uDD10" },
-                { label: "Waiting for prize", desc: "The host sends the AVAX", icon: "\uD83D\uDCE8" },
-                { label: "Prize received", desc: "AVAX in your wallet", icon: "\u2705" },
+                { label: t("claim.createWallet"), desc: t("claim.passkeyDesc"), icon: "\uD83D\uDD10" },
+                { label: t("claim.waitForPrize"), desc: t("claim.hostSendsAvax"), icon: "\uD83D\uDCE8" },
+                { label: t("claim.prizeReceived"), desc: t("claim.avaxReceived"), icon: "\u2705" },
               ].map((s, i) => {
                 const isDone = i < activeStep;
                 const isCurrent = i === activeStep;
@@ -360,7 +362,7 @@ export default function ClaimPage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white font-bold truncate">{winner.nickname}</p>
-              <p className="text-[#00FF88] text-sm font-medium">{winner.score} points</p>
+              <p className="text-[#00FF88] text-sm font-medium">{winner.score} {t("game.points")}</p>
             </div>
             <div className="text-2xl crown-float">&#128081;</div>
           </div>
@@ -369,7 +371,7 @@ export default function ClaimPage() {
         {/* Wallet address (when created) */}
         {walletAddress && (
           <div className="claim-card p-4 mb-5">
-            <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Your wallet</p>
+            <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">{t("claim.yourWallet")}</p>
             <p className="text-[#00FF88] font-mono text-sm">{shortAddress}</p>
           </div>
         )}
@@ -389,17 +391,17 @@ export default function ClaimPage() {
                   onClick={() => { setWalletMode("passkey"); handleCreateWallet(); }}
                   className="claim-btn w-full py-4 px-6 rounded-xl text-lg font-bold transition-all active:scale-95 transform"
                 >
-                  Create wallet with Passkey
+                  {t("claim.createPasskey")}
                 </button>
                 <button
                   onClick={() => setWalletMode("existing")}
                   className="w-full py-4 px-6 rounded-xl text-lg font-bold border border-gray-700 text-white transition-all active:scale-95 hover:border-[#00FF88]/50 hover:text-[#00FF88]"
                   style={{ backgroundColor: "rgba(13, 17, 23, 0.6)" }}
                 >
-                  I already have a wallet
+                  {t("claim.existingWallet")}
                 </button>
                 <p className="text-gray-500 text-xs text-center mt-2 max-w-xs mx-auto leading-relaxed">
-                  Create a new Passkey wallet or connect an existing one (MetaMask, WalletConnect, etc.)
+                  {t("claim.walletHelp")}
                 </p>
               </div>
             )}
@@ -414,17 +416,17 @@ export default function ClaimPage() {
                   {step === "creating" ? (
                     <span className="flex items-center justify-center gap-3">
                       <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                      Creating wallet...
+                      {t("claim.creatingWallet")}
                     </span>
                   ) : (
-                    "Create wallet with Passkey"
+                    t("claim.createPasskey")
                   )}
                 </button>
                 <button
                   onClick={() => setWalletMode("choose")}
                   className="text-gray-500 text-xs text-center mt-3 hover:text-[#00FF88] transition-colors block mx-auto"
                 >
-                  &larr; Back to options
+                  &larr; {t("claim.backToOptions")}
                 </button>
               </>
             )}
@@ -434,12 +436,12 @@ export default function ClaimPage() {
                 {step === "creating" ? (
                   <div className="flex items-center justify-center gap-3 py-4">
                     <div className="w-5 h-5 border-2 border-[#00FF88]/30 border-t-[#00FF88] rounded-full animate-spin" />
-                    <p className="text-gray-400 font-semibold">Saving wallet...</p>
+                    <p className="text-gray-400 font-semibold">{t("claim.savingWallet")}</p>
                   </div>
                 ) : (
                   <>
                     <p className="text-gray-400 text-sm text-center mb-2">
-                      Connect your wallet to receive the prize
+                      {t("claim.connectWallet")}
                     </p>
                     <div className="flex justify-center">
                       <ConnectButton
@@ -466,7 +468,7 @@ export default function ClaimPage() {
                   onClick={() => setWalletMode("choose")}
                   className="text-gray-500 text-xs text-center mt-3 hover:text-[#00FF88] transition-colors block mx-auto"
                 >
-                  &larr; Back to options
+                  &larr; {t("claim.backToOptions")}
                 </button>
               </div>
             )}

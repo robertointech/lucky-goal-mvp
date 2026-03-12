@@ -176,7 +176,7 @@ export default function HostGamePage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#1a1a2e]">
         <div className="text-[#00FF88] text-3xl animate-pulse font-bold">
-          Loading...
+          {t("hostGame.loading")}
         </div>
       </div>
     );
@@ -212,13 +212,13 @@ export default function HostGamePage() {
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-[#00FF88] rounded-full animate-pulse" />
             <span className="text-gray-400 text-sm">
-              {players.length} players
+              {players.length} {t("hostGame.players")}
             </span>
           </div>
           {phase !== "finished" && (
             <div className="bg-white/5 rounded-lg px-3 py-1.5">
               <span className="text-gray-400 text-sm">
-                Question{" "}
+                {t("hostGame.question")}{" "}
                 <span className="text-white font-bold">
                   {currentQ + 1}/{totalQ}
                 </span>
@@ -292,7 +292,7 @@ export default function HostGamePage() {
               }}
             >
               <p className="text-[#00FF88] text-sm font-bold uppercase tracking-widest mb-3">
-                Question {currentQ + 1} of {totalQ}
+                {t("hostGame.question")} {currentQ + 1} {t("hostGame.of")} {totalQ}
               </p>
               <h2 className="text-4xl text-white font-bold leading-tight">
                 {question.question}
@@ -328,13 +328,13 @@ export default function HostGamePage() {
         {phase === "countdown" && question && (
           <div className="flex-1 flex flex-col items-center justify-center px-8">
             <p className="text-[#00FF88] text-xl font-bold uppercase tracking-widest mb-6 animate-pulse">
-              Question {currentQ + 1} of {totalQ}
+              {t("hostGame.question")} {currentQ + 1} {t("hostGame.of")} {totalQ}
             </p>
             <div
               className="text-9xl font-black text-white animate-[popIn_0.5s_ease-out]"
               style={{ textShadow: "0 0 40px rgba(0, 255, 136, 0.4)" }}
             >
-              Get Ready!
+              {t("hostGame.getReady")}
             </div>
           </div>
         )}
@@ -362,10 +362,10 @@ export default function HostGamePage() {
             </div>
 
             <h2 className="text-5xl text-white font-black mb-4 text-center">
-              Penalty Time!
+              {t("hostGame.penaltyTime")}
             </h2>
             <div className="flex items-center gap-2 text-gray-400 text-2xl">
-              <span>Players are kicking</span>
+              <span>{t("hostGame.playersKicking")}</span>
               <span className="inline-flex">
                 <span className="animate-[dotBounce_1.4s_ease-in-out_infinite]">
                   .
@@ -403,10 +403,10 @@ export default function HostGamePage() {
         {phase === "results" && (
           <div className="flex-1 flex flex-col px-8 py-6">
             <h2 className="text-3xl text-white font-black text-center mb-2">
-              Results
+              {t("hostGame.results")}
             </h2>
             <p className="text-gray-500 text-center mb-8 text-lg">
-              Question {currentQ + 1} of {totalQ}
+              {t("hostGame.question")} {currentQ + 1} {t("hostGame.of")} {totalQ}
             </p>
 
             {/* Scoreboard */}
@@ -514,7 +514,7 @@ export default function HostGamePage() {
 
               {/* Score */}
               <p className="text-[#00FF88] text-4xl font-bold mb-8 animate-[fadeIn_0.5s_ease-out_0.7s_backwards]">
-                {winner.score} points
+                {winner.score} {t("hostGame.points")}
               </p>
 
               {/* Prize card */}
@@ -525,7 +525,7 @@ export default function HostGamePage() {
                     boxShadow: "0 0 60px rgba(0, 255, 136, 0.15)",
                   }}
                 >
-                  <p className="text-gray-400 text-lg mb-1">Prize</p>
+                  <p className="text-gray-400 text-lg mb-1">{t("hostGame.prize")}</p>
                   <p className="text-[#00FF88] text-5xl font-black">
                     {currentTournament.prize_amount} AVAX
                   </p>
@@ -538,7 +538,7 @@ export default function HostGamePage() {
                           <span className="text-3xl">✅</span>
                           <div>
                             <p className="text-[#00FF88] font-bold text-xl">
-                              Prize sent!
+                              {t("hostGame.prizeSent")}
                             </p>
                             <p className="text-gray-400 text-sm">
                               {winner.wallet_address.slice(0, 8)}...
@@ -565,10 +565,10 @@ export default function HostGamePage() {
                             {sendingPrize ? (
                               <span className="flex items-center gap-2">
                                 <span className="animate-spin">⏳</span>{" "}
-                                Sending...
+                                {t("hostGame.sending")}
                               </span>
                             ) : (
-                              `Send ${currentTournament.prize_amount} AVAX`
+                              `${t("hostGame.sendPrize")} ${currentTournament.prize_amount} AVAX`
                             )}
                           </button>
                           <p className="text-gray-600 text-xs mt-3 font-mono">
@@ -580,13 +580,13 @@ export default function HostGamePage() {
                     ) : (
                       <div>
                         <p className="text-gray-400 animate-pulse text-lg">
-                          Waiting for winner's wallet...
+                          {t("hostGame.waitingWallet")}
                         </p>
                         <button
                           onClick={refreshPlayers}
                           className="mt-3 text-[#00FF88] text-sm underline hover:no-underline"
                         >
-                          Refresh
+                          {t("hostGame.refresh")}
                         </button>
                       </div>
                     )}

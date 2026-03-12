@@ -8,6 +8,7 @@ import { useCountdown } from "@/hooks/useCountdown";
 import { getGameQuestions, QUESTIONS_PER_GAME } from "@/lib/questions";
 import type { Tournament, Player, Direction } from "@/types/game";
 import JuggleBall from "@/components/JuggleBall";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Kahoot-style colors
 const OPT_COLORS = [
@@ -20,6 +21,7 @@ const OPT_COLORS = [
 export default function PlayerGamePage() {
   const params = useParams();
   const router = useRouter();
+  const { t } = useLanguage();
   const code = (params.code as string).toUpperCase();
 
   const [localTournament, setLocalTournament] = useState<Tournament | null>(null);
@@ -226,16 +228,16 @@ export default function PlayerGamePage() {
               <div className="text-7xl mb-3 animate-[popIn_0.5s_ease-out_0.3s_backwards]">
                 {winner.avatar}
               </div>
-              <h2 className="text-3xl font-black text-white mb-1">You Won!</h2>
+              <h2 className="text-3xl font-black text-white mb-1">{t("game.youWon")}</h2>
               <p className="text-[#00FF88] text-2xl font-bold mb-6">
-                {winner.score} points
+                {winner.score} {t("game.points")}
               </p>
               {currentTournament && currentTournament.prize_amount > 0 && (
                 <div
                   className="bg-[#0D1117] border-2 border-[#00FF88]/30 rounded-2xl px-8 py-5 text-center mb-6"
                   style={{ boxShadow: "0 0 40px rgba(0, 255, 136, 0.15)" }}
                 >
-                  <p className="text-gray-400 text-sm mb-1">Your prize</p>
+                  <p className="text-gray-400 text-sm mb-1">{t("game.yourPrize")}</p>
                   <p className="text-[#00FF88] text-4xl font-black">
                     {currentTournament.prize_amount} AVAX
                   </p>
@@ -246,21 +248,21 @@ export default function PlayerGamePage() {
                 className="bg-[#00FF88] text-black font-black py-4 px-8 rounded-2xl text-lg active:scale-95 transform"
                 style={{ boxShadow: "0 0 30px rgba(0, 255, 136, 0.4)" }}
               >
-                Claim Prize
+                {t("game.claimPrize")}
               </button>
             </>
           ) : (
             <>
               <div className="text-5xl mb-3">{winner.avatar}</div>
               <h2 className="text-2xl font-bold text-white mb-1">
-                {winner.nickname} won!
+                {winner.nickname} {t("game.won")}
               </h2>
               <p className="text-[#00FF88] text-xl font-bold mb-6">
-                {winner.score} points
+                {winner.score} {t("game.points")}
               </p>
               {myRank > 0 && (
                 <div className="bg-[#0D1117] border border-white/10 rounded-2xl px-6 py-4 text-center">
-                  <p className="text-gray-400 text-sm">Your position</p>
+                  <p className="text-gray-400 text-sm">{t("game.yourPosition")}</p>
                   <p className="text-white text-3xl font-black">#{myRank}</p>
                   <p className="text-gray-400 text-sm">
                     {myPlayer?.score ?? 0} pts
@@ -282,7 +284,7 @@ export default function PlayerGamePage() {
             onClick={() => router.push("/play")}
             className="mt-2 border border-white/20 text-white font-bold py-3 px-8 rounded-2xl text-base active:scale-95 transform hover:border-[#00FF88]/50 hover:text-[#00FF88] transition-all"
           >
-            Play Again
+            {t("game.playAgain")}
           </button>
         </div>
 
@@ -295,7 +297,7 @@ export default function PlayerGamePage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#1a1a2e]">
         <div className="text-[#00FF88] text-xl animate-pulse font-bold">
-          Loading...
+          {t("game.loading")}
         </div>
       </div>
     );
@@ -370,7 +372,7 @@ export default function PlayerGamePage() {
                 </span>
                 {timeLeft <= 5 && (
                   <span className="text-red-400 text-xs font-bold animate-pulse uppercase tracking-wider">
-                    Hurry!
+                    {t("game.hurry")}
                   </span>
                 )}
               </div>
@@ -447,13 +449,13 @@ export default function PlayerGamePage() {
                 lastAnswerCorrect ? "text-[#00FF88]" : "text-red-400"
               }`}
             >
-              {lastAnswerCorrect ? "Correct!" : "Incorrect"}
+              {lastAnswerCorrect ? t("game.correct") : t("game.incorrect")}
             </h2>
 
             {/* Show correct answer if wrong */}
             {!lastAnswerCorrect && (
               <p className="text-gray-400 text-sm mt-2">
-                Answer: {question.options[question.correctIndex]}
+                {t("game.answer")}: {question.options[question.correctIndex]}
               </p>
             )}
 
@@ -483,7 +485,7 @@ export default function PlayerGamePage() {
           <div className="flex-1 flex flex-col items-center justify-center">
             <JuggleBall />
             <p className="text-gray-400 font-semibold mt-4">
-              Waiting for results...
+              {t("game.waitingResults")}
             </p>
           </div>
         )}
@@ -492,7 +494,7 @@ export default function PlayerGamePage() {
         {status === "results" && (
           <div className="flex-1 flex flex-col">
             <h2 className="text-xl text-white font-black text-center mb-1">
-              Ranking
+              {t("game.ranking")}
             </h2>
             <p className="text-gray-500 text-center text-sm mb-4">
               Question {currentQ + 1} of {QUESTIONS_PER_GAME}
@@ -550,6 +552,7 @@ function PenaltyArena({
   onKick: () => void;
   onKickComplete: (scored: boolean) => void;
 }) {
+  const { t } = useLanguage();
   const [resultShown, setResultShown] = useState(false);
 
   useEffect(() => {
@@ -580,10 +583,10 @@ function PenaltyArena({
       <div className="text-center mb-2">
         <h2 className="text-xl text-white font-black flex items-center justify-center gap-2">
           <span className="animate-[ballSpin_1s_linear_infinite]">&#9917;</span>
-          Take the Penalty!
+          {t("game.penalty")}
         </h2>
         <p className="text-xs mt-1 font-semibold text-gray-400">
-          Pick a corner and kick!
+          {t("game.pickCorner")}
         </p>
       </div>
 
@@ -766,7 +769,7 @@ function PenaltyArena({
                   ? "0 0 30px rgba(0,255,136,0.5), 0 0 60px rgba(0,255,136,0.2)"
                   : "0 0 20px rgba(255,68,68,0.4)",
               }}>
-              {penaltyResult === "goal" ? "GOAAL!" : "Saved!"}
+              {penaltyResult === "goal" ? t("game.goal") : t("game.saved")}
             </p>
             {penaltyResult === "goal" && (
               <p className="text-[#00FF88] text-lg font-bold mt-1 animate-[scoreFloat_1.5s_ease-out_forwards]">+50 pts</p>
@@ -790,10 +793,10 @@ function PenaltyArena({
           >
             {selectedDirection ? (
               <span className="flex items-center justify-center gap-2">
-                <span className="text-2xl">&#9917;</span> KICK!
+                <span className="text-2xl">&#9917;</span> {t("game.kick")}
               </span>
             ) : (
-              "Choose where to kick"
+              t("game.chooseKick")
             )}
           </button>
         </div>
@@ -810,6 +813,7 @@ function CompactLeaderboard({
   players: Player[];
   myId: string | null;
 }) {
+  const { t } = useLanguage();
   const medals = ["🥇", "🥈", "🥉"];
   return (
     <div className="flex flex-col gap-1.5">
@@ -847,7 +851,7 @@ function CompactLeaderboard({
             >
               {p.nickname}
               {isMe && (
-                <span className="text-[#00FF88] text-xs ml-1">(you)</span>
+                <span className="text-[#00FF88] text-xs ml-1">{t("game.you")}</span>
               )}
             </span>
             <span

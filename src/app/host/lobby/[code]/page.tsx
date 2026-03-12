@@ -6,11 +6,13 @@ import { getTournament, updateTournamentStatus } from "@/lib/gameLogic";
 import { useGameSync } from "@/hooks/useGameSync";
 import { QRCodeSVG } from "qrcode.react";
 import type { Tournament } from "@/types/game";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function HostLobbyPage() {
   const params = useParams();
   const router = useRouter();
   const code = (params.code as string).toUpperCase();
+  const { t } = useLanguage();
 
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,7 +66,7 @@ export default function HostLobbyPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#1a1a2e]">
         <div className="text-[#00FF88] text-2xl animate-pulse font-bold">
-          Loading tournament...
+          {t("hostLobby.loading")}
         </div>
       </div>
     );
@@ -74,7 +76,7 @@ export default function HostLobbyPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#1a1a2e]">
         <div className="text-red-500 text-2xl font-bold">
-          Tournament not found
+          {t("hostLobby.notFound")}
         </div>
       </div>
     );
@@ -126,10 +128,10 @@ export default function HostLobbyPage() {
         <div className="flex-1 flex flex-col items-center justify-center px-8">
           {/* Title */}
           <h1 className="text-white text-3xl font-bold mb-2 text-center">
-            Scan to join
+            {t("hostLobby.scanToJoin")}
           </h1>
           <p className="text-gray-400 text-lg mb-8 text-center">
-            Use your phone to play
+            {t("hostLobby.usePhone")}
           </p>
 
           {/* QR Code - large */}
@@ -151,7 +153,7 @@ export default function HostLobbyPage() {
 
           {/* Code display - copiable */}
           <p className="text-gray-500 text-sm mb-2 uppercase tracking-widest">
-            Or enter the code
+            {t("hostLobby.orEnterCode")}
           </p>
           <button
             onClick={handleCopyCode}
@@ -167,7 +169,7 @@ export default function HostLobbyPage() {
                   : "opacity-0 group-hover:opacity-100 bg-gray-800 text-gray-300"
               }`}
             >
-              {copied ? "Copied!" : "Click to copy"}
+              {copied ? t("hostLobby.copied") : t("hostLobby.clickToCopy")}
             </span>
           </button>
 
@@ -198,12 +200,12 @@ export default function HostLobbyPage() {
               </div>
               <div>
                 <h2 className="text-white font-bold text-xl">
-                  Players
+                  {t("hostLobby.players")}
                 </h2>
                 <div className="flex items-center gap-2 mt-0.5">
                   <div className="w-2 h-2 bg-[#00FF88] rounded-full animate-pulse" />
                   <span className="text-gray-400 text-sm">
-                    Room open
+                    {t("hostLobby.roomOpen")}
                   </span>
                 </div>
               </div>
@@ -216,10 +218,10 @@ export default function HostLobbyPage() {
               <div className="flex flex-col items-center justify-center h-full text-center px-4">
                 <div className="text-5xl mb-4 opacity-30">📱</div>
                 <p className="text-gray-500 text-lg">
-                  Waiting for players...
+                  {t("hostLobby.waitingPlayers")}
                 </p>
                 <p className="text-gray-600 text-sm mt-2">
-                  Players appear here when they scan the QR
+                  {t("hostLobby.playersAppear")}
                 </p>
               </div>
             ) : (
@@ -258,7 +260,7 @@ export default function HostLobbyPage() {
                 }}
               >
                 <span className="relative z-10">
-                  Start Game
+                  {t("hostLobby.startGame")}
                 </span>
                 {/* Shimmer effect */}
                 <div className="absolute inset-0 animate-[shimmer_2s_ease-in-out_infinite]">
@@ -268,7 +270,7 @@ export default function HostLobbyPage() {
             ) : (
               <div className="text-center py-4">
                 <p className="text-gray-500 text-sm">
-                  Minimum 2 players to start
+                  {t("hostLobby.minPlayers")}
                 </p>
                 <div className="flex justify-center gap-1 mt-3">
                   {[0, 1].map((i) => (

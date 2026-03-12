@@ -9,12 +9,14 @@ import { createTournament } from "@/lib/gameLogic";
 import { prepareCreateTournament } from "@/lib/escrow";
 import Papa from "papaparse";
 import type { Question } from "@/types/game";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const PRIZE_PRESETS = ["0.05", "0.1", "0.25", "0.5", "1"];
 
 export default function HostPage() {
   const account = useActiveAccount();
   const router = useRouter();
+  const { t } = useLanguage();
   const [prizeAmount, setPrizeAmount] = useState("0.1");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -177,10 +179,10 @@ export default function HostPage() {
             LUCKY GOAL
           </div>
           <h1 className="text-4xl font-black text-white mb-2 tracking-tight">
-            Create Tournament
+            {t("host.title")}
           </h1>
           <p className="text-gray-400">
-            Set up and launch your trivia + penalty kicks tournament
+            {t("host.subtitle")}
           </p>
         </div>
 
@@ -190,9 +192,9 @@ export default function HostPage() {
             <div className="w-20 h-20 rounded-2xl bg-[#1a1a2e] border border-gray-700/50 flex items-center justify-center mx-auto mb-5">
               <span className="text-4xl">&#128274;</span>
             </div>
-            <h2 className="text-lg text-white font-bold mb-2">Connect your wallet</h2>
+            <h2 className="text-lg text-white font-bold mb-2">{t("host.connectWallet")}</h2>
             <p className="text-gray-400 text-sm mb-6">
-              You need a wallet to deposit the tournament prize
+              {t("host.connectDesc")}
             </p>
             <div className="flex justify-center">
               <ConnectButton
@@ -219,7 +221,7 @@ export default function HostPage() {
             {/* Prize Amount */}
             <div className="host-card p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-white font-semibold">Prize</h3>
+                <h3 className="text-white font-semibold">{t("host.prize")}</h3>
                 <span className="text-gray-500 text-xs">AVAX</span>
               </div>
 
@@ -258,17 +260,17 @@ export default function HostPage() {
             <div className="host-card p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-white font-semibold flex items-center gap-2">
-                  Custom Questions
-                  <span className="text-gray-500 text-xs font-normal bg-gray-800 px-2 py-0.5 rounded-full">Optional</span>
+                  {t("host.customQuestions")}
+                  <span className="text-gray-500 text-xs font-normal bg-gray-800 px-2 py-0.5 rounded-full">{t("host.optional")}</span>
                 </h3>
               </div>
 
               <p className="text-gray-500 text-sm mb-2">
-                Upload a CSV with your own questions. If you don&apos;t upload, defaults are used.
+                {t("host.csvUploadDesc")}
               </p>
               <div className="flex items-center gap-3 mb-4">
                 <p className="text-gray-600 text-xs font-mono">
-                  CSV format: question, option1, option2, option3, option4, correct_answer (0-3)
+                  {t("host.csvFormat")}
                 </p>
                 <button
                   onClick={() => {
@@ -283,7 +285,7 @@ export default function HostPage() {
                   }}
                   className="shrink-0 text-[#00FF88] text-xs font-semibold hover:underline"
                 >
-                  Download Template
+                  {t("host.downloadTemplate")}
                 </button>
               </div>
 
@@ -303,7 +305,7 @@ export default function HostPage() {
                 >
                   <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">&#128196;</div>
                   <p className="text-gray-400 text-sm font-medium group-hover:text-[#00FF88]">
-                    Upload CSV file
+                    {t("host.uploadCsv")}
                   </p>
                   <p className="text-gray-600 text-xs mt-1">
                     question, option1, option2, option3, option4, answer (0-3)
@@ -316,14 +318,14 @@ export default function HostPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-[#00FF88] text-lg">&#9989;</span>
                       <span className="text-[#00FF88] text-sm font-bold">
-                        {customQuestions.length} questions loaded
+                        {customQuestions.length} {t("host.questionsLoaded")}
                       </span>
                     </div>
                     <button
                       onClick={() => { setCustomQuestions(null); setCsvError(""); }}
                       className="text-gray-500 text-xs hover:text-red-400 transition-colors px-2 py-1 rounded-lg hover:bg-red-500/10"
                     >
-                      Remove
+                      {t("host.remove")}
                     </button>
                   </div>
 
@@ -378,7 +380,7 @@ export default function HostPage() {
                     onClick={() => fileInputRef.current?.click()}
                     className="mt-3 text-gray-500 text-xs hover:text-[#00FF88] transition-colors"
                   >
-                    Change file
+                    {t("host.changeFile")}
                   </button>
                 </div>
               )}
@@ -395,13 +397,13 @@ export default function HostPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-semibold flex items-center gap-2">
-                    Enable Passkey on Join
-                    <span className="text-gray-500 text-xs font-normal bg-gray-800 px-2 py-0.5 rounded-full">Optional</span>
+                    {t("host.passkeyToggle")}
+                    <span className="text-gray-500 text-xs font-normal bg-gray-800 px-2 py-0.5 rounded-full">{t("host.optional")}</span>
                   </h3>
                   <p className="text-gray-500 text-sm mt-1">
                     {passkeyOnJoin
-                      ? "Players create a wallet when joining the tournament"
-                      : "Only the winner creates a wallet to claim the prize"}
+                      ? t("host.passkeyOn")
+                      : t("host.passkeyOff")}
                   </p>
                 </div>
                 <button
@@ -426,13 +428,13 @@ export default function HostPage() {
             <div className="host-card p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-white font-semibold flex items-center gap-2">
-                  Goalkeeper Logo
-                  <span className="text-gray-500 text-xs font-normal bg-gray-800 px-2 py-0.5 rounded-full">Optional</span>
+                  {t("host.goalkeeperLogo")}
+                  <span className="text-gray-500 text-xs font-normal bg-gray-800 px-2 py-0.5 rounded-full">{t("host.optional")}</span>
                 </h3>
               </div>
 
               <p className="text-gray-500 text-sm mb-4">
-                Upload your brand logo to display on the goalkeeper&apos;s jersey
+                {t("host.logoUploadDesc")}
               </p>
 
               <input
@@ -450,9 +452,9 @@ export default function HostPage() {
                 >
                   <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">&#128085;</div>
                   <p className="text-gray-400 text-sm font-medium group-hover:text-[#00FF88]">
-                    Upload logo (PNG/JPG)
+                    {t("host.uploadLogo")}
                   </p>
-                  <p className="text-gray-600 text-xs mt-1">Max 500KB</p>
+                  <p className="text-gray-600 text-xs mt-1">{t("host.maxSize")}</p>
                 </button>
               ) : (
                 <div className="flex items-center gap-4">
@@ -460,14 +462,14 @@ export default function HostPage() {
                     <img src={goalkeeperLogo} alt="Logo" className="w-12 h-12 object-contain" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-[#00FF88] text-sm font-bold">Logo uploaded</p>
-                    <p className="text-gray-500 text-xs">Will appear on the goalkeeper</p>
+                    <p className="text-[#00FF88] text-sm font-bold">{t("host.logoUploaded")}</p>
+                    <p className="text-gray-500 text-xs">{t("host.logoDesc")}</p>
                   </div>
                   <button
                     onClick={() => setGoalkeeperLogo(null)}
                     className="text-gray-500 text-xs hover:text-red-400 transition-colors px-2 py-1 rounded-lg hover:bg-red-500/10"
                   >
-                    Remove
+                    {t("host.remove")}
                   </button>
                 </div>
               )}
@@ -479,27 +481,27 @@ export default function HostPage() {
 
               <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
                 <span className="text-[#00FF88]">&#9889;</span>
-                Tournament Preview
+                {t("host.preview")}
               </h3>
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between py-2 border-b border-gray-800/50">
                   <div className="flex items-center gap-2">
                     <span className="w-7 h-7 rounded-lg bg-red-500/15 flex items-center justify-center text-xs">&#127918;</span>
-                    <span className="text-gray-400 text-sm">Format</span>
+                    <span className="text-gray-400 text-sm">{t("host.format")}</span>
                   </div>
-                  <span className="text-white text-sm font-medium">Trivia + Penalties</span>
+                  <span className="text-white text-sm font-medium">{t("host.formatValue")}</span>
                 </div>
 
                 <div className="flex items-center justify-between py-2 border-b border-gray-800/50">
                   <div className="flex items-center gap-2">
                     <span className="w-7 h-7 rounded-lg bg-blue-500/15 flex items-center justify-center text-xs">&#10067;</span>
-                    <span className="text-gray-400 text-sm">Questions</span>
+                    <span className="text-gray-400 text-sm">{t("host.questions")}</span>
                   </div>
                   <span className="text-white text-sm font-medium">
                     {customQuestions
-                      ? <span className="text-[#00FF88]">{questionCount} custom</span>
-                      : "5 trivia questions"
+                      ? <span className="text-[#00FF88]">{questionCount} {t("host.custom")}</span>
+                      : t("host.defaultQuestions")
                     }
                   </span>
                 </div>
@@ -507,32 +509,32 @@ export default function HostPage() {
                 <div className="flex items-center justify-between py-2 border-b border-gray-800/50">
                   <div className="flex items-center gap-2">
                     <span className="w-7 h-7 rounded-lg bg-yellow-500/15 flex items-center justify-center text-xs">&#9201;</span>
-                    <span className="text-gray-400 text-sm">Time</span>
+                    <span className="text-gray-400 text-sm">{t("host.time")}</span>
                   </div>
-                  <span className="text-white text-sm font-medium">20s per question</span>
+                  <span className="text-white text-sm font-medium">{t("host.timeValue")}</span>
                 </div>
 
                 <div className="flex items-center justify-between py-2 border-b border-gray-800/50">
                   <div className="flex items-center gap-2">
                     <span className="w-7 h-7 rounded-lg bg-green-500/15 flex items-center justify-center text-xs">&#9917;</span>
-                    <span className="text-gray-400 text-sm">Penalties</span>
+                    <span className="text-gray-400 text-sm">{t("host.penalties")}</span>
                   </div>
-                  <span className="text-white text-sm font-medium">1 per round</span>
+                  <span className="text-white text-sm font-medium">{t("host.penaltiesValue")}</span>
                 </div>
 
                 <div className="flex items-center justify-between py-2">
                   <div className="flex items-center gap-2">
                     <span className="w-7 h-7 rounded-lg bg-purple-500/15 flex items-center justify-center text-xs">&#11088;</span>
-                    <span className="text-gray-400 text-sm">Scoring</span>
+                    <span className="text-gray-400 text-sm">{t("host.scoring")}</span>
                   </div>
-                  <span className="text-white text-sm font-medium">100 + bonus + 50 goal</span>
+                  <span className="text-white text-sm font-medium">{t("host.scoringValue")}</span>
                 </div>
               </div>
 
               {/* Prize highlight at bottom */}
               {prizeNum > 0 && (
                 <div className="mt-4 pt-4 border-t border-gray-800/50 flex items-center justify-between">
-                  <span className="text-gray-400 text-sm">Total Prize</span>
+                  <span className="text-gray-400 text-sm">{t("host.totalPrize")}</span>
                   <span className="text-[#00FF88] text-xl font-black">{prizeAmount} AVAX</span>
                 </div>
               )}
@@ -553,11 +555,11 @@ export default function HostPage() {
               {loading ? (
                 <span className="flex items-center justify-center gap-3">
                   <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                  Creating tournament...
+                  {t("host.creating")}
                 </span>
               ) : (
                 <span className="flex items-center justify-center gap-2">
-                  Create Tournament
+                  {t("host.createBtn")}
                   <span className="text-xl">&#9889;</span>
                 </span>
               )}
@@ -566,7 +568,7 @@ export default function HostPage() {
             {/* Connected wallet info */}
             <div className="text-center">
               <p className="text-gray-500 text-xs">
-                Connected: {account.address.slice(0, 6)}...{account.address.slice(-4)}
+                {t("host.connected")}: {account.address.slice(0, 6)}...{account.address.slice(-4)}
               </p>
             </div>
           </div>
