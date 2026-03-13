@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 
 const KICK_ANIMATIONS = [
   { transform: "translateY(-80px) rotate(360deg)", duration: 500 },
@@ -11,11 +11,25 @@ const KICK_ANIMATIONS = [
   { transform: "translateY(-110px) rotate(180deg) scale(1.1)", duration: 650 },
 ];
 
+const FACES = ["😝", "😜", "🤪", "😵‍💫", "🥴", "😤"];
+
 export default function JuggleBall() {
   const [juggles, setJuggles] = useState(0);
   const [animating, setAnimating] = useState(false);
   const [currentAnim, setCurrentAnim] = useState(0);
   const [legKick, setLegKick] = useState(false);
+  const [faceIndex, setFaceIndex] = useState(-1);
+  const [headBounce, setHeadBounce] = useState(false);
+  const faceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Trigger headBounce when ball lands (animating goes false)
+  useEffect(() => {
+    if (!animating && juggles > 0) {
+      setHeadBounce(true);
+      const t = setTimeout(() => setHeadBounce(false), 300);
+      return () => clearTimeout(t);
+    }
+  }, [animating, juggles]);
 
   const handleTap = useCallback(() => {
     if (animating) return;
@@ -23,7 +37,14 @@ export default function JuggleBall() {
     setCurrentAnim(animIdx);
     setAnimating(true);
     setLegKick(true);
-    setJuggles((j) => j + 1);
+    setJuggles((j) => {
+      const next = j + 1;
+      setFaceIndex(next % FACES.length);
+      return next;
+    });
+
+    if (faceTimeout.current) clearTimeout(faceTimeout.current);
+    faceTimeout.current = setTimeout(() => setFaceIndex(-1), 1000);
 
     setTimeout(() => setLegKick(false), 200);
     setTimeout(
@@ -33,6 +54,7 @@ export default function JuggleBall() {
   }, [animating, juggles]);
 
   const anim = KICK_ANIMATIONS[currentAnim];
+  const face = faceIndex >= 0 ? FACES[faceIndex] : "🙂";
 
   return (
     <div
@@ -70,6 +92,21 @@ export default function JuggleBall() {
 
       {/* Player */}
       <div className="relative" style={{ fontSize: "4rem", lineHeight: 1 }}>
+        {/* Face with impact bounce */}
+        <span
+          className="block text-center"
+          style={{
+            fontSize: "2rem",
+            lineHeight: 1,
+            transform: headBounce ? "scale(1.3)" : "scale(1)",
+            transition: headBounce
+              ? "transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1)"
+              : "transform 0.15s ease-out",
+          }}
+        >
+          {face}
+        </span>
+
         {/* Kicking leg effect */}
         <span
           className="inline-block transition-transform"

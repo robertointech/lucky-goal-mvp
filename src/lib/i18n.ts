@@ -218,10 +218,32 @@ const translations = {
     // Host Game extras
     "hostGame.loading": "Loading...",
     "hostGame.points": "points",
+    "hostGame.sendMessage": "Send Message to Players",
+    "hostGame.messagePlaceholder": "Write a message...",
+    "hostGame.sendToAll": "Send to All Players",
+    "hostGame.messageSent": "Message sent!",
+    "hostGame.noWallets": "No players with wallets yet",
+
+    // Inbox
+    "inbox.title": "Inbox",
+    "inbox.subtitle": "Messages from tournament hosts",
+    "inbox.noMessages": "No messages yet",
+    "inbox.from": "From",
+    "inbox.tournament": "Tournament",
+    "inbox.back": "Back",
+    "inbox.markAllRead": "Mark all as read",
 
     // Player Game extras
     "game.loading": "Loading...",
     "game.you": "(you)",
+
+    // Medals page
+    "medals.title": "Medals",
+    "medals.subtitle": "Collect medals by playing tournaments",
+    "medals.earned": "Earned",
+    "medals.locked": "Locked",
+    "medals.back": "Back",
+    "medals.timesEarned": "times earned",
   },
   es: {
     // Landing page
@@ -442,10 +464,32 @@ const translations = {
     // Host Game extras
     "hostGame.loading": "Cargando...",
     "hostGame.points": "puntos",
+    "hostGame.sendMessage": "Enviar Mensaje a Jugadores",
+    "hostGame.messagePlaceholder": "Escribe un mensaje...",
+    "hostGame.sendToAll": "Enviar a Todos",
+    "hostGame.messageSent": "¡Mensaje enviado!",
+    "hostGame.noWallets": "Ningún jugador con wallet aún",
+
+    // Inbox
+    "inbox.title": "Bandeja de Entrada",
+    "inbox.subtitle": "Mensajes de los hosts de torneos",
+    "inbox.noMessages": "Sin mensajes aún",
+    "inbox.from": "De",
+    "inbox.tournament": "Torneo",
+    "inbox.back": "Volver",
+    "inbox.markAllRead": "Marcar todo como leído",
 
     // Player Game extras
     "game.loading": "Cargando...",
     "game.you": "(tú)",
+
+    // Medals page
+    "medals.title": "Medallas",
+    "medals.subtitle": "Colecciona medallas jugando torneos",
+    "medals.earned": "Obtenida",
+    "medals.locked": "Bloqueada",
+    "medals.back": "Volver",
+    "medals.timesEarned": "veces obtenida",
   },
 } as const;
 

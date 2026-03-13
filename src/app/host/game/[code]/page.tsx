@@ -16,6 +16,7 @@ import { useCountdown } from "@/hooks/useCountdown";
 import { useSendTransaction } from "thirdweb/react";
 import { getGameQuestions } from "@/lib/questions";
 import { prepareClaimPrize } from "@/lib/escrow";
+import { sendMessageToAll } from "@/lib/messages";
 import type { Tournament, Player, GameStatus } from "@/types/game";
 
 // Kahoot-style option colors
@@ -40,6 +41,9 @@ export default function HostGamePage() {
   const [prizeSent, setPrizeSent] = useState(false);
   const [sendingPrize, setSendingPrize] = useState(false);
   const [prizeError, setPrizeError] = useState("");
+  const [messageText, setMessageText] = useState("");
+  const [messageSent, setMessageSent] = useState(false);
+  const [sendingMessage, setSendingMessage] = useState(false);
   const [prevScores, setPrevScores] = useState<Record<string, number>>({});
   const [correctCounts, setCorrectCounts] = useState<Record<string, number>>({});
   const { mutateAsync: sendTx } = useSendTransaction();
@@ -150,6 +154,29 @@ export default function HostGamePage() {
       processPostTournament(t.id).catch(console.error);
       // Load correct answer counts for dashboard
       getCorrectAnswerCounts(t.id).then(setCorrectCounts).catch(console.error);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!messageText.trim() || !currentTournament) return;
+    const walletAddresses = sorted
+      .map((p) => p.wallet_address)
+      .filter((w): w is string => Boolean(w));
+    if (walletAddresses.length === 0) return;
+    setSendingMessage(true);
+    try {
+      await sendMessageToAll(
+        code,
+        currentTournament.host_wallet,
+        messageText.trim(),
+        walletAddresses
+      );
+      setMessageSent(true);
+      setMessageText("");
+    } catch (err) {
+      console.error("Send message error:", err);
+    } finally {
+      setSendingMessage(false);
     }
   };
 
@@ -682,6 +709,38 @@ export default function HostGamePage() {
                   >
                     {t("host.createNew")} ⚡
                   </button>
+                </div>
+
+                {/* Messaging card */}
+                <div className="bg-[#0D1117] border border-white/8 rounded-xl p-5 mt-6">
+                  <h4 className="text-white font-bold mb-4">{t("hostGame.sendMessage")}</h4>
+                  {messageSent ? (
+                    <div className="flex items-center gap-2 text-[#00FF88] font-semibold py-2">
+                      <span>✅</span>
+                      <span>{t("hostGame.messageSent")}</span>
+                    </div>
+                  ) : (
+                    <>
+                      <textarea
+                        value={messageText}
+                        onChange={(e) => setMessageText(e.target.value)}
+                        placeholder={t("hostGame.messagePlaceholder")}
+                        rows={3}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm resize-none focus:outline-none focus:border-[#00FF88]/50 placeholder-gray-600 mb-3"
+                      />
+                      {sorted.filter((p) => p.wallet_address).length === 0 ? (
+                        <p className="text-gray-500 text-xs">{t("hostGame.noWallets")}</p>
+                      ) : (
+                        <button
+                          onClick={handleSendMessage}
+                          disabled={sendingMessage || !messageText.trim()}
+                          className="bg-[#00FF88] text-black font-bold py-2.5 px-6 rounded-xl text-sm active:scale-95 transform transition-transform disabled:opacity-40"
+                        >
+                          {sendingMessage ? "..." : t("hostGame.sendToAll")}
+                        </button>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
             </div>

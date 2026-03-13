@@ -3,22 +3,32 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getLeaderboard } from "@/lib/globalPlayers";
-import { ACHIEVEMENT_META } from "@/types/game";
-import type { GlobalPlayer, Achievement } from "@/types/game";
+import { getUnreadCount } from "@/lib/messages";
+import { ACHIEVEMENT_META, MEDAL_META } from "@/types/game";
+import type { GlobalPlayer, Achievement, Medal } from "@/types/game";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-type LeaderboardEntry = GlobalPlayer & { achievements: Achievement[] };
+type LeaderboardEntry = GlobalPlayer & { achievements: Achievement[]; medals: Medal[] };
 
 export default function LandingPage() {
   const { t } = useLanguage();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     getLeaderboard(10)
       .then(setLeaderboard)
       .catch(console.error)
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const wallet = localStorage.getItem("lucky_goal_wallet");
+    if (!wallet) return;
+    getUnreadCount(wallet)
+      .then(setUnreadCount)
+      .catch(console.error);
   }, []);
 
   const medals = ["🥇", "🥈", "🥉"];
@@ -153,6 +163,20 @@ export default function LandingPage() {
                           ))}
                         </div>
                       )}
+                      {/* Medal icons */}
+                      {player.medals && player.medals.length > 0 && (
+                        <div className="flex gap-1 mt-0.5 flex-wrap">
+                          {[...new Map(player.medals.map((m) => [m.medal_type, m])).values()].map((m) => (
+                            <span
+                              key={m.id}
+                              className="text-xs opacity-80"
+                              title={MEDAL_META[m.medal_type as keyof typeof MEDAL_META]?.description}
+                            >
+                              {MEDAL_META[m.medal_type as keyof typeof MEDAL_META]?.icon}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {/* Stats */}
@@ -193,12 +217,31 @@ export default function LandingPage() {
 
       {/* Footer */}
       <div className="relative z-10 text-center pb-6 space-y-1">
-        <Link
-          href="/faq"
-          className="text-gray-500 text-xs hover:text-[#00FF88] transition-colors font-semibold"
-        >
-          FAQ
-        </Link>
+        <div className="flex items-center justify-center gap-4">
+          <Link
+            href="/faq"
+            className="text-gray-500 text-xs hover:text-[#00FF88] transition-colors font-semibold"
+          >
+            FAQ
+          </Link>
+          <Link
+            href="/medals"
+            className="text-gray-500 text-xs hover:text-[#00FF88] transition-colors font-semibold"
+          >
+            {t("medals.title")}
+          </Link>
+          <Link
+            href="/inbox"
+            className="relative text-gray-500 text-xs hover:text-[#00FF88] transition-colors font-semibold"
+          >
+            {t("inbox.title")}
+            {unreadCount > 0 && (
+              <span className="absolute -top-2 -right-3 bg-[#00FF88] text-black text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center leading-none">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </Link>
+        </div>
         <p className="text-gray-600 text-xs">
           {t("landing.builtOn")}
         </p>

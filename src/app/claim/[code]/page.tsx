@@ -112,6 +112,7 @@ export default function ClaimPage() {
       if (account?.address) {
         await setPlayerWallet(winner.id, account.address);
         registerWallet(account.address, winner.nickname, winner.avatar, "passkey", code);
+        localStorage.setItem("lucky_goal_wallet", account.address);
         setWalletAddress(account.address);
         setStep("success");
       } else {
@@ -136,6 +137,7 @@ export default function ClaimPage() {
       try {
         await setPlayerWallet(winner.id, activeAccount.address);
         registerWallet(activeAccount.address, winner.nickname, winner.avatar, "external", code);
+        localStorage.setItem("lucky_goal_wallet", activeAccount.address);
         setWalletAddress(activeAccount.address);
         setStep("success");
       } catch (err) {

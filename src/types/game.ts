@@ -94,3 +94,21 @@ export const ACHIEVEMENT_META: Record<AchievementType, { label: string; icon: st
 };
 
 export const TOURNAMENT_CODE_LENGTH = 6;
+
+export type MedalType = "og_participant" | "champion" | "sharpshooter" | "scholar" | "social";
+
+export interface Medal {
+  id: string;
+  player_id: string;
+  medal_type: MedalType;
+  tournament_code: string;
+  earned_at: string;
+}
+
+export const MEDAL_META: Record<MedalType, { label: string; icon: string; description: string }> = {
+  og_participant: { label: "OG", icon: "🎖️", description: "Participated in a tournament" },
+  champion: { label: "Champion", icon: "🏅", description: "Won a tournament" },
+  sharpshooter: { label: "Sharpshooter", icon: "🎯", description: "Scored 3+ goals in one tournament" },
+  scholar: { label: "Scholar", icon: "📚", description: "All answers correct in a tournament" },
+  social: { label: "Social", icon: "🤝", description: "Played in a tournament with 5+ players" },
+};

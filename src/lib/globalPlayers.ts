@@ -1,15 +1,27 @@
 import { supabase } from "./supabase";
-import type { GlobalPlayer, Achievement, AchievementType } from "@/types/game";
+import type { GlobalPlayer, Achievement, AchievementType, Medal, MedalType } from "@/types/game";
 
 // ─── Leaderboard ───
 
-export async function getLeaderboard(limit = 10): Promise<(GlobalPlayer & { achievements: Achievement[] })[]> {
+export type LeaderboardEntry = GlobalPlayer & { achievements: Achievement[]; medals: Medal[] };
+
+export async function getLeaderboard(limit = 10): Promise<LeaderboardEntry[]> {
   const { data } = await supabase
     .from("global_players")
-    .select("*, achievements(*)")
+    .select("*, achievements(*), medals(*)")
     .order("total_xp", { ascending: false })
     .limit(limit);
 
+  return data || [];
+}
+
+// ─── Get medals for a player ───
+
+export async function getMedalsForPlayer(globalPlayerId: string): Promise<Medal[]> {
+  const { data } = await supabase
+    .from("medals")
+    .select()
+    .eq("player_id", globalPlayerId);
   return data || [];
 }
 
@@ -57,6 +69,15 @@ async function upsertGlobalPlayer(
 // ─── Process all players after tournament ends ───
 
 export async function processPostTournament(tournamentId: string) {
+  // Fetch tournament for code
+  const { data: tournament } = await supabase
+    .from("tournaments")
+    .select("code")
+    .eq("id", tournamentId)
+    .maybeSingle();
+
+  const tournamentCode = tournament?.code ?? tournamentId;
+
   // Fetch all players in this tournament
   const { data: players } = await supabase
     .from("players")
@@ -65,6 +86,8 @@ export async function processPostTournament(tournamentId: string) {
     .order("score", { ascending: false });
 
   if (!players || players.length === 0) return;
+
+  const playerCount = players.length;
 
   // Fetch all answers for this tournament
   const { data: answers } = await supabase
@@ -94,9 +117,10 @@ export async function processPostTournament(tournamentId: string) {
         })
         .eq("id", globalPlayer.id);
 
-      // Evaluate achievements
+      // Evaluate achievements and medals
       const playerAnswers = (answers || []).filter((a) => a.player_id === player.id);
       await evaluateAchievements(globalPlayer, player, playerAnswers);
+      await evaluateMedals(globalPlayer, player, playerAnswers, tournamentCode, playerCount);
     } catch (err) {
       console.error(`Error processing player ${player.nickname}:`, err);
     }
@@ -156,6 +180,43 @@ async function evaluateAchievements(
       .upsert(
         { player_id: globalPlayer.id, achievement_type: type },
         { onConflict: "player_id,achievement_type" }
+      )
+      .select();
+  }
+}
+
+// ─── Medal evaluation ───
+
+async function evaluateMedals(
+  globalPlayer: GlobalPlayer,
+  tournamentPlayer: { score: number; goals: number; is_winner: boolean },
+  answers: { is_correct: boolean }[],
+  tournamentCode: string,
+  playerCount: number
+) {
+  const newMedals: MedalType[] = [];
+
+  // og_participant — always
+  newMedals.push("og_participant");
+
+  // champion — won
+  if (tournamentPlayer.is_winner) newMedals.push("champion");
+
+  // sharpshooter — 3+ goals
+  if (tournamentPlayer.goals >= 3) newMedals.push("sharpshooter");
+
+  // scholar — all correct
+  if (answers.length > 0 && answers.every((a) => a.is_correct)) newMedals.push("scholar");
+
+  // social — 5+ players in tournament
+  if (playerCount >= 5) newMedals.push("social");
+
+  for (const type of newMedals) {
+    await supabase
+      .from("medals")
+      .upsert(
+        { player_id: globalPlayer.id, medal_type: type, tournament_code: tournamentCode },
+        { onConflict: "player_id,medal_type,tournament_code" }
       )
       .select();
   }
