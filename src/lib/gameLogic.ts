@@ -55,6 +55,7 @@ export async function getTournament(code: string): Promise<Tournament | null> {
 export async function updateTournamentStatus(tournamentId: string, status: GameStatus, currentQuestion?: number) {
   const update: Record<string, unknown> = { status };
   if (currentQuestion !== undefined) update.current_question = currentQuestion;
+  if (status === "question") update.question_started_at = new Date().toISOString();
 
   const { error } = await supabase
     .from("tournaments")

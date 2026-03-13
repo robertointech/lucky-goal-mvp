@@ -89,9 +89,13 @@ export function useGameSync({ tournamentId, playerId }: UseGameSyncOptions) {
         }
       )
       .subscribe(async (status) => {
-        // Re-fetch tournament immediately after subscribing to close the
+        // Re-fetch tournament on subscribe and on error/timeout to close any
         // race-condition window where status changes could be missed
-        if (status === "SUBSCRIBED") {
+        if (
+          status === "SUBSCRIBED" ||
+          status === "CHANNEL_ERROR" ||
+          status === "TIMED_OUT"
+        ) {
           const { data } = await supabase
             .from("tournaments")
             .select()
@@ -105,6 +109,23 @@ export function useGameSync({ tournamentId, playerId }: UseGameSyncOptions) {
       supabase.removeChannel(channel);
     };
   }, [tournamentId, playerId]);
+
+  // Periodic polling fallback — catches missed Realtime events
+  useEffect(() => {
+    if (!tournamentId) return;
+
+    const poll = async () => {
+      const { data } = await supabase
+        .from("tournaments")
+        .select()
+        .eq("id", tournamentId)
+        .single();
+      if (data) setTournament(data);
+    };
+
+    const interval = setInterval(poll, 5000);
+    return () => clearInterval(interval);
+  }, [tournamentId]);
 
   const refreshPlayers = useCallback(async () => {
     if (!tournamentId) return;

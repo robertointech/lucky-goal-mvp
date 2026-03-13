@@ -92,7 +92,14 @@ export default function PlayerGamePage() {
       setPenaltyResult(null);
       setPenaltyDone(false);
       setScorePopup(null);
-      restart(20);
+      const startedAt = currentTournament?.question_started_at;
+      if (startedAt) {
+        const elapsed = Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000);
+        const remaining = Math.max(0, 20 - elapsed);
+        restart(remaining);
+      } else {
+        restart(20);
+      }
     } else if (status !== "question") {
       triviaStop();
     }

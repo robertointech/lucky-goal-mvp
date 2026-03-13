@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getTournament, joinTournament } from "@/lib/gameLogic";
+import { inAppWallet } from "thirdweb/wallets";
+import { useConnect } from "thirdweb/react";
+import { avalancheFuji } from "thirdweb/chains";
+import { client } from "@/lib/thirdweb";
+import { getTournament, joinTournament, setPlayerWallet } from "@/lib/gameLogic";
+import { registerWallet } from "@/lib/walletRegistry";
 import type { Avatar } from "@/types/game";
 import type { Tournament } from "@/types/game";
 import { AVATARS } from "@/types/game";
@@ -13,12 +18,14 @@ export default function JoinPage() {
   const router = useRouter();
   const { t } = useLanguage();
   const code = (params.code as string).toUpperCase();
+  const { connect } = useConnect();
 
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [nickname, setNickname] = useState("");
   const [avatar, setAvatar] = useState<Avatar | null>(null);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
+  const [creatingWallet, setCreatingWallet] = useState(false);
   const [error, setError] = useState("");
   const [step, setStep] = useState<"avatar" | "nickname">("avatar");
 
@@ -37,26 +44,73 @@ export default function JoinPage() {
     setJoining(true);
     setError("");
 
+    let player: Awaited<ReturnType<typeof joinTournament>>;
     try {
-      const player = await joinTournament(tournament.id, nickname.trim(), avatar);
+      player = await joinTournament(tournament.id, nickname.trim(), avatar);
       sessionStorage.setItem(`player_${code}`, player.id);
       sessionStorage.setItem(`player_nickname_${code}`, player.nickname);
       sessionStorage.setItem(`player_avatar_${code}`, player.avatar);
-      router.push(`/play/lobby/${code}`);
     } catch (err) {
       setError(t("join.errorJoining"));
       console.error(err);
-    } finally {
       setJoining(false);
+      return;
     }
+
+    setJoining(false);
+
+    if (tournament.passkey_on_join) {
+      setCreatingWallet(true);
+      try {
+        const wallet = inAppWallet({
+          auth: {
+            options: ["passkey"],
+            passkeyDomain: window.location.hostname,
+          },
+        });
+
+        await connect(async () => {
+          try {
+            await wallet.connect({
+              client,
+              chain: avalancheFuji,
+              strategy: "passkey",
+              type: "sign-up",
+            });
+          } catch {
+            await wallet.connect({
+              client,
+              chain: avalancheFuji,
+              strategy: "passkey",
+              type: "sign-in",
+            });
+          }
+          return wallet;
+        });
+
+        const account = await wallet.getAccount();
+        if (account?.address) {
+          await setPlayerWallet(player.id, account.address);
+          registerWallet(account.address, player.nickname, player.avatar, "passkey", code);
+        }
+      } catch (err) {
+        console.error("Passkey wallet creation failed, continuing to lobby:", err);
+      } finally {
+        setCreatingWallet(false);
+      }
+    }
+
+    router.push(`/play/lobby/${code}`);
   };
 
-  if (loading) {
+  if (loading || creatingWallet) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#1a1a2e]">
         <div className="text-center">
           <div className="text-5xl mb-4 animate-spin" style={{ animationDuration: "2s" }}>&#9917;</div>
-          <div className="text-[#00FF88] text-lg font-bold animate-pulse">{t("join.finding")}</div>
+          <div className="text-[#00FF88] text-lg font-bold animate-pulse">
+            {creatingWallet ? t("join.creatingWallet") : t("join.finding")}
+          </div>
         </div>
       </div>
     );

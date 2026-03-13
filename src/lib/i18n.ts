@@ -185,6 +185,7 @@ const translations = {
 
     // Join page extras
     "join.errorJoining": "Error joining. Try again.",
+    "join.creatingWallet": "Creating your wallet...",
 
     // Player Lobby extras
     "lobby.waitingForHostLong": "Waiting for Host...",
@@ -408,6 +409,7 @@ const translations = {
 
     // Join page extras
     "join.errorJoining": "Error al unirse. Intenta de nuevo.",
+    "join.creatingWallet": "Creando tu wallet...",
 
     // Player Lobby extras
     "lobby.waitingForHostLong": "Esperando al Host...",

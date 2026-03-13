@@ -19,6 +19,7 @@ export interface Tournament {
   custom_questions: Question[] | null;
   passkey_on_join: boolean;
   goalkeeper_logo: string | null;
+  question_started_at: string | null;
   created_at: string;
 }
 

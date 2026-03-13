@@ -17,6 +17,7 @@ export default function HostLobbyPage() {
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [starting, setStarting] = useState(false);
   const prevCountRef = useRef(0);
 
   useEffect(() => {
@@ -57,9 +58,15 @@ export default function HostLobbyPage() {
   };
 
   const handleStart = async () => {
-    if (!tournament) return;
-    await updateTournamentStatus(tournament.id, "question", 0);
-    router.push(`/host/game/${code}`);
+    if (!tournament || starting) return;
+    setStarting(true);
+    try {
+      await updateTournamentStatus(tournament.id, "question", 0);
+    } catch {
+      // navigate anyway — game page will re-fetch current status
+    } finally {
+      router.push(`/host/game/${code}`);
+    }
   };
 
   if (loading) {
@@ -253,19 +260,28 @@ export default function HostLobbyPage() {
             {canStart ? (
               <button
                 onClick={handleStart}
-                className="w-full relative overflow-hidden bg-[#00FF88] text-black font-bold py-5 px-6 rounded-2xl text-xl tracking-wide active:scale-[0.97] transform transition-transform"
+                disabled={starting}
+                className="w-full relative overflow-hidden bg-[#00FF88] text-black font-bold py-5 px-6 rounded-2xl text-xl tracking-wide active:scale-[0.97] transform transition-transform disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100"
                 style={{
                   boxShadow:
                     "0 0 40px rgba(0, 255, 136, 0.3), 0 4px 20px rgba(0, 0, 0, 0.3)",
                 }}
               >
-                <span className="relative z-10">
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  {starting && (
+                    <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                  )}
                   {t("hostLobby.startGame")}
                 </span>
                 {/* Shimmer effect */}
-                <div className="absolute inset-0 animate-[shimmer_2s_ease-in-out_infinite]">
-                  <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_ease-in-out_infinite]" />
-                </div>
+                {!starting && (
+                  <div className="absolute inset-0 animate-[shimmer_2s_ease-in-out_infinite]">
+                    <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_ease-in-out_infinite]" />
+                  </div>
+                )}
               </button>
             ) : (
               <div className="text-center py-4">
