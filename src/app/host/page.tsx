@@ -222,7 +222,39 @@ export default function HostPage() {
             <div className="host-card p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-white font-semibold">{t("host.prize")}</h3>
-                <span className="text-gray-500 text-xs">AVAX</span>
+              </div>
+
+              {/* Token selector */}
+              <div className="grid grid-cols-4 gap-2 mb-4">
+                {[
+                  { symbol: "AVAX", icon: "🔺", active: true },
+                  { symbol: "USDt", icon: "💲", active: false },
+                  { symbol: "ETH", icon: "💎", active: false },
+                  { symbol: "USDC", icon: "🔵", active: false },
+                ].map((token) => (
+                  <button
+                    key={token.symbol}
+                    disabled={!token.active}
+                    className="relative flex flex-col items-center gap-1.5 rounded-xl px-2 py-3 transition-all"
+                    style={{
+                      background: token.active ? "rgba(0, 255, 136, 0.08)" : "#0D1117",
+                      border: token.active ? "2px solid #00FF88" : "2px solid rgba(255,255,255,0.06)",
+                      boxShadow: token.active ? "0 0 20px rgba(0,255,136,0.15), inset 0 0 12px rgba(0,255,136,0.05)" : "none",
+                      opacity: token.active ? 1 : 0.5,
+                      cursor: token.active ? "default" : "not-allowed",
+                    }}
+                  >
+                    {!token.active && (
+                      <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-gray-700 text-gray-300 text-[9px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap z-10 border border-gray-600">
+                        SOON
+                      </span>
+                    )}
+                    <span className="text-xl">{token.icon}</span>
+                    <span className={`text-xs font-bold ${token.active ? "text-[#00FF88]" : "text-gray-500"}`}>
+                      {token.symbol}
+                    </span>
+                  </button>
+                ))}
               </div>
 
               {/* Big prize input */}
