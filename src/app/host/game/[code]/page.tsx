@@ -14,9 +14,12 @@ import { processPostTournament } from "@/lib/globalPlayers";
 import { useGameSync } from "@/hooks/useGameSync";
 import { useCountdown } from "@/hooks/useCountdown";
 import { useSendTransaction } from "thirdweb/react";
+import { prepareTransaction, toWei } from "thirdweb";
+import { avalancheFuji } from "thirdweb/chains";
 import { getGameQuestions } from "@/lib/questions";
 import { prepareClaimPrize } from "@/lib/escrow";
 import { sendMessageToAll } from "@/lib/messages";
+import { client } from "@/lib/thirdweb";
 import type { Tournament, Player, GameStatus } from "@/types/game";
 
 // Kahoot-style option colors
@@ -46,6 +49,13 @@ export default function HostGamePage() {
   const [sendingMessage, setSendingMessage] = useState(false);
   const [prevScores, setPrevScores] = useState<Record<string, number>>({});
   const [correctCounts, setCorrectCounts] = useState<Record<string, number>>({});
+  // Airdrop state
+  const [airdropAmount, setAirdropAmount] = useState("");
+  const [airdropConfirm, setAirdropConfirm] = useState(false);
+  const [airdropSending, setAirdropSending] = useState(false);
+  const [airdropSent, setAirdropSent] = useState(false);
+  const [airdropError, setAirdropError] = useState("");
+  const [airdropProgress, setAirdropProgress] = useState({ current: 0, total: 0 });
   const { mutateAsync: sendTx } = useSendTransaction();
   const { t } = useLanguage();
 
@@ -742,6 +752,46 @@ export default function HostGamePage() {
                     </>
                   )}
                 </div>
+
+                {/* Airdrop card */}
+                <AirdropCard
+                  players={sorted}
+                  airdropAmount={airdropAmount}
+                  setAirdropAmount={setAirdropAmount}
+                  airdropConfirm={airdropConfirm}
+                  setAirdropConfirm={setAirdropConfirm}
+                  airdropSending={airdropSending}
+                  airdropSent={airdropSent}
+                  airdropError={airdropError}
+                  airdropProgress={airdropProgress}
+                  onAirdrop={async () => {
+                    const walletPlayers = sorted.filter((p) => p.wallet_address);
+                    if (!walletPlayers.length || !airdropAmount) return;
+                    const each = parseFloat(airdropAmount) / walletPlayers.length;
+                    if (isNaN(each) || each <= 0) return;
+                    setAirdropSending(true);
+                    setAirdropError("");
+                    setAirdropProgress({ current: 0, total: walletPlayers.length });
+                    try {
+                      for (let i = 0; i < walletPlayers.length; i++) {
+                        setAirdropProgress({ current: i + 1, total: walletPlayers.length });
+                        const tx = prepareTransaction({
+                          to: walletPlayers[i].wallet_address!,
+                          value: toWei(each.toFixed(8)),
+                          chain: avalancheFuji,
+                          client,
+                        });
+                        await sendTx(tx);
+                      }
+                      setAirdropSent(true);
+                    } catch (err) {
+                      console.error("Airdrop error:", err);
+                      setAirdropError(t("hostGame.airdropError"));
+                    } finally {
+                      setAirdropSending(false);
+                    }
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -795,6 +845,101 @@ export default function HostGamePage() {
           100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
       `}</style>
+    </div>
+  );
+}
+
+// ---- Airdrop Card ----
+function AirdropCard({
+  players, airdropAmount, setAirdropAmount, airdropConfirm, setAirdropConfirm,
+  airdropSending, airdropSent, airdropError, airdropProgress, onAirdrop,
+}: {
+  players: Player[];
+  airdropAmount: string;
+  setAirdropAmount: (v: string) => void;
+  airdropConfirm: boolean;
+  setAirdropConfirm: (v: boolean) => void;
+  airdropSending: boolean;
+  airdropSent: boolean;
+  airdropError: string;
+  airdropProgress: { current: number; total: number };
+  onAirdrop: () => void;
+}) {
+  const { t } = useLanguage();
+  const walletPlayers = players.filter((p) => p.wallet_address);
+  const amount = parseFloat(airdropAmount) || 0;
+  const each = walletPlayers.length > 0 ? amount / walletPlayers.length : 0;
+
+  return (
+    <div className="bg-[#0D1117] border border-white/8 rounded-xl p-5 mt-6">
+      <h4 className="text-white font-bold mb-4">{t("hostGame.airdrop")}</h4>
+
+      {airdropSent ? (
+        <div className="flex items-center gap-2 text-[#00FF88] font-semibold py-2">
+          <span>✅</span>
+          <span>{t("hostGame.airdropSent")}</span>
+        </div>
+      ) : walletPlayers.length === 0 ? (
+        <p className="text-gray-500 text-xs">{t("hostGame.airdropNoWallets")}</p>
+      ) : (
+        <>
+          <div className="flex gap-3 items-end mb-3">
+            <div className="flex-1">
+              <label className="text-gray-500 text-xs block mb-1">{t("hostGame.airdropAmount")}</label>
+              <input
+                type="number"
+                step="0.001"
+                min="0"
+                value={airdropAmount}
+                onChange={(e) => { setAirdropAmount(e.target.value); setAirdropConfirm(false); }}
+                disabled={airdropSending}
+                placeholder="0.05"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00FF88]/50 placeholder-gray-600"
+              />
+            </div>
+          </div>
+
+          {amount > 0 && (
+            <p className="text-gray-400 text-xs mb-3">
+              Send <span className="text-white font-bold">{each.toFixed(4)} AVAX</span> to each of <span className="text-white font-bold">{walletPlayers.length}</span> players (<span className="text-[#00FF88] font-bold">{amount} AVAX</span> total)
+            </p>
+          )}
+
+          {airdropError && <p className="text-red-400 text-xs mb-3">{airdropError}</p>}
+
+          {airdropSending ? (
+            <div className="flex items-center gap-2 text-gray-400 text-sm">
+              <span className="animate-spin">⏳</span>
+              {t("hostGame.airdropSending")
+                .replace("{current}", String(airdropProgress.current))
+                .replace("{total}", String(airdropProgress.total))}
+            </div>
+          ) : !airdropConfirm ? (
+            <button
+              onClick={() => setAirdropConfirm(true)}
+              disabled={!amount || amount <= 0}
+              className="bg-[#00FF88] text-black font-bold py-2.5 px-6 rounded-xl text-sm active:scale-95 transform transition-transform disabled:opacity-40"
+            >
+              {t("hostGame.airdropBtn")}
+            </button>
+          ) : (
+            <div className="flex gap-2">
+              <button
+                onClick={onAirdrop}
+                className="bg-[#00FF88] text-black font-bold py-2.5 px-6 rounded-xl text-sm active:scale-95 transform transition-transform"
+              >
+                {t("hostGame.airdropConfirm")}
+              </button>
+              <button
+                onClick={() => setAirdropConfirm(false)}
+                className="border border-white/20 text-gray-400 font-bold py-2.5 px-4 rounded-xl text-sm active:scale-95 transform transition-transform hover:text-white"
+              >
+                {t("hostGame.airdropCancel")}
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

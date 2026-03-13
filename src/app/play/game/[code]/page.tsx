@@ -9,6 +9,15 @@ import { getGameQuestions, QUESTIONS_PER_GAME } from "@/lib/questions";
 import type { Tournament, Player, Direction } from "@/types/game";
 import JuggleBall from "@/components/JuggleBall";
 import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  playCorrect,
+  playIncorrect,
+  playGoal,
+  playSaved,
+  playWin,
+  isMuted,
+  toggleMute,
+} from "@/lib/sounds";
 
 // Kahoot-style colors
 const OPT_COLORS = [
@@ -41,6 +50,17 @@ export default function PlayerGamePage() {
   const [goalkeeperDirection, setGoalkeeperDirection] = useState<Direction | null>(null);
   const [penaltyResult, setPenaltyResult] = useState<"goal" | "saved" | null>(null);
   const [penaltyDone, setPenaltyDone] = useState(false);
+
+  // Sound mute state — initialized from localStorage after mount
+  const [muted, setMuted] = useState(false);
+  useEffect(() => {
+    setMuted(isMuted());
+  }, []);
+
+  const handleToggleMute = () => {
+    const next = toggleMute();
+    setMuted(next);
+  };
 
   const { timeLeft, restart, stop: triviaStop } = useCountdown(20);
   const {
@@ -220,6 +240,23 @@ export default function PlayerGamePage() {
   const sorted = [...players].sort((a, b) => b.score - a.score);
   const myRank = sorted.findIndex((p) => p.id === playerId) + 1;
 
+  // Sound effects
+  useEffect(() => {
+    if (lastAnswerCorrect === true) playCorrect();
+    else if (lastAnswerCorrect === false) playIncorrect();
+  }, [lastAnswerCorrect]);
+
+  useEffect(() => {
+    if (penaltyResult === "goal") playGoal();
+    else if (penaltyResult === "saved") playSaved();
+  }, [penaltyResult]);
+
+  useEffect(() => {
+    if (status === "finished" && winner && winner.id === playerId) {
+      playWin();
+    }
+  }, [status, winner, playerId]);
+
   // ========== FINISHED ==========
   if (status === "finished" && winner) {
     const isSelf = winner.id === playerId;
@@ -350,14 +387,24 @@ export default function PlayerGamePage() {
             ))}
           </div>
         </div>
-        {myPlayer && (
-          <div className="flex items-center gap-1.5 bg-[#0D1117] rounded-lg px-3 py-1.5">
-            <span className="text-sm">{myPlayer.avatar}</span>
-            <span className="text-[#00FF88] font-bold text-sm tabular-nums">
-              {myPlayer.score}
-            </span>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {myPlayer && (
+            <div className="flex items-center gap-1.5 bg-[#0D1117] rounded-lg px-3 py-1.5">
+              <span className="text-sm">{myPlayer.avatar}</span>
+              <span className="text-[#00FF88] font-bold text-sm tabular-nums">
+                {myPlayer.score}
+              </span>
+            </div>
+          )}
+          <button
+            onClick={handleToggleMute}
+            aria-label={muted ? t("game.unmute") : t("game.mute")}
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0D1117] text-base active:scale-90 transition-transform"
+            style={{ opacity: muted ? 0.45 : 1 }}
+          >
+            {muted ? "🔇" : "🔊"}
+          </button>
+        </div>
       </div>
 
       {/* Main content */}
@@ -537,7 +584,153 @@ export default function PlayerGamePage() {
   );
 }
 
-// ---- Penalty Arena (CSS goal) ----
+// ---- Goalkeeper SVG character ----
+function GoalkeeperSVG({
+  diveDir,
+  dived,
+  saved,
+  logo,
+}: {
+  diveDir: Direction | null;
+  dived: boolean;
+  saved: boolean;
+  logo: string | null;
+}) {
+  const diveTranslateX =
+    dived && diveDir ? (diveDir === "left" ? -52 : diveDir === "right" ? 52 : 0) : 0;
+  const diveTranslateY = dived && diveDir ? (diveDir === "center" ? -16 : 8) : 0;
+  const diveRotate =
+    dived && diveDir ? (diveDir === "left" ? -44 : diveDir === "right" ? 44 : 0) : 0;
+
+  // Arms: spread wide at rest; stretch hard toward dive side on kick
+  const leftArmAngle =
+    dived && diveDir
+      ? diveDir === "left"
+        ? -155
+        : diveDir === "center"
+          ? -90
+          : -45
+      : -75;
+  const rightArmAngle =
+    dived && diveDir
+      ? diveDir === "right"
+        ? -25
+        : diveDir === "center"
+          ? -90
+          : -135
+      : -105;
+
+  const tx = `translate(${diveTranslateX}px, ${diveTranslateY}px) rotate(${diveRotate}deg)`;
+  const transition = dived ? "transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94)" : "none";
+  const armTransition = dived ? "transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94)" : "none";
+  const glowColor = saved ? "rgba(255,68,68,0.75)" : "rgba(255,255,255,0.25)";
+
+  return (
+    <svg
+      viewBox="-32 -62 64 78"
+      width="64"
+      height="78"
+      style={{ transform: tx, transition, filter: `drop-shadow(0 0 8px ${glowColor})`, overflow: "visible" }}
+    >
+      {/* Legs */}
+      <line x1="-6" y1="8" x2="-12" y2="22" stroke="#111827" strokeWidth="6" strokeLinecap="round" />
+      <line x1="6" y1="8" x2="12" y2="22" stroke="#111827" strokeWidth="6" strokeLinecap="round" />
+      {/* Boots */}
+      <ellipse cx="-12" cy="23" rx="6" ry="3.5" fill="#1f2937" />
+      <ellipse cx="12" cy="23" rx="6" ry="3.5" fill="#1f2937" />
+      {/* Boot highlight */}
+      <ellipse cx="-12" cy="22" rx="3" ry="1.5" fill="rgba(255,255,255,0.2)" />
+      <ellipse cx="12" cy="22" rx="3" ry="1.5" fill="rgba(255,255,255,0.2)" />
+
+      {/* Torso / jersey */}
+      <rect x="-11" y="-9" width="22" height="19" rx="5" fill="#E63946" />
+      {/* Jersey centre stripe */}
+      <rect x="-3" y="-9" width="6" height="19" rx="2" fill="rgba(255,255,255,0.18)" />
+      {/* Jersey collar */}
+      <rect x="-5" y="-9" width="10" height="4" rx="2" fill="#c1121f" />
+
+      {/* Logo on jersey */}
+      {logo ? (
+        <>
+          <defs>
+            <clipPath id="gkLogoClip">
+              <circle cx="0" cy="2" r="6" />
+            </clipPath>
+          </defs>
+          <image href={logo} x="-6" y="-4" width="12" height="12" clipPath="url(#gkLogoClip)" />
+        </>
+      ) : (
+        <text x="0" y="6" textAnchor="middle" fontSize="7" fontWeight="900" fill="#00FF88" fontFamily="monospace">
+          LG
+        </text>
+      )}
+
+      {/* Left arm */}
+      <g
+        style={{
+          transformOrigin: "-11px -3px",
+          transform: `rotate(${leftArmAngle + 90}deg)`,
+          transition: armTransition,
+        }}
+      >
+        <line x1="-11" y1="-3" x2="-27" y2="-3" stroke="#E63946" strokeWidth="6" strokeLinecap="round" />
+        {/* Left glove */}
+        <ellipse cx="-29" cy="-3" rx="5.5" ry="4.5" fill="#f5c518" />
+        <ellipse cx="-30" cy="-4" rx="2.5" ry="1.5" fill="#d4a010" />
+      </g>
+
+      {/* Right arm */}
+      <g
+        style={{
+          transformOrigin: "11px -3px",
+          transform: `rotate(${rightArmAngle + 90}deg)`,
+          transition: armTransition,
+        }}
+      >
+        <line x1="11" y1="-3" x2="27" y2="-3" stroke="#E63946" strokeWidth="6" strokeLinecap="round" />
+        {/* Right glove */}
+        <ellipse cx="29" cy="-3" rx="5.5" ry="4.5" fill="#f5c518" />
+        <ellipse cx="30" cy="-4" rx="2.5" ry="1.5" fill="#d4a010" />
+      </g>
+
+      {/* Neck */}
+      <rect x="-4" y="-15" width="8" height="8" rx="2" fill="#f4a261" />
+
+      {/* Head */}
+      <ellipse cx="0" cy="-26" rx="12" ry="13" fill="#f4a261" />
+      {/* Hair */}
+      <path d="M -12 -30 Q 0 -44 12 -30 Q 9 -38 0 -40 Q -9 -38 -12 -30 Z" fill="#5c3d1e" />
+      {/* Eyes */}
+      <ellipse cx="-4.5" cy="-26" rx="2.2" ry="2.5" fill="#1c1206" />
+      <ellipse cx="4.5" cy="-26" rx="2.2" ry="2.5" fill="#1c1206" />
+      {/* Eye whites / shine */}
+      <circle cx="-3.5" cy="-27" r="0.8" fill="white" />
+      <circle cx="5.5" cy="-27" r="0.8" fill="white" />
+      {/* Nose */}
+      <ellipse cx="0" cy="-21" rx="1.5" ry="1" fill="rgba(0,0,0,0.12)" />
+      {/* Mouth */}
+      {saved ? (
+        <path d="M -4 -17 Q 0 -20 4 -17" stroke="#8b2c0e" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      ) : (
+        <path d="M -3 -17 Q 0 -15 3 -17" stroke="#8b2c0e" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      )}
+      {/* Eyebrows — furrowed on save */}
+      {saved ? (
+        <>
+          <path d="M -7 -30 Q -4 -32 -2 -30" stroke="#5c3d1e" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+          <path d="M 2 -30 Q 5 -32 7 -30" stroke="#5c3d1e" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+        </>
+      ) : (
+        <>
+          <path d="M -7 -30 Q -4 -31 -2 -30" stroke="#5c3d1e" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+          <path d="M 2 -30 Q 5 -31 7 -30" stroke="#5c3d1e" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+        </>
+      )}
+    </svg>
+  );
+}
+
+// ---- Penalty Arena (redesigned) ----
 function PenaltyArena({
   penaltyTimeLeft,
   kicked,
@@ -580,9 +773,23 @@ function PenaltyArena({
   const timerColor =
     penaltyTimeLeft > 5 ? "#00FF88" : penaltyTimeLeft > 2 ? "#FFD700" : "#FF4444";
 
-  // Goalkeeper dive position
-  const gkDiveX: Record<Direction, string> = { left: "-35%", center: "0%", right: "35%" };
-  const gkDiveRotate: Record<Direction, string> = { left: "-25deg", center: "0deg", right: "25deg" };
+  // SVG scene: viewBox "0 0 320 240"
+  // Goal interior: x=10..310, y=10..178
+  // Grass: y=178..220
+  // Penalty spot in grass: x=160, y=205
+  // GK foreignObject anchor: x=100, y=98 (width=120, height=88)
+  // Ball starts at (160, 205) = penalty spot
+  // Ball destinations per zone (approx center of zone, mid-height):
+  //   left  => (60, 65)   right => (260, 65)   center => (160, 55)
+
+  // Goalkeeper position in scene coordinates when dived:
+  // left => foreignObject x shifts to ~30, right => ~170, center => ~100 (stays)
+  // We embed this via the GoalkeeperSVG component's own transform so the foreignObject stays fixed.
+
+  // Net vertical lines: 19 lines spaced 16px from x=8 to x=312
+  const netVLines = Array.from({ length: 19 }, (_, i) => 8 + (i + 1) * 16);
+  // Net horizontal lines: 10 lines spaced 16px from y=8 to y=176
+  const netHLines = Array.from({ length: 10 }, (_, i) => 8 + (i + 1) * 16);
 
   return (
     <div className="flex-1 flex flex-col">
@@ -592,197 +799,309 @@ function PenaltyArena({
           <span className="animate-[ballSpin_1s_linear_infinite]">&#9917;</span>
           {t("game.penalty")}
         </h2>
-        <p className="text-xs mt-1 font-semibold text-gray-400">
-          {t("game.pickCorner")}
-        </p>
+        <p className="text-xs mt-1 font-semibold text-gray-400">{t("game.pickCorner")}</p>
       </div>
 
-      {/* Goal frame with timer arc */}
       <div className="flex-1 flex flex-col items-center justify-center px-2">
-        <div className="relative w-full max-w-[340px] mx-auto">
-          {/* Circular timer behind goal */}
+        <div className="relative w-full max-w-[360px] mx-auto">
+
+          {/* Circular timer arc — sits outside/above the SVG scene */}
           {!kicked && (
-            <svg className="absolute -inset-3 z-0" viewBox="0 0 200 140" fill="none">
-              <path d="M 15 130 A 85 85 0 0 1 185 130" stroke="rgba(255,255,255,0.08)" strokeWidth="4" strokeLinecap="round" fill="none" />
-              <path d="M 15 130 A 85 85 0 0 1 185 130" stroke={timerColor} strokeWidth="4" strokeLinecap="round" fill="none"
-                strokeDasharray={`${timerPct * 268} 268`}
-                style={{ transition: "stroke-dasharray 1s linear, stroke 0.3s", filter: `drop-shadow(0 0 6px ${timerColor}80)` }}
+            <svg
+              className="absolute z-0 pointer-events-none"
+              style={{ inset: "-14px" }}
+              viewBox="0 0 220 160"
+              fill="none"
+            >
+              <path
+                d="M 20 148 A 95 95 0 0 1 200 148"
+                stroke="rgba(255,255,255,0.07)"
+                strokeWidth="4"
+                strokeLinecap="round"
+                fill="none"
               />
-              <text x="100" y="28" textAnchor="middle" fill={timerColor} fontSize="18" fontWeight="900" fontFamily="monospace"
+              <path
+                d="M 20 148 A 95 95 0 0 1 200 148"
+                stroke={timerColor}
+                strokeWidth="4"
+                strokeLinecap="round"
+                fill="none"
+                strokeDasharray={`${timerPct * 299} 299`}
+                style={{
+                  transition: "stroke-dasharray 1s linear, stroke 0.3s",
+                  filter: `drop-shadow(0 0 6px ${timerColor}80)`,
+                }}
+              />
+              <text
+                x="110"
+                y="30"
+                textAnchor="middle"
+                fill={timerColor}
+                fontSize="20"
+                fontWeight="900"
+                fontFamily="monospace"
                 style={{ filter: `drop-shadow(0 0 4px ${timerColor}60)` }}
-              >{penaltyTimeLeft}</text>
+              >
+                {penaltyTimeLeft}
+              </text>
             </svg>
           )}
 
-          {/* Goal structure */}
-          <div className="goal-frame relative" style={{
-            aspectRatio: "16/10",
-            border: "4px solid rgba(255,255,255,0.7)",
-            borderBottom: "none",
-            borderRadius: "8px 8px 0 0",
-            background: "linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(0,255,136,0.03) 100%)",
-          }}>
-            {/* Net pattern */}
-            <div className="absolute inset-0 overflow-hidden rounded-t-[4px]" style={{
-              backgroundImage: `
-                linear-gradient(45deg, rgba(255,255,255,0.04) 1px, transparent 1px),
-                linear-gradient(-45deg, rgba(255,255,255,0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px),
-                linear-gradient(0deg, rgba(255,255,255,0.06) 1px, transparent 1px)
-              `,
-              backgroundSize: "14px 14px, 14px 14px, 20px 20px, 20px 20px",
-            }} />
+          {/* Main scene — all rendered in one SVG for correct layering */}
+          <svg
+            viewBox="0 0 320 240"
+            width="100%"
+            style={{ display: "block", overflow: "visible" }}
+            aria-label="Penalty kick scene"
+          >
+            {/* === GRASS === */}
+            <rect x="0" y="178" width="320" height="62" fill="#1a5c2a" />
+            {/* Alternating grass stripes */}
+            {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+              <rect key={i} x={i * 40} y="178" width="20" height="62" fill="rgba(255,255,255,0.022)" />
+            ))}
+            {/* Penalty area box */}
+            <rect
+              x="80" y="178" width="160" height="30"
+              fill="none"
+              stroke="rgba(255,255,255,0.5)"
+              strokeWidth="1.5"
+            />
+            {/* Penalty spot */}
+            <circle cx="160" cy="214" r="3.5" fill="rgba(255,255,255,0.55)" />
+            {/* Goal line */}
+            <line x1="0" y1="178" x2="320" y2="178" stroke="rgba(255,255,255,0.65)" strokeWidth="2" />
 
-            {/* Goal post depth effect */}
-            <div className="absolute -left-1 top-0 bottom-0 w-2 rounded-l" style={{ background: "linear-gradient(90deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1))" }} />
-            <div className="absolute -right-1 top-0 bottom-0 w-2 rounded-r" style={{ background: "linear-gradient(270deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1))" }} />
-            <div className="absolute -top-1 left-0 right-0 h-2 rounded-t" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1))" }} />
+            {/* === NET (inside goal) === */}
+            <rect x="10" y="10" width="300" height="168" fill="rgba(12,16,30,0.88)" />
 
-            {/* 3 clickable zones */}
-            <div className="absolute inset-0 grid grid-cols-3 z-10">
-              {(["left", "center", "right"] as Direction[]).map((dir) => {
-                const isSelected = selectedDirection === dir;
-                return (
-                  <button
-                    key={dir}
-                    onClick={() => !kicked && onDirectionSelect(dir)}
-                    className="relative flex items-center justify-center transition-all duration-200"
+            {/* Net vertical lines */}
+            {netVLines.map((x) => (
+              <line key={`nv${x}`} x1={x} y1="10" x2={x} y2="178" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
+            ))}
+            {/* Net horizontal lines */}
+            {netHLines.map((y) => (
+              <line key={`nh${y}`} x1="10" y1={y} x2="310" y2={y} stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
+            ))}
+            {/* Net perspective diagonal accents (top portion only) */}
+            {Array.from({ length: 8 }, (_, i) => (
+              <line
+                key={`nd${i}`}
+                x1={10 + i * 38}
+                y1="10"
+                x2={10 + (i + 1) * 38}
+                y2="40"
+                stroke="rgba(255,255,255,0.04)"
+                strokeWidth="0.7"
+              />
+            ))}
+
+            {/* Net ripple on GOAL */}
+            {penaltyResult === "goal" && (
+              <g style={{ animation: "netShake 0.55s ease-out 0.3s both" }}>
+                {netVLines.map((x) => (
+                  <line key={`gv${x}`} x1={x} y1="10" x2={x} y2="178" stroke="rgba(0,255,136,0.35)" strokeWidth="1.4" />
+                ))}
+                {netHLines.map((y) => (
+                  <line key={`gh${y}`} x1="10" y1={y} x2="310" y2={y} stroke="rgba(0,255,136,0.35)" strokeWidth="1.4" />
+                ))}
+              </g>
+            )}
+
+            {/* === POSTS === */}
+            {/* Left post */}
+            <rect x="0" y="0" width="11" height="180" rx="3" fill="white" />
+            <rect x="11" y="0" width="5" height="180" fill="rgba(0,0,0,0.3)" />
+            <rect x="2" y="2" width="3" height="176" rx="1" fill="rgba(255,255,255,0.55)" />
+
+            {/* Right post */}
+            <rect x="309" y="0" width="11" height="180" rx="3" fill="white" />
+            <rect x="304" y="0" width="5" height="180" fill="rgba(0,0,0,0.3)" />
+            <rect x="315" y="2" width="3" height="176" rx="1" fill="rgba(255,255,255,0.55)" />
+
+            {/* Crossbar */}
+            <rect x="0" y="0" width="320" height="11" rx="3" fill="white" />
+            <rect x="0" y="11" width="320" height="4" fill="rgba(0,0,0,0.25)" />
+            <rect x="2" y="2" width="316" height="3" rx="1" fill="rgba(255,255,255,0.55)" />
+
+            {/* === DIRECTION ZONES (clickable, inside the goal) === */}
+            {(["left", "center", "right"] as Direction[]).map((dir, i) => {
+              const isSelected = selectedDirection === dir;
+              const zx = 11 + i * 99;
+              return (
+                <g
+                  key={dir}
+                  onClick={() => !kicked && onDirectionSelect(dir)}
+                  style={{ cursor: kicked ? "default" : "pointer" }}
+                >
+                  {/* Zone highlight fill */}
+                  <rect
+                    x={zx} y="12" width="99" height="166"
+                    fill={isSelected ? "rgba(0,255,136,0.16)" : "rgba(0,0,0,0)"}
+                    stroke={isSelected ? "rgba(0,255,136,0.55)" : "none"}
+                    strokeWidth="2"
+                    rx="2"
+                    style={{ transition: "fill 0.18s" }}
+                  />
+                  {/* Zone dividers */}
+                  {i > 0 && (
+                    <line
+                      x1={zx} y1="16" x2={zx} y2="174"
+                      stroke="rgba(255,255,255,0.07)"
+                      strokeWidth="1"
+                      strokeDasharray="5 5"
+                    />
+                  )}
+                  {/* Direction label */}
+                  {!kicked && (
+                    <text
+                      x={zx + 49} y="100"
+                      textAnchor="middle"
+                      fontSize="9"
+                      fontWeight="700"
+                      fontFamily="monospace"
+                      letterSpacing="2"
+                      fill={isSelected ? "#00FF88" : "rgba(255,255,255,0.18)"}
+                      style={{
+                        textTransform: "uppercase",
+                        transition: "fill 0.18s",
+                        filter: isSelected ? "drop-shadow(0 0 5px rgba(0,255,136,0.7))" : "none",
+                      }}
+                    >
+                      {dir === "left" ? "LEFT" : dir === "center" ? "CENTER" : "RIGHT"}
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+
+            {/* === GOALKEEPER (foreignObject so we can use the React SVG component) === */}
+            <foreignObject x="96" y="94" width="128" height="92" style={{ overflow: "visible" }}>
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "flex-end",
+                  justifyContent: "center",
+                }}
+              >
+                <GoalkeeperSVG
+                  diveDir={goalkeeperDirection}
+                  dived={kicked}
+                  saved={penaltyResult === "saved"}
+                  logo={goalkeeperLogo}
+                />
+              </div>
+            </foreignObject>
+
+            {/* === BALL at penalty spot (before kick) === */}
+            {!kicked && (
+              <g style={{ animation: "ballFloat 2s ease-in-out infinite", transformOrigin: "160px 214px" }}>
+                {/* Glow ring when direction selected */}
+                {selectedDirection && (
+                  <circle cx="160" cy="214" r="14" fill="rgba(0,255,136,0.12)" stroke="rgba(0,255,136,0.5)" strokeWidth="1.5" />
+                )}
+                <text
+                  x="160" y="219"
+                  textAnchor="middle"
+                  fontSize="18"
+                  style={{
+                    filter: selectedDirection
+                      ? "drop-shadow(0 0 8px rgba(0,255,136,0.8))"
+                      : "drop-shadow(0 0 4px rgba(255,255,255,0.3))",
+                  }}
+                >
+                  &#9917;
+                </text>
+              </g>
+            )}
+
+            {/* === BALL arc on kick === */}
+            {kicked && selectedDirection && (
+              <text
+                x="160"
+                y="219"
+                textAnchor="middle"
+                fontSize="18"
+                style={{
+                  animation: `ballArcSvg_${selectedDirection} 0.65s cubic-bezier(0.22,0.61,0.36,1) forwards`,
+                  transformOrigin: "160px 214px",
+                }}
+              >
+                &#9917;
+              </text>
+            )}
+          </svg>
+
+          {/* === RESULT OVERLAY (HTML layer on top of SVG) === */}
+          {penaltyResult && (
+            <div
+              className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-20"
+              style={{ paddingBottom: "60px" }}
+            >
+              {penaltyResult === "goal" && (
+                <>
+                  {/* Particle burst */}
+                  <div className="relative flex items-center justify-center">
+                    {Array.from({ length: 12 }, (_, i) => {
+                      const angle = (i / 12) * 360;
+                      return (
+                        <div
+                          key={i}
+                          className="absolute rounded-full"
+                          style={{
+                            width: i % 2 === 0 ? "10px" : "6px",
+                            height: i % 2 === 0 ? "10px" : "6px",
+                            background:
+                              i % 3 === 0 ? "#00FF88" : i % 3 === 1 ? "#FFD700" : "#ffffff",
+                            animation: "particleBurst 0.8s ease-out forwards",
+                            animationDelay: `${i * 0.035}s`,
+                            "--burst-angle": `${angle}deg`,
+                          } as React.CSSProperties}
+                        />
+                      );
+                    })}
+                    <p
+                      className="text-5xl font-black"
+                      style={{
+                        color: "#00FF88",
+                        textShadow:
+                          "0 0 40px rgba(0,255,136,0.8), 0 0 80px rgba(0,255,136,0.4)",
+                        animation: "goalCelebrate 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards",
+                      }}
+                    >
+                      {t("game.goal")}
+                    </p>
+                  </div>
+                  <p
+                    className="font-black text-2xl mt-2"
                     style={{
-                      background: isSelected ? "rgba(0, 255, 136, 0.15)" : "transparent",
-                      borderLeft: dir !== "left" ? "1px dashed rgba(255,255,255,0.1)" : "none",
+                      color: "#00FF88",
+                      animation: "scoreFloat 1.5s ease-out forwards",
+                      animationDelay: "0.25s",
+                      opacity: 0,
                     }}
                   >
-                    {!kicked && (
-                      <span className="text-xs font-bold uppercase tracking-widest transition-all" style={{
-                        color: isSelected ? "#00FF88" : "rgba(255,255,255,0.2)",
-                        textShadow: isSelected ? "0 0 10px rgba(0,255,136,0.5)" : "none",
-                      }}>
-                        {dir === "left" ? "LEFT" : dir === "center" ? "CENTER" : "RIGHT"}
-                      </span>
-                    )}
-                    {isSelected && !kicked && (
-                      <div className="absolute inset-2 rounded-lg border-2 border-[#00FF88]/40 animate-pulse"
-                        style={{ boxShadow: "inset 0 0 20px rgba(0,255,136,0.1), 0 0 15px rgba(0,255,136,0.1)" }} />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Goalkeeper - visible at all times */}
-            <div
-              className="absolute z-30 flex flex-col items-center transition-all"
-              style={{
-                bottom: "2%",
-                left: "50%",
-                transform: kicked && goalkeeperDirection
-                  ? `translateX(calc(-50% + ${gkDiveX[goalkeeperDirection]})) rotate(${gkDiveRotate[goalkeeperDirection]}) ${penaltyResult === "saved" ? "scaleX(" + (goalkeeperDirection === "left" ? "-1" : "1") + ")" : ""}`
-                  : "translateX(-50%)",
-                transition: kicked ? "all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)" : "none",
-              }}
-            >
-              {/* Logo on jersey */}
-              {(goalkeeperLogo || true) && (
-                <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center mb-[-4px] z-10"
-                  style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.2)" }}>
-                  {goalkeeperLogo ? (
-                    <img src={goalkeeperLogo} alt="" className="w-5 h-5 object-contain" />
-                  ) : (
-                    <span className="text-[10px] font-black text-[#00FF88]">LG</span>
-                  )}
-                </div>
+                    +50 pts
+                  </p>
+                </>
               )}
-              {/* Goalkeeper body */}
-              <div className="text-4xl" style={{
-                filter: kicked && penaltyResult === "saved"
-                  ? "drop-shadow(0 0 15px rgba(255,68,68,0.6))"
-                  : "drop-shadow(0 0 8px rgba(255,255,255,0.3))",
-              }}>
-                🧤
-              </div>
-              {/* Goalkeeper hands spread on dive */}
-              {kicked && penaltyResult === "saved" && (
-                <div className="absolute -top-1 text-2xl animate-[gkGrab_0.3s_ease-out_0.5s_forwards]" style={{ opacity: 0 }}>
-                  🤲
-                </div>
+              {penaltyResult === "saved" && (
+                <p
+                  className="text-4xl font-black"
+                  style={{
+                    color: "#f87171",
+                    textShadow: "0 0 30px rgba(255,68,68,0.65)",
+                    animation: "shakeX 0.5s ease-out forwards",
+                  }}
+                >
+                  {t("game.saved")}
+                </p>
               )}
-            </div>
-
-            {/* Ball animation - arc trajectory */}
-            {kicked && selectedDirection && (
-              <div className="absolute z-20 text-3xl" style={{
-                left: "50%",
-                top: "100%",
-                transform: "translate(-50%, 0)",
-                animation: `ballArc_${selectedDirection} 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) forwards`,
-              }}>
-                &#9917;
-              </div>
-            )}
-
-            {/* Net shake on goal */}
-            {penaltyResult === "goal" && (
-              <div className="absolute inset-0 animate-[netShake_0.5s_ease-out_0.4s] rounded-t-[4px] overflow-hidden">
-                <div className="w-full h-full" style={{
-                  backgroundImage: `
-                    linear-gradient(90deg, rgba(0,255,136,0.15) 1px, transparent 1px),
-                    linear-gradient(0deg, rgba(0,255,136,0.15) 1px, transparent 1px)
-                  `,
-                  backgroundSize: "20px 20px",
-                }} />
-              </div>
-            )}
-          </div>
-
-          {/* Realistic grass field */}
-          <div className="relative h-10 rounded-b-lg overflow-hidden" style={{
-            background: "linear-gradient(180deg, #1a5c2a 0%, #2d8a4e 30%, #1f6b35 60%, #1a5c2a 100%)",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.1)",
-          }}>
-            {/* Grass stripes */}
-            <div className="absolute inset-0" style={{
-              backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(255,255,255,0.03) 20px, rgba(255,255,255,0.03) 40px)",
-            }} />
-            {/* Penalty spot */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white/30" />
-            {/* Goal line */}
-            <div className="absolute top-0 left-0 right-0 h-[3px]" style={{
-              background: "linear-gradient(90deg, rgba(255,255,255,0.3), rgba(255,255,255,0.6), rgba(255,255,255,0.3))",
-            }} />
-          </div>
-
-          {/* Ball at bottom before kick */}
-          {!kicked && (
-            <div className="flex justify-center mt-3">
-              <div className="text-4xl animate-[ballReady_2s_ease-in-out_infinite]" style={{
-                filter: selectedDirection
-                  ? "drop-shadow(0 0 12px rgba(0,255,136,0.5))"
-                  : "drop-shadow(0 0 6px rgba(255,255,255,0.2))",
-              }}>
-                &#9917;
-              </div>
             </div>
           )}
         </div>
-
-        {/* Result overlay */}
-        {penaltyResult && (
-          <div className={`mt-4 text-center ${
-            penaltyResult === "goal" ? "animate-[goalCelebrate_0.6s_ease-out]" : "animate-[shakeX_0.5s_ease-out]"
-          }`}>
-            <p className={`text-3xl font-black ${penaltyResult === "goal" ? "text-[#00FF88]" : "text-red-400"}`}
-              style={{
-                textShadow: penaltyResult === "goal"
-                  ? "0 0 30px rgba(0,255,136,0.5), 0 0 60px rgba(0,255,136,0.2)"
-                  : "0 0 20px rgba(255,68,68,0.4)",
-              }}>
-              {penaltyResult === "goal" ? t("game.goal") : t("game.saved")}
-            </p>
-            {penaltyResult === "goal" && (
-              <p className="text-[#00FF88] text-lg font-bold mt-1 animate-[scoreFloat_1.5s_ease-out_forwards]">+50 pts</p>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Kick button */}
@@ -793,9 +1112,13 @@ function PenaltyArena({
             disabled={!selectedDirection}
             className="w-full font-black py-5 rounded-2xl text-xl active:scale-[0.95] transform transition-all disabled:opacity-20"
             style={{
-              background: selectedDirection ? "linear-gradient(135deg, #00FF88, #00CC6A)" : "#222",
+              background: selectedDirection
+                ? "linear-gradient(135deg, #00FF88, #00CC6A)"
+                : "#222",
               color: selectedDirection ? "#000" : "#555",
-              boxShadow: selectedDirection ? "0 0 30px rgba(0,255,136,0.35), 0 4px 15px rgba(0,0,0,0.3)" : "none",
+              boxShadow: selectedDirection
+                ? "0 0 30px rgba(0,255,136,0.35), 0 4px 15px rgba(0,0,0,0.3)"
+                : "none",
             }}
           >
             {selectedDirection ? (
@@ -960,70 +1283,79 @@ const ANIMATIONS_CSS = `
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-6px); }
   }
+  /* Legacy HTML arc keyframes — kept for backward compat if referenced elsewhere */
   @keyframes ballArc_left {
-    0% {
-      left: 50%; top: 100%;
-      transform: translate(-50%, 0) scale(1) rotate(0deg);
-    }
-    40% {
-      left: 35%; top: 40%;
-      transform: translate(-50%, -50%) scale(0.85) rotate(-180deg);
-    }
-    100% {
-      left: 18%; top: 28%;
-      transform: translate(-50%, -50%) scale(0.7) rotate(-360deg);
-    }
+    0%   { left: 50%; top: 100%; transform: translate(-50%, 0) scale(1) rotate(0deg); }
+    40%  { left: 35%; top: 40%;  transform: translate(-50%, -50%) scale(0.85) rotate(-180deg); }
+    100% { left: 18%; top: 28%;  transform: translate(-50%, -50%) scale(0.7) rotate(-360deg); }
   }
   @keyframes ballArc_center {
-    0% {
-      left: 50%; top: 100%;
-      transform: translate(-50%, 0) scale(1) rotate(0deg);
-    }
-    40% {
-      left: 50%; top: 45%;
-      transform: translate(-50%, -50%) scale(0.9) rotate(-180deg);
-    }
-    100% {
-      left: 50%; top: 18%;
-      transform: translate(-50%, -50%) scale(0.7) rotate(-360deg);
-    }
+    0%   { left: 50%; top: 100%; transform: translate(-50%, 0) scale(1) rotate(0deg); }
+    40%  { left: 50%; top: 45%;  transform: translate(-50%, -50%) scale(0.9) rotate(-180deg); }
+    100% { left: 50%; top: 18%;  transform: translate(-50%, -50%) scale(0.7) rotate(-360deg); }
   }
   @keyframes ballArc_right {
-    0% {
-      left: 50%; top: 100%;
-      transform: translate(-50%, 0) scale(1) rotate(0deg);
-    }
-    40% {
-      left: 65%; top: 40%;
-      transform: translate(-50%, -50%) scale(0.85) rotate(180deg);
-    }
-    100% {
-      left: 82%; top: 28%;
-      transform: translate(-50%, -50%) scale(0.7) rotate(360deg);
-    }
+    0%   { left: 50%; top: 100%; transform: translate(-50%, 0) scale(1) rotate(0deg); }
+    40%  { left: 65%; top: 40%;  transform: translate(-50%, -50%) scale(0.85) rotate(180deg); }
+    100% { left: 82%; top: 28%;  transform: translate(-50%, -50%) scale(0.7) rotate(360deg); }
   }
+
+  /* SVG-space ball arc keyframes (translate within SVG viewBox 0 0 320 240) */
+  /* Ball starts at (160, 219) — penalty spot text anchor */
+  /* Destination: left (60,65) center (160,52) right (260,65) */
+  /* translate() moves the text; scale shrinks it; rotate spins it */
+  @keyframes ballArcSvg_left {
+    0%   { transform: translate(0px, 0px)    scale(1)    rotate(0deg); }
+    35%  { transform: translate(-60px, -90px)  scale(0.88) rotate(-200deg); }
+    100% { transform: translate(-100px, -154px) scale(0.72) rotate(-400deg); }
+  }
+  @keyframes ballArcSvg_center {
+    0%   { transform: translate(0px, 0px)    scale(1)    rotate(0deg); }
+    35%  { transform: translate(0px, -90px)   scale(0.9)  rotate(-200deg); }
+    100% { transform: translate(0px, -167px)  scale(0.72) rotate(-400deg); }
+  }
+  @keyframes ballArcSvg_right {
+    0%   { transform: translate(0px, 0px)    scale(1)    rotate(0deg); }
+    35%  { transform: translate(60px, -90px)   scale(0.88) rotate(200deg); }
+    100% { transform: translate(100px, -154px) scale(0.72) rotate(400deg); }
+  }
+
+  /* Ball idle float animation at penalty spot */
+  @keyframes ballFloat {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-5px); }
+  }
+
+  /* Particle burst for GOAL celebration */
+  @keyframes particleBurst {
+    0%   { transform: rotate(var(--burst-angle, 0deg)) translateX(0px);   opacity: 1; }
+    60%  { transform: rotate(var(--burst-angle, 0deg)) translateX(48px);  opacity: 0.8; }
+    100% { transform: rotate(var(--burst-angle, 0deg)) translateX(72px);  opacity: 0; }
+  }
+
   @keyframes gkGrab {
     0% { opacity: 0; transform: scale(0.5); }
     100% { opacity: 1; transform: scale(1.2); }
   }
   @keyframes netShake {
-    0% { transform: translateX(0); }
-    10% { transform: translateX(4px) translateY(-2px); }
-    20% { transform: translateX(-4px) translateY(2px); }
-    30% { transform: translateX(3px) translateY(-1px); }
-    40% { transform: translateX(-2px) translateY(1px); }
-    50% { transform: translateX(1px); }
+    0%   { transform: translateX(0); }
+    10%  { transform: translateX(5px) translateY(-3px); }
+    22%  { transform: translateX(-5px) translateY(3px); }
+    34%  { transform: translateX(4px) translateY(-2px); }
+    46%  { transform: translateX(-3px) translateY(2px); }
+    58%  { transform: translateX(2px); }
+    70%  { transform: translateX(-1px); }
     100% { transform: translateX(0); }
   }
   @keyframes gkDive {
-    0% { opacity: 0; transform: scale(0.3) rotate(-20deg); }
-    60% { transform: scale(1.3) rotate(5deg); }
+    0%   { opacity: 0; transform: scale(0.3) rotate(-20deg); }
+    60%  { transform: scale(1.3) rotate(5deg); }
     100% { opacity: 1; transform: scale(1) rotate(0deg); }
   }
   @keyframes goalCelebrate {
-    0% { opacity: 0; transform: scale(0.3); }
-    50% { transform: scale(1.2); }
-    70% { transform: scale(0.95); }
+    0%   { opacity: 0; transform: scale(0.2); }
+    55%  { transform: scale(1.25); }
+    75%  { transform: scale(0.93); }
     100% { opacity: 1; transform: scale(1); }
   }
 `;

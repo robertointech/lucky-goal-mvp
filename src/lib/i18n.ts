@@ -236,6 +236,8 @@ const translations = {
     // Player Game extras
     "game.loading": "Loading...",
     "game.you": "(you)",
+    "game.mute": "Mute sound",
+    "game.unmute": "Unmute sound",
 
     // Medals page
     "medals.title": "Medals",
@@ -244,6 +246,48 @@ const translations = {
     "medals.locked": "Locked",
     "medals.back": "Back",
     "medals.timesEarned": "times earned",
+
+    // Landing — How it Works
+    "landing.howItWorks": "How it Works",
+    "landing.step1Title": "Create Tournament",
+    "landing.step1Desc": "Set your prize pool, upload custom questions, and get a shareable code in seconds.",
+    "landing.step2Title": "Players Join",
+    "landing.step2Desc": "Players scan the QR or enter the code. No app download, no wallet required to play.",
+    "landing.step3Title": "Win Prizes",
+    "landing.step3Desc": "Answer trivia, score penalties, climb the leaderboard. The winner claims AVAX on-chain.",
+
+    // Landing — Features
+    "landing.features": "Why Lucky Goal",
+    "landing.feat1Title": "Real-time Sync",
+    "landing.feat1Desc": "Questions, kicks and results sync instantly across all devices via Supabase Realtime.",
+    "landing.feat2Title": "Passkey Wallets",
+    "landing.feat2Desc": "Winners get a self-custodial Web3 wallet created with Face ID — no seed phrases.",
+    "landing.feat3Title": "On-chain Prizes",
+    "landing.feat3Desc": "Prize pools live on Avalanche. The host sends AVAX directly to the winner's wallet.",
+    "landing.feat4Title": "Custom Questions",
+    "landing.feat4Desc": "Upload a CSV with your own trivia to make every tournament unique for your audience.",
+
+    // Landing — Medals Showcase
+    "landing.medallasShowcase": "Earn Medals",
+    "landing.medallasDesc": "Collect unique medals as you play, win, and compete across tournaments.",
+
+    // Footer extras
+    "landing.footerGithub": "GitHub",
+    "landing.footerExplorer": "Explorer",
+
+    // Airdrop
+    "hostGame.airdrop": "Airdrop to All Players",
+    "hostGame.airdropDesc": "Send AVAX to every player who has a wallet",
+    "hostGame.airdropPreview": "Send {each} AVAX to each of {n} players ({total} AVAX total)",
+    "hostGame.airdropConfirm": "Confirm Airdrop",
+    "hostGame.airdropSending": "Sending {i} of {n}...",
+    "hostGame.airdropSent": "Airdrop complete! Sent to {n} players.",
+    "hostGame.airdropError": "Error during airdrop",
+    "hostGame.airdropBtn": "Airdrop",
+    "hostGame.airdropCancel": "Cancel",
+    "hostGame.airdropEach": "per player",
+    "hostGame.airdropNoWallets": "No players with wallets",
+    "hostGame.airdropAmount": "Total AVAX to airdrop",
   },
   es: {
     // Landing page
@@ -482,6 +526,8 @@ const translations = {
     // Player Game extras
     "game.loading": "Cargando...",
     "game.you": "(tú)",
+    "game.mute": "Silenciar",
+    "game.unmute": "Activar sonido",
 
     // Medals page
     "medals.title": "Medallas",
@@ -490,6 +536,48 @@ const translations = {
     "medals.locked": "Bloqueada",
     "medals.back": "Volver",
     "medals.timesEarned": "veces obtenida",
+
+    // Landing — How it Works
+    "landing.howItWorks": "Cómo Funciona",
+    "landing.step1Title": "Crear Torneo",
+    "landing.step1Desc": "Define el premio, sube preguntas personalizadas y obtén un código para compartir en segundos.",
+    "landing.step2Title": "Jugadores se Unen",
+    "landing.step2Desc": "Escanean el QR o ingresan el código. Sin app, sin wallet para jugar.",
+    "landing.step3Title": "Ganar Premios",
+    "landing.step3Desc": "Responde trivia, mete goles, sube el ranking. El ganador reclama AVAX on-chain.",
+
+    // Landing — Features
+    "landing.features": "Por qué Lucky Goal",
+    "landing.feat1Title": "Sincronización en Tiempo Real",
+    "landing.feat1Desc": "Preguntas, penales y resultados se sincronizan instantáneamente via Supabase Realtime.",
+    "landing.feat2Title": "Wallets con Passkey",
+    "landing.feat2Desc": "Los ganadores obtienen una wallet Web3 creada con Face ID — sin frases semilla.",
+    "landing.feat3Title": "Premios On-chain",
+    "landing.feat3Desc": "Los premios viven en Avalanche. El host envía AVAX directamente a la wallet del ganador.",
+    "landing.feat4Title": "Preguntas Personalizadas",
+    "landing.feat4Desc": "Sube un CSV con tu propia trivia para que cada torneo sea único para tu audiencia.",
+
+    // Landing — Medals Showcase
+    "landing.medallasShowcase": "Gana Medallas",
+    "landing.medallasDesc": "Colecciona medallas únicas mientras juegas, ganas y compites en torneos.",
+
+    // Footer extras
+    "landing.footerGithub": "GitHub",
+    "landing.footerExplorer": "Explorer",
+
+    // Airdrop
+    "hostGame.airdrop": "Airdrop a Todos los Jugadores",
+    "hostGame.airdropDesc": "Envía AVAX a cada jugador que tenga wallet",
+    "hostGame.airdropPreview": "Enviar {each} AVAX a cada uno de {n} jugadores ({total} AVAX total)",
+    "hostGame.airdropConfirm": "Confirmar Airdrop",
+    "hostGame.airdropSending": "Enviando {i} de {n}...",
+    "hostGame.airdropSent": "¡Airdrop completo! Enviado a {n} jugadores.",
+    "hostGame.airdropError": "Error durante el airdrop",
+    "hostGame.airdropBtn": "Airdrop",
+    "hostGame.airdropCancel": "Cancelar",
+    "hostGame.airdropEach": "por jugador",
+    "hostGame.airdropNoWallets": "Ningún jugador con wallet",
+    "hostGame.airdropAmount": "Total AVAX a enviar",
   },
 } as const;
 
