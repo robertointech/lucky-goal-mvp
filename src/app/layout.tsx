@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { ThirdwebProvider } from "thirdweb/react";
+import { NearWalletProvider } from "@/providers/NearWalletProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import LanguageToggle from "@/components/LanguageToggle";
 import "./globals.css";
@@ -23,12 +23,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-lucky-dark">
-        <ThirdwebProvider>
+        <NearWalletProvider>
           <LanguageProvider>
             <LanguageToggle />
             {children}
           </LanguageProvider>
-        </ThirdwebProvider>
+        </NearWalletProvider>
       </body>
     </html>
   );

@@ -2,10 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { inAppWallet } from "thirdweb/wallets";
-import { useConnect } from "thirdweb/react";
-import { avalancheFuji } from "thirdweb/chains";
-import { client } from "@/lib/thirdweb";
+import { useNearWallet } from "@/hooks/useNearWallet";
 import { getTournament, joinTournament, setPlayerWallet } from "@/lib/gameLogic";
 import { registerWallet } from "@/lib/walletRegistry";
 import type { Avatar } from "@/types/game";
@@ -18,7 +15,7 @@ export default function JoinPage() {
   const router = useRouter();
   const { t } = useLanguage();
   const code = (params.code as string).toUpperCase();
-  const { connect } = useConnect();
+  const { accountId, isConnected, connect } = useNearWallet();
 
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [nickname, setNickname] = useState("");
@@ -38,6 +35,21 @@ export default function JoinPage() {
     };
     load();
   }, [code, t]);
+
+  // When NEAR wallet connects after passkey_on_join, save the wallet
+  useEffect(() => {
+    if (!creatingWallet || !isConnected || !accountId) return;
+    // Wallet connected, save it
+    const playerId = sessionStorage.getItem(`player_${code}`);
+    const playerNickname = sessionStorage.getItem(`player_nickname_${code}`);
+    const playerAvatar = sessionStorage.getItem(`player_avatar_${code}`);
+    if (playerId) {
+      setPlayerWallet(playerId, accountId).catch(console.error);
+      registerWallet(accountId, playerNickname || "", playerAvatar || "", "passkey", code);
+    }
+    setCreatingWallet(false);
+    router.push(`/play/lobby/${code}`);
+  }, [creatingWallet, isConnected, accountId, code, router]);
 
   const handleJoin = async () => {
     if (!tournament || !nickname.trim() || !avatar) return;
@@ -62,40 +74,12 @@ export default function JoinPage() {
     if (tournament.passkey_on_join) {
       setCreatingWallet(true);
       try {
-        const wallet = inAppWallet({
-          auth: {
-            options: ["passkey"],
-            passkeyDomain: window.location.hostname,
-          },
-        });
-
-        await connect(async () => {
-          try {
-            await wallet.connect({
-              client,
-              chain: avalancheFuji,
-              strategy: "passkey",
-              type: "sign-up",
-            });
-          } catch {
-            await wallet.connect({
-              client,
-              chain: avalancheFuji,
-              strategy: "passkey",
-              type: "sign-in",
-            });
-          }
-          return wallet;
-        });
-
-        const account = await wallet.getAccount();
-        if (account?.address) {
-          await setPlayerWallet(player.id, account.address);
-          registerWallet(account.address, player.nickname, player.avatar, "passkey", code);
-        }
+        // Open NEAR wallet selector modal for passkey/wallet creation
+        connect();
+        // The useEffect above handles the rest when wallet connects
+        return;
       } catch (err) {
-        console.error("Passkey wallet creation failed, continuing to lobby:", err);
-      } finally {
+        console.error("Wallet creation failed, continuing to lobby:", err);
         setCreatingWallet(false);
       }
     }

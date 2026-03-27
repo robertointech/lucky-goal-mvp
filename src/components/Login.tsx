@@ -1,25 +1,16 @@
 "use client";
 
-import { ConnectButton } from "thirdweb/react";
-import { client } from "@/lib/thirdweb";
-import { avalancheFuji } from "thirdweb/chains";
-import { inAppWallet } from "thirdweb/wallets";
+import { useNearWallet } from "@/hooks/useNearWallet";
 
 export default function Login() {
-  const wallets = [
-    inAppWallet({
-      auth: {
-        options: ["email", "google"],
-      },
-    }),
-  ];
+  const { connect } = useNearWallet();
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
       {/* Logo */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-white mb-2">
-          ⚽ Lucky Goal
+          Lucky Goal
         </h1>
         <p className="text-gray-400 text-lg">
           Trivia + Penalties = Engagement
@@ -28,46 +19,34 @@ export default function Login() {
 
       {/* Card */}
       <div className="card w-full max-w-sm text-center">
-        <h2 className="text-xl font-semibold mb-2">¡Bienvenido!</h2>
+        <h2 className="text-xl font-semibold mb-2">Welcome!</h2>
         <p className="text-gray-400 text-sm mb-6">
-          Inicia sesión para jugar
+          Connect your wallet to play
         </p>
 
-        {/* Thirdweb Connect Button */}
+        {/* NEAR Wallet Selector Button */}
         <div className="flex justify-center">
-          <ConnectButton
-            client={client}
-            wallets={wallets}
-            chain={avalancheFuji}
-            connectButton={{
-              label: "Iniciar Sesión",
-              style: {
-                backgroundColor: "#00FF7F",
-                color: "#000",
-                fontWeight: "bold",
-                padding: "12px 24px",
-                borderRadius: "8px",
-                fontSize: "16px",
-                width: "100%",
-              },
+          <button
+            onClick={connect}
+            className="font-bold px-6 py-3 rounded-lg text-base w-full transition-all"
+            style={{
+              backgroundColor: "#00FF7F",
+              color: "#000",
             }}
-            connectModal={{
-              title: "Lucky Goal",
-              titleIcon: "⚽",
-              size: "compact",
-            }}
-          />
+          >
+            Connect Wallet
+          </button>
         </div>
 
         <p className="text-gray-500 text-xs mt-4">
-          No necesitas wallet ni crypto
+          Supports NEAR, Ethereum wallets & more
         </p>
       </div>
 
       {/* Footer */}
       <div className="mt-8 text-center">
         <p className="text-gray-600 text-sm">
-          Built on Avalanche 🔺
+          Multichain: Avalanche + Arbitrum + NEAR
         </p>
       </div>
     </div>

@@ -13,13 +13,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { processPostTournament } from "@/lib/globalPlayers";
 import { useGameSync } from "@/hooks/useGameSync";
 import { useCountdown } from "@/hooks/useCountdown";
-import { useSendTransaction } from "thirdweb/react";
-import { prepareTransaction, toWei } from "thirdweb";
-import { avalancheFuji } from "thirdweb/chains";
 import { getGameQuestions } from "@/lib/questions";
 import { prepareClaimPrize } from "@/lib/escrow";
 import { sendMessageToAll } from "@/lib/messages";
-import { client } from "@/lib/thirdweb";
+import { sendNativeTransfer } from "@/lib/chains";
 import type { Tournament, Player, GameStatus } from "@/types/game";
 
 // Kahoot-style option colors
@@ -56,7 +53,6 @@ export default function HostGamePage() {
   const [airdropSent, setAirdropSent] = useState(false);
   const [airdropError, setAirdropError] = useState("");
   const [airdropProgress, setAirdropProgress] = useState({ current: 0, total: 0 });
-  const { mutateAsync: sendTx } = useSendTransaction();
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -195,8 +191,7 @@ export default function HostGamePage() {
     setSendingPrize(true);
     setPrizeError("");
     try {
-      const tx = prepareClaimPrize(code, winner.wallet_address);
-      await sendTx(tx);
+      await prepareClaimPrize(code, winner.wallet_address);
       setPrizeSent(true);
     } catch (err) {
       console.error("Prize transfer error:", err);
@@ -775,13 +770,10 @@ export default function HostGamePage() {
                     try {
                       for (let i = 0; i < walletPlayers.length; i++) {
                         setAirdropProgress({ current: i + 1, total: walletPlayers.length });
-                        const tx = prepareTransaction({
-                          to: walletPlayers[i].wallet_address!,
-                          value: toWei(each.toFixed(8)),
-                          chain: avalancheFuji,
-                          client,
-                        });
-                        await sendTx(tx);
+                        await sendNativeTransfer(
+                          walletPlayers[i].wallet_address!,
+                          each.toFixed(8)
+                        );
                       }
                       setAirdropSent(true);
                     } catch (err) {

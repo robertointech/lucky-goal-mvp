@@ -2,9 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useActiveAccount, useSendTransaction, ConnectButton } from "thirdweb/react";
-import { client } from "@/lib/thirdweb";
-import { avalancheFuji } from "thirdweb/chains";
+import { useNearWallet } from "@/hooks/useNearWallet";
 import { createTournament } from "@/lib/gameLogic";
 import { prepareCreateTournament } from "@/lib/escrow";
 import Papa from "papaparse";
@@ -14,13 +12,12 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const PRIZE_PRESETS = ["0.05", "0.1", "0.25", "0.5", "1"];
 
 export default function HostPage() {
-  const account = useActiveAccount();
+  const { accountId, isConnected, connect } = useNearWallet();
   const router = useRouter();
   const { t } = useLanguage();
   const [prizeAmount, setPrizeAmount] = useState("0.1");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { mutateAsync: sendTx } = useSendTransaction();
 
   // Custom questions state
   const [customQuestions, setCustomQuestions] = useState<Question[] | null>(null);
@@ -113,7 +110,7 @@ export default function HostPage() {
   };
 
   const handleCreate = async () => {
-    if (!account) return;
+    if (!accountId) return;
 
     const prize = parseFloat(prizeAmount) || 0;
     if (prize <= 0) {
@@ -126,7 +123,7 @@ export default function HostPage() {
 
     try {
       const tournament = await createTournament(
-        account.address,
+        accountId,
         prize,
         customQuestions,
         passkeyOnJoin,
@@ -134,8 +131,7 @@ export default function HostPage() {
       );
 
       try {
-        const tx = prepareCreateTournament(tournament.code, prizeAmount);
-        await sendTx(tx);
+        await prepareCreateTournament(tournament.code, prizeAmount);
       } catch (escrowErr: unknown) {
         const msg = escrowErr instanceof Error ? escrowErr.message : String(escrowErr);
         if (msg.includes("insufficient") || msg.includes("exceeds balance")) {
@@ -186,7 +182,7 @@ export default function HostPage() {
           </p>
         </div>
 
-        {!account ? (
+        {!isConnected ? (
           /* Connect wallet state */
           <div className="host-card p-8 text-center">
             <div className="w-20 h-20 rounded-2xl bg-[#1a1a2e] border border-gray-700/50 flex items-center justify-center mx-auto mb-5">
@@ -197,23 +193,17 @@ export default function HostPage() {
               {t("host.connectDesc")}
             </p>
             <div className="flex justify-center">
-              <ConnectButton
-                client={client}
-                chain={avalancheFuji}
-                connectButton={{
-                  label: "Connect Wallet",
-                  style: {
-                    background: "linear-gradient(135deg, #00FF88, #00CC6A)",
-                    color: "#000",
-                    fontWeight: "bold",
-                    padding: "14px 28px",
-                    borderRadius: "12px",
-                    fontSize: "16px",
-                    boxShadow: "0 0 20px rgba(0,255,136,0.3)",
-                    border: "none",
-                  },
+              <button
+                onClick={connect}
+                className="font-bold px-7 py-3.5 rounded-xl text-base transition-all"
+                style={{
+                  background: "linear-gradient(135deg, #00FF88, #00CC6A)",
+                  color: "#000",
+                  boxShadow: "0 0 20px rgba(0,255,136,0.3)",
                 }}
-              />
+              >
+                Connect Wallet
+              </button>
             </div>
           </div>
         ) : (
@@ -600,7 +590,7 @@ export default function HostPage() {
             {/* Connected wallet info */}
             <div className="text-center">
               <p className="text-gray-500 text-xs">
-                {t("host.connected")}: {account.address.slice(0, 6)}...{account.address.slice(-4)}
+                {t("host.connected")}: {accountId}
               </p>
             </div>
           </div>

@@ -1,50 +1,42 @@
 "use client";
 
-import { ConnectButton } from "thirdweb/react";
-import { client } from "@/lib/thirdweb";
-import { avalancheFuji } from "thirdweb/chains";
-import type { Account } from "thirdweb/wallets";
+import { useNearWallet } from "@/hooks/useNearWallet";
 
 interface HomeProps {
-  account: Account;
+  account: { address: string };
   onStartGame: () => void;
 }
 
 export default function Home({ account, onStartGame }: HomeProps) {
-  // Get shortened address
+  const { connect } = useNearWallet();
+
   const shortAddress = account.address
-    ? `${account.address.slice(0, 6)}...${account.address.slice(-4)}`
+    ? account.address.length > 20
+      ? `${account.address.slice(0, 6)}...${account.address.slice(-4)}`
+      : account.address
     : "";
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-between py-8 px-4">
       {/* Header */}
       <div className="w-full max-w-sm flex justify-between items-center">
-        <div className="text-lucky-green font-bold">⚽ Lucky Goal</div>
-        <ConnectButton
-          client={client}
-          chain={avalancheFuji}
-          connectButton={{
-            style: {
-              backgroundColor: "#0D1117",
-              color: "#fff",
-              fontSize: "12px",
-              padding: "8px 12px",
-              borderRadius: "8px",
-              border: "1px solid #30363D",
-            },
-          }}
-        />
+        <div className="text-lucky-green font-bold">Lucky Goal</div>
+        <button
+          onClick={connect}
+          className="text-xs px-3 py-2 rounded-lg border border-gray-700 text-white bg-[#0D1117]"
+        >
+          {shortAddress || "Connect"}
+        </button>
       </div>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center text-center">
-        <div className="text-6xl mb-4">⚽</div>
+        <div className="text-6xl mb-4">&#9917;</div>
         <h1 className="text-3xl font-bold text-white mb-2">
-          ¡Hola!
+          Lucky Goal
         </h1>
         <p className="text-gray-400 mb-2">
-          Wallet conectada:
+          Wallet connected:
         </p>
         <code className="bg-lucky-card px-3 py-1 rounded text-lucky-green text-sm mb-8">
           {shortAddress}
@@ -55,18 +47,18 @@ export default function Home({ account, onStartGame }: HomeProps) {
           onClick={onStartGame}
           className="btn-primary text-xl px-12 py-4"
         >
-          🎮 JUGAR
+          PLAY
         </button>
 
         <p className="text-gray-500 text-sm mt-4">
-          5 preguntas • 5 penales
+          5 questions + 5 penalties
         </p>
       </div>
 
       {/* Footer */}
       <div className="text-center">
         <p className="text-gray-600 text-xs">
-          Avalanche Fuji Testnet
+          Multichain: Avalanche + Arbitrum + NEAR
         </p>
       </div>
     </div>

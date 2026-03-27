@@ -2,10 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { inAppWallet } from "thirdweb/wallets";
-import { useConnect, useActiveAccount, ConnectButton } from "thirdweb/react";
-import { avalancheFuji } from "thirdweb/chains";
-import { client } from "@/lib/thirdweb";
+import { useNearWallet } from "@/hooks/useNearWallet";
 import { getTournament, getPlayers, setPlayerWallet } from "@/lib/gameLogic";
 import { getEscrowTournament } from "@/lib/escrow";
 import { registerWallet } from "@/lib/walletRegistry";
@@ -27,8 +24,7 @@ export default function ClaimPage() {
   const [prizeReceived, setPrizeReceived] = useState(false);
   const [walletMode, setWalletMode] = useState<WalletMode>("choose");
 
-  const { connect } = useConnect();
-  const activeAccount = useActiveAccount();
+  const { accountId, isConnected, connect } = useNearWallet();
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -72,73 +68,39 @@ export default function ClaimPage() {
     load();
   }, [code]);
 
+  // NEAR wallet: "passkey" mode now opens the wallet selector modal
   const handleCreateWallet = async () => {
     if (!winner) return;
     setStep("creating");
     setErrorMsg("");
 
     try {
-      const wallet = inAppWallet({
-        auth: {
-          options: ["passkey"],
-          passkeyDomain:
-            typeof window !== "undefined" ? window.location.hostname : "localhost",
-        },
-      });
-
-      await connect(async () => {
-        try {
-          // Try sign-up first (new users creating wallet)
-          await wallet.connect({
-            client,
-            chain: avalancheFuji,
-            strategy: "passkey",
-            type: "sign-up",
-          });
-        } catch {
-          // Fallback to sign-in (returning users with existing passkey)
-          await wallet.connect({
-            client,
-            chain: avalancheFuji,
-            strategy: "passkey",
-            type: "sign-in",
-          });
-        }
-        return wallet;
-      });
-
-      const account = await wallet.getAccount();
-
-      if (account?.address) {
-        await setPlayerWallet(winner.id, account.address);
-        registerWallet(account.address, winner.nickname, winner.avatar, "passkey", code);
-        localStorage.setItem("lucky_goal_wallet", account.address);
-        setWalletAddress(account.address);
-        setStep("success");
-      } else {
-        throw new Error("Could not get wallet address");
-      }
+      // Open NEAR wallet selector modal
+      connect();
+      // The wallet connection is handled by the useEffect below
     } catch (err) {
-      console.error("Passkey wallet error:", err);
+      console.error("Wallet connection error:", err);
       setErrorMsg(
         err instanceof Error
           ? err.message
-          : "Error creating wallet. Try again."
+          : "Error connecting wallet. Try again."
       );
       setStep("ready");
     }
   };
 
-  // When external wallet connects, save it and advance
+  // When NEAR wallet connects (either passkey or existing), save it
   useEffect(() => {
-    if (walletMode !== "existing" || !activeAccount?.address || !winner || step !== "ready") return;
+    if (!isConnected || !accountId || !winner || step === "success") return;
+    if (walletMode === "choose") return;
+
     const save = async () => {
       setStep("creating");
       try {
-        await setPlayerWallet(winner.id, activeAccount.address);
-        registerWallet(activeAccount.address, winner.nickname, winner.avatar, "external", code);
-        localStorage.setItem("lucky_goal_wallet", activeAccount.address);
-        setWalletAddress(activeAccount.address);
+        await setPlayerWallet(winner.id, accountId);
+        registerWallet(accountId, winner.nickname, winner.avatar, walletMode === "passkey" ? "passkey" : "external", code);
+        localStorage.setItem("lucky_goal_wallet", accountId);
+        setWalletAddress(accountId);
         setStep("success");
       } catch (err) {
         console.error("Save wallet error:", err);
@@ -147,7 +109,7 @@ export default function ClaimPage() {
       }
     };
     save();
-  }, [activeAccount?.address, walletMode, winner, step]);
+  }, [isConnected, accountId, winner, walletMode, step, code]);
 
   useEffect(() => {
     if (step !== "success" || prizeReceived) return;
@@ -224,7 +186,9 @@ export default function ClaimPage() {
   }
 
   const shortAddress = walletAddress
-    ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+    ? walletAddress.length > 20
+      ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+      : walletAddress
     : "";
 
   return (
@@ -396,7 +360,7 @@ export default function ClaimPage() {
                   {t("claim.createPasskey")}
                 </button>
                 <button
-                  onClick={() => setWalletMode("existing")}
+                  onClick={() => { setWalletMode("existing"); connect(); }}
                   className="w-full py-4 px-6 rounded-xl text-lg font-bold border border-gray-700 text-white transition-all active:scale-95 hover:border-[#00FF88]/50 hover:text-[#00FF88]"
                   style={{ backgroundColor: "rgba(13, 17, 23, 0.6)" }}
                 >
@@ -446,23 +410,17 @@ export default function ClaimPage() {
                       {t("claim.connectWallet")}
                     </p>
                     <div className="flex justify-center">
-                      <ConnectButton
-                        client={client}
-                        chain={avalancheFuji}
-                        connectButton={{
-                          label: "Connect Wallet",
-                          style: {
-                            background: "linear-gradient(135deg, #00FF88, #00CC6A)",
-                            color: "#000",
-                            fontWeight: "bold",
-                            padding: "14px 28px",
-                            borderRadius: "12px",
-                            fontSize: "16px",
-                            boxShadow: "0 0 20px rgba(0,255,136,0.3)",
-                            border: "none",
-                          },
+                      <button
+                        onClick={connect}
+                        className="font-bold px-7 py-3.5 rounded-xl text-base transition-all"
+                        style={{
+                          background: "linear-gradient(135deg, #00FF88, #00CC6A)",
+                          color: "#000",
+                          boxShadow: "0 0 20px rgba(0,255,136,0.3)",
                         }}
-                      />
+                      >
+                        Connect Wallet
+                      </button>
                     </div>
                   </>
                 )}
