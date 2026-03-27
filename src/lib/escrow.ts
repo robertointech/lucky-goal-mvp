@@ -1,6 +1,5 @@
 import { createPublicClient, http, parseEther, encodeFunctionData, type Hex } from "viem";
 import { avalancheFuji } from "viem/chains";
-import { sendContractCall } from "./chain-signatures";
 import type { ChainKey } from "./chains";
 
 const ESCROW_ADDRESS = (process.env.NEXT_PUBLIC_ESCROW_CONTRACT || "") as Hex;
@@ -77,6 +76,7 @@ export async function prepareCreateTournament(
     return "";
   }
 
+  const { sendContractCall } = await import("./chain-signatures");
   return sendContractCall(
     nearAccountId,
     signerAccount,
@@ -120,6 +120,7 @@ export async function prepareClaimPrize(
     return "";
   }
 
+  const { sendContractCall } = await import("./chain-signatures");
   return sendContractCall(
     nearAccountId,
     signerAccount,
