@@ -16,8 +16,13 @@ import { setupModal } from "@near-wallet-selector/modal-ui";
 import type { WalletSelectorModal } from "@near-wallet-selector/modal-ui";
 import { setupBitteWallet } from "@near-wallet-selector/bitte-wallet";
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
-// TODO: Re-enable when wagmi is configured for Ethereum wallet support
-// import { setupEthereumWallets } from "@near-wallet-selector/ethereum-wallets";
+import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
+import { setupNightly } from "@near-wallet-selector/nightly";
+import { setupEthereumWallets } from "@near-wallet-selector/ethereum-wallets";
+import { wagmiConfig, queryClient } from "@/lib/wagmi-config";
+import { WagmiProvider } from "wagmi";
+import { QueryClientProvider } from "@tanstack/react-query";
+import * as wagmiCore from "@wagmi/core";
 import { nearConfig, NEAR_CONTRACT_ID } from "@/lib/near-config";
 import "@near-wallet-selector/modal-ui/styles.css";
 
@@ -39,7 +44,7 @@ export const NearWalletContext = createContext<NearWalletContextType>({
   isLoading: true,
 });
 
-export function NearWalletProvider({ children }: { children: ReactNode }) {
+function NearWalletInner({ children }: { children: ReactNode }) {
   const [selector, setSelector] = useState<WalletSelector | null>(null);
   const [modal, setModal] = useState<WalletSelectorModal | null>(null);
   const [accounts, setAccounts] = useState<AccountState[]>([]);
@@ -49,8 +54,15 @@ export function NearWalletProvider({ children }: { children: ReactNode }) {
 
   const init = useCallback(async () => {
     const modules = [
+      setupMyNearWallet(),
       setupBitteWallet(),
       setupHereWallet(),
+      setupNightly(),
+      setupEthereumWallets({
+        wagmiConfig: wagmiConfig as any,
+        wagmiCore: wagmiCore as any,
+        alwaysOnboardDuringSignIn: true,
+      }),
     ];
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -93,5 +105,15 @@ export function NearWalletProvider({ children }: { children: ReactNode }) {
     >
       {children}
     </NearWalletContext.Provider>
+  );
+}
+
+export function NearWalletProvider({ children }: { children: ReactNode }) {
+  return (
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <NearWalletInner>{children}</NearWalletInner>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }

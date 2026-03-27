@@ -1,7 +1,11 @@
 import { createPublicClient, http, parseEther, encodeFunctionData, type Hex } from "viem";
 import { avalancheFuji } from "viem/chains";
+import { sendContractCall } from "./chain-signatures";
+import type { ChainKey } from "./chains";
 
 const ESCROW_ADDRESS = (process.env.NEXT_PUBLIC_ESCROW_CONTRACT || "") as Hex;
+const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+const DEFAULT_CHAIN: ChainKey = "avalancheFuji";
 
 const publicClient = createPublicClient({
   chain: avalancheFuji,
@@ -51,10 +55,36 @@ export function getCreateTournamentData(code: string, avaxAmount: string) {
   };
 }
 
-// TODO: Wire to NEAR chain signatures for actual on-chain execution
-export async function prepareCreateTournament(code: string, avaxAmount: string) {
+export async function prepareCreateTournament(
+  code: string,
+  avaxAmount: string,
+  nearAccountId?: string,
+  signerAccount?: {
+    accountId: string;
+    signAndSendTransactions: (tx: { transactions: any[] }) => Promise<any[]>;
+  }
+): Promise<string> {
   const txData = getCreateTournamentData(code, avaxAmount);
-  console.warn("[escrow] prepareCreateTournament: TX prepared but not sent (pending chain signature integration)", txData);
+
+  if (DEMO_MODE) {
+    const fakeTx = "0x" + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
+    console.log(`[escrow] DEMO_MODE: createTournament(${code}, ${avaxAmount} AVAX) -> ${fakeTx}`);
+    return fakeTx;
+  }
+
+  if (!nearAccountId || !signerAccount) {
+    console.warn("[escrow] prepareCreateTournament: no signer provided, skipping");
+    return "";
+  }
+
+  return sendContractCall(
+    nearAccountId,
+    signerAccount,
+    DEFAULT_CHAIN,
+    ESCROW_ADDRESS,
+    txData.data,
+    avaxAmount
+  );
 }
 
 export function getClaimPrizeData(code: string, winnerAddress: string) {
@@ -68,10 +98,35 @@ export function getClaimPrizeData(code: string, winnerAddress: string) {
   };
 }
 
-// TODO: Wire to NEAR chain signatures for actual on-chain execution
-export async function prepareClaimPrize(code: string, winnerAddress: string) {
+export async function prepareClaimPrize(
+  code: string,
+  winnerAddress: string,
+  nearAccountId?: string,
+  signerAccount?: {
+    accountId: string;
+    signAndSendTransactions: (tx: { transactions: any[] }) => Promise<any[]>;
+  }
+): Promise<string> {
   const txData = getClaimPrizeData(code, winnerAddress);
-  console.warn("[escrow] prepareClaimPrize: TX prepared but not sent (pending chain signature integration)", txData);
+
+  if (DEMO_MODE) {
+    const fakeTx = "0x" + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
+    console.log(`[escrow] DEMO_MODE: claimPrize(${code}, ${winnerAddress}) -> ${fakeTx}`);
+    return fakeTx;
+  }
+
+  if (!nearAccountId || !signerAccount) {
+    console.warn("[escrow] prepareClaimPrize: no signer provided, skipping");
+    return "";
+  }
+
+  return sendContractCall(
+    nearAccountId,
+    signerAccount,
+    DEFAULT_CHAIN,
+    ESCROW_ADDRESS,
+    txData.data
+  );
 }
 
 export async function getEscrowTournament(code: string) {
