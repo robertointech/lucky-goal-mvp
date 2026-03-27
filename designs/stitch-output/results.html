@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lucky Goal - Tournament Results</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&amp;family=Be+Vietnam+Pro:wght@100;300;400;500;600;700;800;900&amp;family=Lexend:wght@100;200;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-low": "#111127",
+                        "error-container": "#9f0519",
+                        "error-dim": "#d7383b",
+                        "on-primary-container": "#005b2c",
+                        "secondary-dim": "#d4d2ed",
+                        "surface-dim": "#0c0c1f",
+                        "surface-container-high": "#1d1d37",
+                        "surface-bright": "#292948",
+                        "surface-tint": "#a4ffb9",
+                        "background": "#0c0c1f",
+                        "on-surface-variant": "#aaa8c3",
+                        "tertiary-fixed": "#ebeef7",
+                        "primary-container": "#00fd87",
+                        "surface-variant": "#23233f",
+                        "on-error-container": "#ffa8a3",
+                        "on-tertiary-fixed-variant": "#5f636a",
+                        "primary-fixed-dim": "#00ed7e",
+                        "primary-dim": "#00ed7e",
+                        "inverse-surface": "#fcf8ff",
+                        "tertiary": "#f8f9ff",
+                        "on-error": "#490006",
+                        "tertiary-dim": "#dddfe8",
+                        "on-secondary-fixed-variant": "#5a5971",
+                        "on-tertiary-container": "#53575e",
+                        "secondary": "#e2e0fc",
+                        "on-secondary": "#505066",
+                        "secondary-fixed": "#e2e0fc",
+                        "on-primary": "#006532",
+                        "tertiary-fixed-dim": "#dddfe8",
+                        "surface-container-lowest": "#000000",
+                        "on-surface": "#e5e3ff",
+                        "on-tertiary-fixed": "#43464d",
+                        "on-background": "#e5e3ff",
+                        "secondary-container": "#45455b",
+                        "inverse-on-surface": "#53536a",
+                        "on-primary-fixed": "#004621",
+                        "outline-variant": "#46465c",
+                        "on-secondary-container": "#d0cee9",
+                        "surface-container": "#17172f",
+                        "surface": "#0c0c1f",
+                        "secondary-fixed-dim": "#d4d2ed",
+                        "primary": "#a4ffb9",
+                        "surface-container-highest": "#23233f",
+                        "tertiary-container": "#e8ebf4",
+                        "outline": "#74738b",
+                        "on-secondary-fixed": "#3e3d53",
+                        "inverse-primary": "#006e37",
+                        "on-tertiary": "#5b5f67",
+                        "error": "#ff716c",
+                        "on-primary-fixed-variant": "#006632",
+                        "primary-fixed": "#00fd87"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Be Vietnam Pro"],
+                        "label": ["Lexend"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .hex-bg {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l25.98 15v30L30 60 4.02 45V15z' fill-opacity='0.03' fill='%2300FF88' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+        .confetti-overlay {
+            background-image: radial-gradient(circle, #00FF88 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.1;
+        }
+        .glass-card {
+            background: rgba(35, 35, 63, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .podium-gradient-1 { background: linear-gradient(180deg, #FFD700 0%, #B8860B 100%); }
+        .podium-gradient-2 { background: linear-gradient(180deg, #C0C0C0 0%, #808080 100%); }
+        .podium-gradient-3 { background: linear-gradient(180deg, #CD7F32 0%, #8B4513 100%); }
+        .active-glow { box-shadow: 0px 0px 40px 0px rgba(0, 255, 136, 0.3); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container min-h-screen overflow-x-hidden relative">
+<!-- Global Background Elements -->
+<div class="fixed inset-0 hex-bg z-0"></div>
+<div class="fixed inset-0 confetti-overlay z-0"></div>
+<div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary-container/10 blur-[120px] rounded-full z-0"></div>
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 flex justify-between items-center w-full px-6 py-4 tonal-shift-surface-container-low bg-transparent">
+<div class="flex items-center gap-4">
+<button class="hover:opacity-80 transition-opacity active:scale-95 duration-100">
+<span class="material-symbols-outlined text-[#00FF88]">arrow_back</span>
+</button>
+<h1 class="font-['Space_Grotesk'] font-bold tracking-tight text-on-surface text-lg uppercase">Tournament Results</h1>
+</div>
+<button class="hover:opacity-80 transition-opacity active:scale-95 duration-100">
+<span class="material-symbols-outlined text-[#00FF88]">leaderboard</span>
+</button>
+</header>
+<main class="relative z-10 px-4 pb-32">
+<!-- Winner Celebration Hero -->
+<section class="flex flex-col items-center pt-8 pb-12">
+<div class="relative mb-6">
+<!-- Golden Glow -->
+<div class="absolute inset-0 bg-yellow-400/30 blur-[60px] rounded-full scale-150 animate-pulse"></div>
+<!-- Winner Avatar -->
+<div class="relative w-32 h-32 rounded-full border-4 border-yellow-400 overflow-hidden shadow-[0_0_30px_rgba(255,215,0,0.5)]">
+<img alt="Carlos Avatar" class="w-full h-full object-cover bg-surface-container-high" data-alt="stylized 3D cartoon avatar of a cheerful young man with short dark hair and a confident expression on a vibrant background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuABi2bjp-elgrwecJNtqDGtft_XP3rbL7j72zPyRa8zX8t3asmG5sSE_QS_WdM3NxyENRWA9FQ_KeN709hSyLeRYludquB4SowHnYmsh3h5D1_S8hdyTE-JUC3v_iIh0maplvNqL6ibICqTRQoFEFznA40iGwdRSK9QhDna3PKW7sEZMk8z-Wrzack8LkFOemv6bVLpFNBQ7dFsO_KYyfJSYmpHO0ErvAnZfm9uMAjGrABjmo9PbEaWmlPTDqbUv7159JUkcZGITgg"/>
+<div class="absolute top-0 right-0 p-1 bg-yellow-400 rounded-full border-2 border-background translate-x-1 translate-y-1">
+<span class="material-symbols-outlined text-background text-sm" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+</div>
+</div>
+<!-- Crown Icon -->
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 drop-shadow-lg">
+<span class="material-symbols-outlined text-4xl text-yellow-400" style="font-variation-settings: 'FILL' 1;">comedy_mask</span>
+<!-- Using mask as proxy for crown/trophy aesthetic in material -->
+</div>
+</div>
+<div class="text-center">
+<div class="flex items-center justify-center gap-2 mb-1">
+<span class="text-2xl">🏆</span>
+<h2 class="font-headline font-black text-4xl tracking-tighter uppercase italic text-on-surface">CARLOS</h2>
+<span class="text-2xl">🏆</span>
+</div>
+<p class="font-label text-primary uppercase tracking-[0.2em] text-xs font-bold">Absolute Champion</p>
+</div>
+</section>
+<!-- Podium Section (3D Vibe) -->
+<section class="grid grid-cols-3 gap-2 items-end mb-16 px-2">
+<!-- 2nd Place -->
+<div class="flex flex-col items-center">
+<div class="w-14 h-14 rounded-full border-2 border-[#C0C0C0] overflow-hidden mb-3 bg-surface-container-high">
+<img alt="GoalGetter" class="w-full h-full" data-alt="digital avatar of a gamer wearing a headset with neon accents, dynamic modern illustrative style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDY55eUlRWz7wtvMKngadnUjPgksj0XWHtxOKrnu2yEcN7KX_jxXV5uNuBHwndxTNKQIut6F5JLIaswGS68GMBifkvc53N24INOyju3HNHba9CzmMIkMSaiCbihnDEvbr5956mqrktoNYTlhgfSqeez1pGn9D6F2MjU2J6O2rMyTEf2ZMd6R9jRYpVBfAEL03XaHjDt497fBPE-qgJaNDWW79a76iYxBlaJq-Ex4_25_nVuMctytQY25opa8GIXatYtw6lkYi6chdk"/>
+</div>
+<div class="podium-gradient-2 w-full h-24 rounded-t-xl flex flex-col items-center justify-start pt-4 relative">
+<span class="font-headline font-bold text-background text-2xl">2</span>
+<div class="absolute -bottom-8 w-full text-center">
+<p class="font-label text-[10px] text-on-surface-variant truncate w-full px-1">GoalGetter</p>
+<p class="font-headline font-bold text-primary text-xs">8,450 PKT</p>
+</div>
+</div>
+</div>
+<!-- 1st Place (Center) -->
+<div class="flex flex-col items-center scale-110 z-20">
+<div class="podium-gradient-1 w-full h-40 rounded-t-2xl flex flex-col items-center justify-start pt-6 relative shadow-[0_-10px_40px_rgba(255,215,0,0.2)]">
+<span class="font-headline font-black text-background text-4xl">1</span>
+<div class="absolute -bottom-10 w-full text-center">
+<p class="font-label text-[10px] text-on-surface font-bold truncate w-full px-1 uppercase">Carlos</p>
+<p class="font-headline font-black text-primary text-sm">9,200 PKT</p>
+</div>
+</div>
+</div>
+<!-- 3rd Place -->
+<div class="flex flex-col items-center">
+<div class="w-14 h-14 rounded-full border-2 border-[#CD7F32] overflow-hidden mb-3 bg-surface-container-high">
+<img alt="CryptoStriker" class="w-full h-full" data-alt="modern tech-focused avatar of a person wearing stylish glasses and a streetwear hoodie, digital art style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCe2wb2PpBjk50Ad0Ebp8ZHFtMFkU6oUSiDHQp8KTrhJOP0w1nlZWCTrVAaAapcGvgV9i9NIeE90uCNVvd5uvPZKZzIRSQTEjwyvSbhplQlhkUwQi7Z_-gslg81l1muuJj39fXQcfh7ZI47nrdd0LXM2nEUsl0xm0OwV2IHQUaFNYt9yunWId4RIT3kjEmqm-P1sjsc6ke2Tr6Op-1owHXuj4rRm0j_mPMq-x0oYyMprG966leeQ9lYvnQQk1GqHW1bRCXKrhaZrnM"/>
+</div>
+<div class="podium-gradient-3 w-full h-16 rounded-t-xl flex flex-col items-center justify-start pt-3 relative">
+<span class="font-headline font-bold text-background text-xl">3</span>
+<div class="absolute -bottom-8 w-full text-center">
+<p class="font-label text-[10px] text-on-surface-variant truncate w-full px-1">CryptoStriker</p>
+<p class="font-headline font-bold text-primary text-xs">7,820 PKT</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Action Buttons -->
+<section class="flex flex-col gap-4 mb-12">
+<button class="w-full py-5 bg-gradient-to-r from-primary-container to-on-primary-fixed rounded-xl font-headline font-black text-on-primary-fixed uppercase tracking-widest text-lg active:scale-95 transition-all shadow-[0_15px_30px_rgba(0,253,135,0.2)] active-glow">
+                CLAIM PRIZE
+            </button>
+<div class="flex gap-3">
+<button class="flex-1 py-4 bg-surface-container-high border border-outline-variant/20 rounded-xl font-label text-on-surface text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-surface-bright transition-colors">
+<span class="material-symbols-outlined text-sm">share</span>
+                    Share Results
+                </button>
+<button class="flex-1 py-4 bg-surface-container-high border border-outline-variant/20 rounded-xl font-label text-on-surface text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-surface-bright transition-colors">
+<span class="material-symbols-outlined text-sm">refresh</span>
+                    New Tournament
+                </button>
+</div>
+</section>
+<!-- Detailed Ranking List -->
+<section class="space-y-4">
+<div class="flex justify-between items-center px-2 mb-2">
+<h3 class="font-headline font-bold text-on-surface text-lg">Top Challengers</h3>
+<span class="font-label text-[10px] text-on-surface-variant uppercase tracking-widest">Rank 4-10</span>
+</div>
+<!-- Rank Item Loop -->
+<div class="space-y-3">
+<!-- Rank 4 -->
+<div class="glass-card rounded-xl p-4 flex items-center gap-4 border-l-4 border-primary/40">
+<span class="font-headline font-bold text-on-surface-variant w-4">4</span>
+<div class="w-10 h-10 rounded-lg overflow-hidden bg-surface-container-low">
+<img alt="User 4" class="w-full h-full" data-alt="minimalist flat vector avatar of a sports fan in a jersey" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7GSe0rK2d2E0yiZEnNWHfhkCwVshgMmUgK9KdtXBeyQrrQNrXmAXuI7pFlv6ZKZZf3Rt_1YDsPxBrBJBLBHdq1rIl4Kw7lomvM090B1XS70gD-D_5bN6mwfvZVslx90rCx9Dkw8_5diEfBBINJXNmPA5mwpy3BmJxpvqfpgAIgHh15v6m4agLgqKlfpxjiQxySFO2WuLAshG9jOhIJSSAwWXqkeT99JFv6Ma2N-bfaz266AHi1o-auJqeRGf6YidnYQ2ibFlFdjM"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-end mb-1">
+<span class="font-body font-semibold text-on-surface">StrikeKing</span>
+<span class="font-label text-[10px] text-primary">7,100 PKT</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-lowest rounded-full overflow-hidden flex gap-0.5">
+<div class="h-full bg-primary-dim w-[80%]"></div>
+<div class="h-full bg-surface-variant w-[20%]"></div>
+</div>
+<p class="font-label text-[9px] text-on-surface-variant mt-1 uppercase tracking-tighter">8/10 Correct</p>
+</div>
+</div>
+<!-- Rank 5 -->
+<div class="glass-card rounded-xl p-4 flex items-center gap-4">
+<span class="font-headline font-bold text-on-surface-variant w-4">5</span>
+<div class="w-10 h-10 rounded-lg overflow-hidden bg-surface-container-low">
+<img alt="User 5" class="w-full h-full" data-alt="minimalist flat vector avatar of a profile image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTUYzONgEf85-cREYDGYXIXq3FjL67Rd03oEc-_lLRY_yUpVAmmHNBRH9uMLN94Eo8--eRaYXPgDn0pRnDfc5xO2vLUxI40lEJpZfVgRI0y650hJMpk5OfB_o2WW-zd4XzDLJWCEAceFtPMSAhn4Aqq1wI_ntJtkX8GJceyM_4OIeOGdo_H6cDOc4fMtAs-RAWOxFc6vItjOeTcklwaf-VY61Szyv5Qu6sd-twx-7_eatgmol2CXCyR4XN1eltKqPQLYyeQpTjQR0"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-end mb-1">
+<span class="font-body font-semibold text-on-surface">NitroFan</span>
+<span class="font-label text-[10px] text-on-surface-variant">6,850 PKT</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-lowest rounded-full overflow-hidden flex gap-0.5">
+<div class="h-full bg-primary-dim w-[70%] opacity-80"></div>
+<div class="h-full bg-surface-variant w-[30%]"></div>
+</div>
+<p class="font-label text-[9px] text-on-surface-variant mt-1 uppercase tracking-tighter">7/10 Correct</p>
+</div>
+</div>
+<!-- Rank 6 -->
+<div class="glass-card rounded-xl p-4 flex items-center gap-4">
+<span class="font-headline font-bold text-on-surface-variant w-4">6</span>
+<div class="w-10 h-10 rounded-lg overflow-hidden bg-surface-container-low">
+<img alt="User 6" class="w-full h-full" data-alt="minimalist flat vector avatar of a profile image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0KUfwuZHYJhQogi1HjYVHouWc6ei0niU8ugXIXmtWeeJuUKNHZcHcXDZZJamCKLSD7qSnvO7Bzdu8xeYfiII2WY75_jJuyi7CW_qYBZDzNH3cVx_Gj0hGV0LMFTRFFLMUMNEnytmDLcCJ-8oH19kpOkAwm0JDEJuCnCSbdc_3i7xUznFyXR5rMv6Zs2f6YnDFHCEJIUmxYvlz79csc7ItMpV9X8RvJUTTEMYO4Nlor9nw_3iFGihmjwhjYnLT9SLgbYRUBQ8eqCA"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-end mb-1">
+<span class="font-body font-semibold text-on-surface">BlockHero</span>
+<span class="font-label text-[10px] text-on-surface-variant">6,400 PKT</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-lowest rounded-full overflow-hidden flex gap-0.5">
+<div class="h-full bg-primary-dim w-[60%] opacity-70"></div>
+<div class="h-full bg-surface-variant w-[40%]"></div>
+</div>
+<p class="font-label text-[9px] text-on-surface-variant mt-1 uppercase tracking-tighter">6/10 Correct</p>
+</div>
+</div>
+<!-- More Ranks Hint -->
+<div class="py-4 text-center">
+<span class="font-label text-[10px] text-outline uppercase tracking-widest">Scroll to see full rankings</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-[#111127]/60 backdrop-blur-xl rounded-t-[1.5rem] shadow-[0px_-15px_30px_rgba(0,253,135,0.15)]">
+<div class="flex flex-col items-center justify-center text-[#aaa8c3] opacity-70 hover:text-[#00FF88] transition-all active:scale-90 duration-200 cursor-pointer">
+<span class="material-symbols-outlined mb-1">sports_esports</span>
+<span class="font-['Lexend'] text-[10px] font-medium uppercase tracking-widest">Play</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#aaa8c3] opacity-70 hover:text-[#00FF88] transition-all active:scale-90 duration-200 cursor-pointer">
+<span class="material-symbols-outlined mb-1">group</span>
+<span class="font-['Lexend'] text-[10px] font-medium uppercase tracking-widest">Squad</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#aaa8c3] opacity-70 hover:text-[#00FF88] transition-all active:scale-90 duration-200 cursor-pointer">
+<span class="material-symbols-outlined mb-1">shopping_cart</span>
+<span class="font-['Lexend'] text-[10px] font-medium uppercase tracking-widest">Market</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#00fd87] text-[#0c0c1f] rounded-xl px-4 py-1 animate-pulse active:scale-90 duration-200 cursor-pointer">
+<span class="material-symbols-outlined mb-1">leaderboard</span>
+<span class="font-['Lexend'] text-[10px] font-medium uppercase tracking-widest">Stats</span>
+</div>
+</nav>
+</body></html>

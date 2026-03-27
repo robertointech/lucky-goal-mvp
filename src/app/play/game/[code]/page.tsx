@@ -261,36 +261,50 @@ export default function PlayerGamePage() {
   if (status === "finished" && winner) {
     const isSelf = winner.id === playerId;
     return (
-      <div className="min-h-screen flex flex-col bg-[#1a1a2e] relative overflow-hidden">
+      <div className="min-h-screen flex flex-col bg-surface font-body relative overflow-hidden">
+        {/* Background effects */}
+        <div className="fixed inset-0 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle, rgba(0,253,135,0.03) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
+        <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary-container/10 blur-[120px] rounded-full pointer-events-none" />
+
         {/* Confetti for winner */}
         {isSelf && <MiniConfetti />}
 
         <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 relative z-10">
           {isSelf ? (
             <>
-              <div className="text-5xl mb-1 animate-[crownDrop_0.8s_ease-out]">👑</div>
-              <div className="text-7xl mb-3 animate-[popIn_0.5s_ease-out_0.3s_backwards]">
-                {winner.avatar}
+              {/* Winner celebration hero */}
+              <div className="relative mb-6">
+                <div className="absolute inset-0 bg-yellow-400/30 blur-[60px] rounded-full scale-150 animate-pulse" />
+                <div className="relative">
+                  <div className="text-5xl mb-1 animate-[crownDrop_0.8s_ease-out]">&#128081;</div>
+                  <div className="text-7xl mb-3 animate-[popIn_0.5s_ease-out_0.3s_backwards]">
+                    {winner.avatar}
+                  </div>
+                </div>
               </div>
-              <h2 className="text-3xl font-black text-white mb-1">{t("game.youWon")}</h2>
-              <p className="text-[#00FF88] text-2xl font-bold mb-6">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <span className="text-2xl">&#127942;</span>
+                <h2 className="font-headline font-black text-4xl tracking-tighter uppercase italic text-on-surface">{t("game.youWon")}</h2>
+                <span className="text-2xl">&#127942;</span>
+              </div>
+              <p className="font-body text-primary uppercase tracking-[0.2em] text-xs font-bold mb-4">Absolute Champion</p>
+              <p className="text-primary-container font-headline text-2xl font-bold mb-6">
                 {winner.score} {t("game.points")}
               </p>
               {currentTournament && currentTournament.prize_amount > 0 && (
                 <div
-                  className="bg-[#0D1117] border-2 border-[#00FF88]/30 rounded-2xl px-8 py-5 text-center mb-6"
-                  style={{ boxShadow: "0 0 40px rgba(0, 255, 136, 0.15)" }}
+                  className="bg-lucky-card border-2 border-primary/30 rounded-2xl px-8 py-5 text-center mb-6"
+                  style={{ boxShadow: "0 0 40px rgba(0, 253, 135, 0.15)" }}
                 >
-                  <p className="text-gray-400 text-sm mb-1">{t("game.yourPrize")}</p>
-                  <p className="text-[#00FF88] text-4xl font-black">
+                  <p className="text-on-surface-variant text-sm mb-1 font-body">{t("game.yourPrize")}</p>
+                  <p className="text-primary-container text-4xl font-headline font-black">
                     {currentTournament.prize_amount} AVAX
                   </p>
                 </div>
               )}
               <button
                 onClick={() => router.push(`/claim/${code}`)}
-                className="bg-[#00FF88] text-black font-black py-4 px-8 rounded-2xl text-lg active:scale-95 transform"
-                style={{ boxShadow: "0 0 30px rgba(0, 255, 136, 0.4)" }}
+                className="w-full max-w-sm py-5 bg-gradient-to-r from-primary-container to-primary-dim text-on-primary font-headline font-black rounded-xl text-lg uppercase tracking-widest active:scale-95 transition-all shadow-[0_15px_30px_rgba(0,253,135,0.2)]"
               >
                 {t("game.claimPrize")}
               </button>
@@ -298,17 +312,17 @@ export default function PlayerGamePage() {
           ) : (
             <>
               <div className="text-5xl mb-3">{winner.avatar}</div>
-              <h2 className="text-2xl font-bold text-white mb-1">
+              <h2 className="text-2xl font-headline font-bold text-on-surface mb-1">
                 {winner.nickname} {t("game.won")}
               </h2>
-              <p className="text-[#00FF88] text-xl font-bold mb-6">
+              <p className="text-primary font-headline text-xl font-bold mb-6">
                 {winner.score} {t("game.points")}
               </p>
               {myRank > 0 && (
-                <div className="bg-[#0D1117] border border-white/10 rounded-2xl px-6 py-4 text-center">
-                  <p className="text-gray-400 text-sm">{t("game.yourPosition")}</p>
-                  <p className="text-white text-3xl font-black">#{myRank}</p>
-                  <p className="text-gray-400 text-sm">
+                <div className="bg-lucky-card border border-outline-variant/20 rounded-2xl px-6 py-4 text-center">
+                  <p className="text-on-surface-variant text-sm font-body">{t("game.yourPosition")}</p>
+                  <p className="text-on-surface text-3xl font-headline font-black">#{myRank}</p>
+                  <p className="text-on-surface-variant text-sm font-body">
                     {myPlayer?.score ?? 0} pts
                   </p>
                 </div>
@@ -317,19 +331,28 @@ export default function PlayerGamePage() {
           )}
         </div>
 
-        {/* Compact leaderboard */}
-        <div className="relative z-10 px-4 pb-2">
-          <CompactLeaderboard players={sorted} myId={playerId} />
-        </div>
-
-        {/* Play Again */}
-        <div className="relative z-10 px-4 pb-4 text-center">
+        {/* Action buttons */}
+        <div className="relative z-10 px-4 pb-2 flex gap-3 max-w-sm mx-auto w-full">
+          <button
+            onClick={() => {
+              const text = `I ${isSelf ? "won" : "played"} Lucky Goal! ${isSelf ? winner.score + " pts" : ""}\n${typeof window !== "undefined" ? window.location.origin : ""}`;
+              window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+            }}
+            className="flex-1 py-4 bg-surface-container-high border border-outline-variant/20 rounded-xl font-body text-on-surface text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-surface-bright transition-colors"
+          >
+            Share Results
+          </button>
           <button
             onClick={() => router.push("/play")}
-            className="mt-2 border border-white/20 text-white font-bold py-3 px-8 rounded-2xl text-base active:scale-95 transform hover:border-[#00FF88]/50 hover:text-[#00FF88] transition-all"
+            className="flex-1 py-4 bg-surface-container-high border border-outline-variant/20 rounded-xl font-body text-on-surface text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-surface-bright transition-colors"
           >
             {t("game.playAgain")}
           </button>
+        </div>
+
+        {/* Compact leaderboard */}
+        <div className="relative z-10 px-4 pb-2">
+          <CompactLeaderboard players={sorted} myId={playerId} />
         </div>
 
         <style>{ANIMATIONS_CSS}</style>
@@ -339,8 +362,8 @@ export default function PlayerGamePage() {
 
   if (!currentTournament || !question) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#1a1a2e]">
-        <div className="text-[#00FF88] text-xl animate-pulse font-bold">
+      <div className="min-h-screen flex items-center justify-center bg-surface">
+        <div className="text-primary text-xl animate-pulse font-headline font-bold">
           {t("game.loading")}
         </div>
       </div>
@@ -349,16 +372,20 @@ export default function PlayerGamePage() {
 
   // Timer color
   const timerColor =
-    timeLeft > 10 ? "#00FF88" : timeLeft > 5 ? "#FFD700" : "#FF4444";
+    timeLeft > 10 ? "#00fd87" : timeLeft > 5 ? "#FFD700" : "#FF4444";
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#1a1a2e] relative overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-surface font-body relative overflow-hidden">
+      {/* Hex pattern overlay */}
+      <div className="fixed inset-0 pointer-events-none opacity-40" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l25.98 15v30L30 60 4.02 45V15z' fill-opacity='0.05' fill='%23ffffff' fill-rule='evenodd'/%3E%3C/svg%3E\")" }} />
+      <div className="fixed top-1/4 left-1/2 -translate-x-1/2 w-[120%] h-[120%] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent pointer-events-none" />
+
       {/* Score popup */}
       {scorePopup && (
         <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
           <span
-            className="text-[#00FF88] text-4xl font-black animate-[scoreFloat_1.5s_ease-out_forwards]"
-            style={{ textShadow: "0 0 20px rgba(0, 255, 136, 0.6)" }}
+            className="text-primary-container text-4xl font-headline font-black animate-[scoreFloat_1.5s_ease-out_forwards]"
+            style={{ textShadow: "0 0 20px rgba(0, 253, 135, 0.6)" }}
           >
             {scorePopup}
           </span>
@@ -366,22 +393,22 @@ export default function PlayerGamePage() {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+      <header className="bg-surface/80 backdrop-blur-xl flex justify-between items-center w-full px-4 py-3 z-50 shadow-[0_1px_20px_rgba(0,0,0,0.4)] relative">
         <div className="flex items-center gap-2">
-          <span className="text-gray-500 text-sm">
+          <span className="font-body text-on-surface-variant text-xs tracking-[0.2em] font-semibold uppercase">
             {currentQ + 1}/{QUESTIONS_PER_GAME}
           </span>
           {/* Progress dots */}
-          <div className="flex gap-1">
+          <div className="flex gap-1.5">
             {gameQuestions.map((_, i) => (
               <div
                 key={i}
-                className={`w-2 h-2 rounded-full transition-all ${
+                className={`w-8 h-1.5 rounded-full transition-all ${
                   i < currentQ
-                    ? "bg-[#00FF88]"
+                    ? "bg-primary-dim shadow-[0_0_8px_rgba(0,237,126,0.4)]"
                     : i === currentQ
-                      ? "bg-[#00FF88] animate-pulse"
-                      : "bg-gray-700"
+                      ? "bg-primary-container shadow-[0_0_8px_rgba(0,253,135,0.4)]"
+                      : "bg-surface-variant/50 border border-outline-variant/10"
                 }`}
               />
             ))}
@@ -389,9 +416,9 @@ export default function PlayerGamePage() {
         </div>
         <div className="flex items-center gap-2">
           {myPlayer && (
-            <div className="flex items-center gap-1.5 bg-[#0D1117] rounded-lg px-3 py-1.5">
+            <div className="flex items-center gap-1.5 bg-surface-container-high/80 backdrop-blur-md rounded-full px-3 py-1.5 border border-primary/20 shadow-[0_0_15px_rgba(0,253,135,0.1)]">
               <span className="text-sm">{myPlayer.avatar}</span>
-              <span className="text-[#00FF88] font-bold text-sm tabular-nums">
+              <span className="text-primary-container font-headline font-bold text-sm tabular-nums">
                 {myPlayer.score}
               </span>
             </div>
@@ -399,74 +426,86 @@ export default function PlayerGamePage() {
           <button
             onClick={handleToggleMute}
             aria-label={muted ? t("game.unmute") : t("game.mute")}
-            className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0D1117] text-base active:scale-90 transition-transform"
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-high text-base active:scale-90 transition-transform"
             style={{ opacity: muted ? 0.45 : 1 }}
           >
             {muted ? "🔇" : "🔊"}
           </button>
         </div>
-      </div>
+      </header>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col px-4 py-3">
+      <div className="flex-1 flex flex-col px-4 py-3 relative z-10">
         {/* ========== QUESTION - NOT ANSWERED ========== */}
         {status === "question" && !answered && (
           <>
-            {/* Timer */}
-            <div className="mb-3">
-              <div className="flex items-center justify-between mb-1.5">
-                <span
-                  className="text-3xl font-black tabular-nums transition-colors"
-                  style={{
-                    color: timerColor,
-                    textShadow: timeLeft <= 5 ? `0 0 15px ${timerColor}80` : "none",
-                  }}
-                >
-                  {timeLeft}
+            {/* Circular Timer */}
+            <div className="relative flex flex-col items-center mb-6">
+              <div className="relative w-28 h-28 flex items-center justify-center">
+                <svg className="w-full h-full" viewBox="0 0 128 128">
+                  <circle cx="64" cy="64" r="58" fill="transparent" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
+                  <circle
+                    cx="64" cy="64" r="58" fill="transparent"
+                    stroke={timerColor}
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray="364.4"
+                    strokeDashoffset={364.4 * (1 - timeLeft / 20)}
+                    style={{
+                      transition: "stroke-dashoffset 1s linear, stroke 0.3s",
+                      transform: "rotate(-90deg)",
+                      transformOrigin: "50% 50%",
+                      filter: `drop-shadow(0 0 8px ${timerColor}99)`,
+                    }}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="font-headline text-4xl font-bold text-on-surface tracking-tighter">{timeLeft}</span>
+                </div>
+              </div>
+              {timeLeft <= 5 && (
+                <span className="text-error text-xs font-body font-bold animate-pulse uppercase tracking-wider mt-2">
+                  {t("game.hurry")}
                 </span>
-                {timeLeft <= 5 && (
-                  <span className="text-red-400 text-xs font-bold animate-pulse uppercase tracking-wider">
-                    {t("game.hurry")}
-                  </span>
-                )}
-              </div>
-              <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-1000 ease-linear"
-                  style={{
-                    width: `${(timeLeft / 20) * 100}%`,
-                    backgroundColor: timerColor,
-                    boxShadow: `0 0 10px ${timerColor}80`,
-                  }}
-                />
-              </div>
+              )}
             </div>
 
             {/* Question */}
-            <div className="bg-[#0D1117] border border-white/10 rounded-2xl px-5 py-4 mb-4">
-              <h2 className="text-xl text-white font-bold text-center leading-snug">
+            <div className="w-full text-center mb-6">
+              <h1 className="font-headline text-2xl font-bold text-on-surface leading-tight tracking-tight">
                 {question.question}
-              </h2>
+              </h1>
             </div>
 
-            {/* Options - Kahoot style */}
-            <div className="grid grid-cols-2 gap-2.5 flex-1">
+            {/* Options - Kahoot style with glass */}
+            <div className="grid grid-cols-2 gap-4 flex-1 max-w-md mx-auto w-full">
               {question.options.map((opt, i) => (
                 <button
                   key={i}
                   onClick={() => handleSubmitAnswer(i)}
-                  className="rounded-2xl flex flex-col items-center justify-center gap-1 px-3 py-4 min-h-[80px] active:scale-[0.93] transition-transform"
+                  className="group relative rounded-xl flex flex-col items-center justify-center gap-3 px-3 py-5 min-h-[90px] active:scale-95 transition-all"
                   style={{
-                    backgroundColor: OPT_COLORS[i].bg,
-                    boxShadow: `0 4px 15px ${OPT_COLORS[i].bg}50`,
+                    background: `rgba(${i === 0 ? "226,27,60" : i === 1 ? "19,104,206" : i === 2 ? "216,158,0" : "38,137,12"}, 0.12)`,
+                    backdropFilter: "blur(20px)",
+                    border: `1px solid ${OPT_COLORS[i].bg}4D`,
+                    boxShadow: `inset 0 0 20px ${OPT_COLORS[i].bg}1A`,
                   }}
                 >
-                  <span className="text-white/60 text-xl font-bold">
-                    {OPT_COLORS[i].icon}
-                  </span>
-                  <span className="text-white font-bold text-sm text-center leading-tight">
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center"
+                    style={{
+                      backgroundColor: OPT_COLORS[i].bg,
+                      boxShadow: `0 0 15px ${OPT_COLORS[i].bg}66`,
+                    }}
+                  >
+                    <span className="text-white font-bold text-lg">
+                      {OPT_COLORS[i].icon}
+                    </span>
+                  </div>
+                  <span className="text-on-surface font-body font-semibold text-base text-center leading-tight">
                     {opt}
                   </span>
+                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
                 </button>
               ))}
             </div>
@@ -485,22 +524,22 @@ export default function PlayerGamePage() {
             {/* Result icon */}
             <div
               className={`w-24 h-24 rounded-full flex items-center justify-center mb-4 animate-[popIn_0.4s_ease-out] ${
-                lastAnswerCorrect ? "bg-[#00FF88]/20" : "bg-red-500/20"
+                lastAnswerCorrect ? "bg-primary-container/20" : "bg-error/20"
               }`}
               style={{
                 boxShadow: lastAnswerCorrect
-                  ? "0 0 40px rgba(0, 255, 136, 0.3)"
+                  ? "0 0 40px rgba(0, 253, 135, 0.3)"
                   : "0 0 40px rgba(255, 68, 68, 0.3)",
               }}
             >
               <span className="text-5xl">
-                {lastAnswerCorrect ? "✅" : "❌"}
+                {lastAnswerCorrect ? "&#9989;" : "&#10060;"}
               </span>
             </div>
 
             <h2
-              className={`text-2xl font-black mb-1 ${
-                lastAnswerCorrect ? "text-[#00FF88]" : "text-red-400"
+              className={`text-2xl font-headline font-black mb-1 ${
+                lastAnswerCorrect ? "text-primary-container" : "text-error"
               }`}
             >
               {lastAnswerCorrect ? t("game.correct") : t("game.incorrect")}
@@ -508,7 +547,7 @@ export default function PlayerGamePage() {
 
             {/* Show correct answer if wrong */}
             {!lastAnswerCorrect && (
-              <p className="text-gray-400 text-sm mt-2">
+              <p className="text-on-surface-variant text-sm mt-2 font-body">
                 {t("game.answer")}: {question.options[question.correctIndex]}
               </p>
             )}
@@ -547,27 +586,27 @@ export default function PlayerGamePage() {
         {/* ========== RESULTS ========== */}
         {status === "results" && (
           <div className="flex-1 flex flex-col">
-            <h2 className="text-xl text-white font-black text-center mb-1">
+            <h2 className="text-xl text-on-surface font-headline font-black text-center mb-1 uppercase">
               {t("game.ranking")}
             </h2>
-            <p className="text-gray-500 text-center text-sm mb-4">
+            <p className="text-on-surface-variant text-center text-xs font-body uppercase tracking-widest mb-4">
               Question {currentQ + 1} of {QUESTIONS_PER_GAME}
             </p>
 
             {/* My position highlight */}
             {myRank > 0 && (
               <div
-                className="flex items-center justify-center gap-3 bg-[#00FF88]/10 border border-[#00FF88]/30 rounded-2xl px-4 py-3 mb-4 animate-[popIn_0.4s_ease-out]"
-                style={{ boxShadow: "0 0 20px rgba(0, 255, 136, 0.1)" }}
+                className="flex items-center justify-center gap-3 bg-primary-container/10 border border-primary/30 rounded-2xl px-4 py-3 mb-4 animate-[popIn_0.4s_ease-out]"
+                style={{ boxShadow: "0 0 20px rgba(0, 253, 135, 0.1)" }}
               >
-                <span className="text-white font-black text-2xl">
+                <span className="text-on-surface font-headline font-black text-2xl">
                   #{myRank}
                 </span>
                 <span className="text-lg">{myPlayer?.avatar}</span>
-                <span className="text-white font-bold flex-1">
+                <span className="text-on-surface font-body font-bold flex-1">
                   {myPlayer?.nickname}
                 </span>
-                <span className="text-[#00FF88] font-black text-xl">
+                <span className="text-primary-container font-headline font-black text-xl">
                   {myPlayer?.score}
                 </span>
               </div>
@@ -1156,37 +1195,39 @@ function CompactLeaderboard({
             style={{
               animationDelay: `${i * 0.06}s`,
               animationFillMode: "backwards",
-              backgroundColor: isMe
-                ? "rgba(0, 255, 136, 0.1)"
+              background: isMe
+                ? "rgba(0, 253, 135, 0.1)"
                 : "rgba(13, 17, 23, 0.5)",
+              backdropFilter: "blur(20px)",
               border: isMe
-                ? "1px solid rgba(0, 255, 136, 0.25)"
-                : "1px solid rgba(255, 255, 255, 0.04)",
+                ? "1px solid rgba(0, 253, 135, 0.25)"
+                : "1px solid rgba(70, 70, 92, 0.15)",
+              borderLeft: i < 3 ? `4px solid ${i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : "#CD7F32"}` : undefined,
             }}
           >
             <span className="min-w-[28px] text-center">
               {i < 3 ? (
                 <span className="text-lg">{medals[i]}</span>
               ) : (
-                <span className="text-gray-600 font-bold text-sm">
+                <span className="text-outline font-headline font-bold text-sm">
                   {i + 1}
                 </span>
               )}
             </span>
             <span className="text-xl">{p.avatar}</span>
             <span
-              className={`font-semibold text-sm flex-1 truncate ${
-                isMe ? "text-white" : "text-gray-300"
+              className={`font-body font-semibold text-sm flex-1 truncate ${
+                isMe ? "text-on-surface" : "text-on-surface/80"
               }`}
             >
               {p.nickname}
               {isMe && (
-                <span className="text-[#00FF88] text-xs ml-1">{t("game.you")}</span>
+                <span className="text-primary text-xs ml-1">{t("game.you")}</span>
               )}
             </span>
             <span
-              className={`font-bold tabular-nums text-sm ${
-                isMe ? "text-[#00FF88]" : "text-gray-500"
+              className={`font-headline font-bold tabular-nums text-sm ${
+                isMe ? "text-primary-container" : "text-on-surface-variant"
               }`}
             >
               {p.score}

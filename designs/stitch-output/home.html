@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lucky Goal - The Kinetic Stadium</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&amp;family=Lexend:wght@100;200;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary": "#440900",
+                        "outline": "#72757d",
+                        "on-primary": "#006532",
+                        "on-primary-fixed": "#004621",
+                        "surface-container-high": "#1b2028",
+                        "surface-container": "#151a21",
+                        "on-primary-fixed-variant": "#006632",
+                        "surface-tint": "#a4ffb9",
+                        "inverse-surface": "#f8f9ff",
+                        "on-error-container": "#ffa8a3",
+                        "on-tertiary-fixed": "#360600",
+                        "surface-container-highest": "#20262f",
+                        "on-secondary-fixed-variant": "#5a5971",
+                        "on-background": "#f1f3fc",
+                        "tertiary-container": "#fc3c00",
+                        "surface-container-lowest": "#000000",
+                        "surface-bright": "#262c36",
+                        "surface-container-low": "#0f141a",
+                        "primary-container": "#00fd87",
+                        "on-tertiary-fixed-variant": "#721600",
+                        "primary": "#a4ffb9",
+                        "inverse-on-surface": "#51555c",
+                        "surface-variant": "#20262f",
+                        "on-surface-variant": "#a8abb3",
+                        "background": "#0a0e14",
+                        "tertiary-fixed-dim": "#ff7d5c",
+                        "tertiary-dim": "#dc3300",
+                        "on-secondary": "#505066",
+                        "on-primary-container": "#005b2c",
+                        "surface": "#0a0e14",
+                        "error-container": "#9f0519",
+                        "on-secondary-container": "#d0cee9",
+                        "on-secondary-fixed": "#3e3d53",
+                        "on-surface": "#f1f3fc",
+                        "on-error": "#490006",
+                        "primary-fixed": "#00fd87",
+                        "primary-dim": "#00ed7e",
+                        "secondary-dim": "#d4d2ed",
+                        "error": "#ff716c",
+                        "tertiary": "#ff7350",
+                        "secondary": "#e2e0fc",
+                        "secondary-fixed": "#e2e0fc",
+                        "surface-dim": "#0a0e14",
+                        "primary-fixed-dim": "#00ed7e",
+                        "on-tertiary-container": "#000000",
+                        "secondary-container": "#45455b",
+                        "outline-variant": "#44484f",
+                        "error-dim": "#d7383b",
+                        "tertiary-fixed": "#ff9479",
+                        "inverse-primary": "#006e37",
+                        "secondary-fixed-dim": "#d4d2ed"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Lexend"],
+                        "label": ["Lexend"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glow-primary:hover {
+            box-shadow: 0 0 20px rgba(0, 253, 135, 0.4);
+        }
+        .glass-card {
+            background: rgba(32, 38, 47, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .kinetic-gradient {
+            background: linear-gradient(135deg, #a4ffb9 0%, #00fd87 100%);
+        }
+        .stadium-overlay {
+            background: radial-gradient(circle at 50% -20%, rgba(0, 253, 135, 0.15) 0%, transparent 70%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary overflow-x-hidden">
+<!-- TopAppBar -->
+<nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-[#0a0e14] dark:bg-[#0a0e14] bg-gradient-to-b from-[#0f141a] to-transparent shadow-[0_10px_30px_rgba(0,253,135,0.05)]">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#00fd87]" data-icon="sports_soccer">sports_soccer</span>
+<span class="text-xl font-black tracking-tighter text-[#00fd87] uppercase font-['Space_Grotesk']">LUCKY GOAL</span>
+</div>
+<button class="bg-primary-container text-on-primary px-4 py-2 rounded-full font-bold text-xs hover:glow-primary transition-all duration-300 active:scale-95 font-['Lexend'] uppercase tracking-wider">
+            Connect Wallet
+        </button>
+</nav>
+<!-- Main Content Canvas -->
+<main class="pt-20 pb-32 px-5 min-h-screen stadium-overlay">
+<!-- Hero Section -->
+<header class="relative mb-12 flex flex-col items-center text-center">
+<div class="absolute -top-10 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/10 blur-[100px] rounded-full -z-10"></div>
+<h1 class="font-headline font-bold text-5xl md:text-7xl leading-tight tracking-tighter text-primary-container mb-4 uppercase italic">
+                WIN BIG IN <br/> THE ARENA
+            </h1>
+<p class="font-body text-on-surface-variant text-base md:text-lg max-w-[280px] md:max-w-md leading-relaxed mb-8">
+                Master the ultimate football trivia challenge and dominate the penalty kick shootout to claim massive rewards.
+            </p>
+<div class="w-full flex flex-col gap-4">
+<button class="kinetic-gradient text-on-primary py-5 rounded-xl font-headline font-black text-xl uppercase tracking-widest shadow-[0_10px_40px_rgba(0,253,135,0.2)] active:scale-95 transition-transform hover:glow-primary">
+                    CREATE TOURNAMENT
+                </button>
+<button class="glass-card border border-outline-variant/15 text-primary py-5 rounded-xl font-headline font-bold text-xl uppercase tracking-widest active:scale-95 transition-transform">
+                    JOIN GAME
+                </button>
+</div>
+</header>
+<!-- Dynamic Game Status (Contextual Card) -->
+<section class="mb-12">
+<div class="bg-surface-container-low p-1 rounded-2xl">
+<div class="glass-card border border-outline-variant/10 rounded-2xl p-6 relative overflow-hidden">
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="bg-tertiary-container/20 text-tertiary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 inline-block">Live Match</span>
+<h2 class="font-headline font-bold text-2xl text-on-surface">UCL TRIVIA FINAL</h2>
+</div>
+<div class="text-right">
+<span class="text-on-surface-variant text-[10px] uppercase font-bold block mb-1">Prize Pool</span>
+<span class="text-primary-container font-headline font-black text-xl">5.5 ETH</span>
+</div>
+</div>
+<!-- Penalty Kick Gauge Mockup -->
+<div class="space-y-2">
+<div class="flex justify-between text-[10px] font-bold text-on-surface-variant uppercase">
+<span>Power Meter</span>
+<span class="text-primary">Perfect Strike Zone</span>
+</div>
+<div class="h-4 w-full bg-surface-container-highest rounded-full overflow-hidden flex p-0.5">
+<div class="h-full w-full rounded-full bg-gradient-to-r from-tertiary-container via-primary-container to-tertiary-container opacity-90 relative">
+<div class="absolute top-0 left-1/2 -translate-x-1/2 h-full w-12 bg-white/40 blur-[2px]"></div>
+<div class="absolute top-0 left-[55%] h-full w-1 bg-white shadow-[0_0_10px_#fff]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Leaderboard Preview: TOP STRIKERS -->
+<section class="mb-8">
+<div class="flex justify-between items-end mb-6">
+<h3 class="font-headline font-bold text-2xl uppercase tracking-tight text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="leaderboard">leaderboard</span>
+                    TOP STRIKERS
+                </h3>
+<button class="text-on-surface-variant text-xs font-bold uppercase tracking-widest hover:text-primary transition-colors">View All</button>
+</div>
+<div class="space-y-3">
+<!-- Rank 1 -->
+<div class="bg-[#0D1117] border border-outline-variant/20 rounded-xl p-4 flex items-center justify-between group hover:border-primary/40 transition-all">
+<div class="flex items-center gap-4">
+<div class="relative">
+<img alt="Avatar" class="w-12 h-12 rounded-full border-2 border-primary shadow-[0_0_15px_rgba(0,253,135,0.2)]" data-alt="Portrait avatar of a digital soccer player with neon futuristic gear and a determined expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8HfC2yc_uIFDcpfci64nBWsJEDVLA9m5U1outvrDRvQ8zPkc-b2O61y_NxhXEa5TV6fyB5WVodsH7t0KjJEmA8QFlptxH1ZdJKweyc31BtbVQqMfKBL2tyQyew217YzjlKLm69tyiIUjcInd7gSo-UTBX5pjC2To2f1mJJKbeYET1YQhw0V847zdORMKemeAFRBdP4zHovmkhUs0hB5zmkEwWmq4WoynAsxe9qfEPB25kE63kkGbKTP9iTbnz_2c2ftglU6jD2jk"/>
+<div class="absolute -top-2 -left-2 bg-primary-container text-on-primary w-6 h-6 rounded-full flex items-center justify-center font-black text-xs">1</div>
+</div>
+<div>
+<p class="font-headline font-bold text-on-surface group-hover:text-primary transition-colors">CryptoStriker.eth</p>
+<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Global Rank: #01</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline font-black text-primary-container text-xl tracking-tight">2,450</p>
+<p class="text-[9px] font-bold text-on-surface-variant uppercase tracking-widest">PKT SCORE</p>
+</div>
+</div>
+<!-- Rank 2 -->
+<div class="bg-[#0D1117] border border-outline-variant/20 rounded-xl p-4 flex items-center justify-between group hover:border-primary/40 transition-all">
+<div class="flex items-center gap-4">
+<div class="relative">
+<img alt="Avatar" class="w-12 h-12 rounded-full border-2 border-outline-variant/30" data-alt="Portrait avatar of a female esports athlete with a visor and glowing green accents on her techwear" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIj7U6btqt1M7tFDcpBUH4ktbx5SEepTIoJY11YEd7FjyCbrbybN3bYr5nV4Xd5pc7u7MSXpNZQevljEQ83HqMrFrvC9UPm6M4lSSk5eijU5yg63uIXScaMfSQdHH87b--pmgpua9ZcE6nuD-XhupbgVpubkl3ja0xnwUEbtaixt_skfbPvVZbtvD6auhn6tsGSpVAz84BcMmi8vO7CieRLGgcrvPZ_SUZnwCWgCLcI_l9UWaw_j9tdIoYe1FfT2Vgh3RthMt_MJU"/>
+<div class="absolute -top-2 -left-2 bg-surface-container-highest text-on-surface w-6 h-6 rounded-full flex items-center justify-center font-black text-xs">2</div>
+</div>
+<div>
+<p class="font-headline font-bold text-on-surface group-hover:text-primary transition-colors">Baller_NFT</p>
+<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Global Rank: #02</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline font-black text-on-surface text-xl tracking-tight">2,120</p>
+<p class="text-[9px] font-bold text-on-surface-variant uppercase tracking-widest">PKT SCORE</p>
+</div>
+</div>
+<!-- Rank 3 -->
+<div class="bg-[#0D1117] border border-outline-variant/20 rounded-xl p-4 flex items-center justify-between group hover:border-primary/40 transition-all">
+<div class="flex items-center gap-4">
+<div class="relative">
+<img alt="Avatar" class="w-12 h-12 rounded-full border-2 border-outline-variant/30" data-alt="Portrait avatar of a cybernetic soccer fan with mechanical goggles and green neon hair" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJz4fCfKJhzdYKL9U_zwRRLZnp-wnK6PoaGXcow8Lz1yLDOiEdTXpJRxBo6vUJmSbTBCgyzHk-KVwzD0yteeYLEoTxL9egBR_kyRO6R1RrIhHmhE7KvBeujvl5zmvLs19okmcTFdFonkDThpRdfGrigGeumPa8XM7-_5w0M3HZmWxUDEwrbEexQUgwyzjROu1afioZReO_XhEw4iE-0k_d9vBXhlurjDx55nLPXbWbISQs3IVIKil9OeIcYg7AdxUFCmL6DEpnnjo"/>
+<div class="absolute -top-2 -left-2 bg-surface-container-highest text-on-surface w-6 h-6 rounded-full flex items-center justify-center font-black text-xs">3</div>
+</div>
+<div>
+<p class="font-headline font-bold text-on-surface group-hover:text-primary transition-colors">GoalMachine.sol</p>
+<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Global Rank: #03</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline font-black text-on-surface text-xl tracking-tight">1,980</p>
+<p class="text-[9px] font-bold text-on-surface-variant uppercase tracking-widest">PKT SCORE</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Bento Grid Feature Display -->
+<section class="grid grid-cols-2 gap-4 mb-12">
+<div class="col-span-1 bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10 flex flex-col justify-between aspect-square">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="quiz">quiz</span>
+<div>
+<h4 class="font-headline font-bold text-on-surface text-lg leading-tight uppercase">Rapid Trivia</h4>
+<p class="text-[10px] text-on-surface-variant font-medium mt-1">Answer fast to charge your kicker.</p>
+</div>
+</div>
+<div class="col-span-1 bg-primary-container/5 rounded-2xl p-5 border border-primary/20 flex flex-col justify-between aspect-square">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="stadium">stadium</span>
+<div>
+<h4 class="font-headline font-bold text-primary text-lg leading-tight uppercase">Global Arenas</h4>
+<p class="text-[10px] text-on-surface-variant font-medium mt-1">Tournament modes for every skill level.</p>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-[#0f141a]/80 backdrop-blur-xl border-t border-[#44484f]/15 shadow-[0_-10px_40px_rgba(0,253,135,0.08)] rounded-t-3xl">
+<a class="flex flex-col items-center justify-center text-[#00fd87] bg-[#00fd87]/10 rounded-xl px-4 py-1 active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="sports_esports" style="font-variation-settings: 'FILL' 1;">sports_esports</span>
+<span class="font-['Lexend'] text-[10px] uppercase font-bold tracking-widest mt-1">Play</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#a8abb3] opacity-60 hover:text-[#a4ffb9] hover:opacity-100 active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="font-['Lexend'] text-[10px] uppercase font-bold tracking-widest mt-1">Squad</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#a8abb3] opacity-60 hover:text-[#a4ffb9] hover:opacity-100 active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="font-['Lexend'] text-[10px] uppercase font-bold tracking-widest mt-1">Market</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#a8abb3] opacity-60 hover:text-[#a4ffb9] hover:opacity-100 active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span class="font-['Lexend'] text-[10px] uppercase font-bold tracking-widest mt-1">Stats</span>
+</a>
+</nav>
+</body></html>

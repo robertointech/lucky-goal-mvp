@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lucky Goal - Trivia Challenge</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Be+Vietnam+Pro:wght@300;400;500;600;700&amp;family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-high": "#1d1d37",
+              "on-error": "#490006",
+              "secondary-fixed-dim": "#d4d2ed",
+              "primary-container": "#00fd87",
+              "primary": "#a4ffb9",
+              "on-secondary-fixed-variant": "#5a5971",
+              "secondary-dim": "#d4d2ed",
+              "surface-bright": "#292948",
+              "error-dim": "#d7383b",
+              "secondary-fixed": "#e2e0fc",
+              "on-surface": "#e5e3ff",
+              "on-error-container": "#ffa8a3",
+              "primary-fixed-dim": "#00ed7e",
+              "tertiary-container": "#e8ebf4",
+              "on-surface-variant": "#aaa8c3",
+              "on-primary-fixed-variant": "#006632",
+              "tertiary-dim": "#dddfe8",
+              "error": "#ff716c",
+              "surface": "#0c0c1f",
+              "on-tertiary-fixed-variant": "#5f636a",
+              "outline-variant": "#46465c",
+              "surface-container-low": "#111127",
+              "inverse-on-surface": "#53536a",
+              "surface-tint": "#a4ffb9",
+              "surface-variant": "#23233f",
+              "surface-container-lowest": "#000000",
+              "error-container": "#9f0519",
+              "surface-dim": "#0c0c1f",
+              "on-background": "#e5e3ff",
+              "on-tertiary-container": "#53575e",
+              "background": "#0c0c1f",
+              "tertiary": "#f8f9ff",
+              "on-primary-container": "#005b2c",
+              "secondary-container": "#45455b",
+              "tertiary-fixed-dim": "#dddfe8",
+              "on-primary-fixed": "#004621",
+              "inverse-surface": "#fcf8ff",
+              "primary-fixed": "#00fd87",
+              "tertiary-fixed": "#ebeef7",
+              "on-tertiary-fixed": "#43464d",
+              "inverse-primary": "#006e37",
+              "on-primary": "#006532",
+              "surface-container": "#17172f",
+              "on-secondary-container": "#d0cee9",
+              "outline": "#74738b",
+              "secondary": "#e2e0fc",
+              "on-tertiary": "#5b5f67",
+              "on-secondary-fixed": "#3e3d53",
+              "surface-container-highest": "#23233f",
+              "primary-dim": "#00ed7e",
+              "on-secondary": "#505066"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Be Vietnam Pro"],
+              "label": ["Lexend"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-card {
+        background: rgba(35, 35, 63, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .hex-overlay {
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l25.98 15v30L30 60 4.02 45V15z' fill-opacity='0.05' fill='%23ffffff' fill-rule='evenodd'/%3E%3C/svg%3E");
+      }
+      .timer-ring {
+        transition: stroke-dashoffset 0.35s;
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col overflow-hidden">
+<!-- Top App Bar -->
+<header class="bg-[#0c0c1f]/80 backdrop-blur-xl flex justify-between items-center w-full px-6 py-4 max-w-none docked full-width top-0 z-50 no-border shadow-[0_1px_20px_rgba(0,0,0,0.4)] shadow-2xl">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#00FF88]" data-icon="close">close</span>
+</div>
+<div class="font-['Space_Grotesk'] font-bold tracking-tight uppercase text-[#00FF88] scale-105">
+            MATCH TRIVIA
+        </div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#aaa8c3] hover:text-[#00FF88] hover:bg-white/5 transition-all" data-icon="leaderboard">leaderboard</span>
+</div>
+</header>
+<!-- Main Game Canvas -->
+<main class="flex-1 relative flex flex-col items-center px-6 pt-12 pb-32 overflow-y-auto">
+<!-- Background Decorative Elements -->
+<div class="fixed inset-0 hex-overlay pointer-events-none opacity-40"></div>
+<div class="fixed top-1/4 left-1/2 -translate-x-1/2 w-[120%] h-[120%] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent pointer-events-none"></div>
+<!-- Timer Section -->
+<div class="relative flex flex-col items-center mb-8">
+<div class="relative w-32 h-32 flex items-center justify-center">
+<svg class="w-full h-full">
+<circle class="text-surface-container-high" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-width="8"></circle>
+<circle class="timer-ring drop-shadow-[0_0_8px_rgba(0,255,136,0.6)]" cx="64" cy="64" fill="transparent" r="58" stroke="#00FF88" stroke-dasharray="364.4" stroke-dashoffset="120" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="font-headline text-4xl font-bold text-white tracking-tighter">15</span>
+</div>
+</div>
+<div class="mt-6 flex flex-col items-center">
+<span class="font-label text-xs tracking-[0.2em] text-on-surface-variant font-semibold uppercase">Question 3/5</span>
+<div class="flex gap-1.5 mt-2">
+<div class="w-8 h-1.5 rounded-full bg-primary-dim shadow-[0_0_8px_rgba(0,237,126,0.4)]"></div>
+<div class="w-8 h-1.5 rounded-full bg-primary-dim shadow-[0_0_8px_rgba(0,237,126,0.4)]"></div>
+<div class="w-8 h-1.5 rounded-full bg-surface-bright border border-outline-variant/20"></div>
+<div class="w-8 h-1.5 rounded-full bg-surface-variant/50 border border-outline-variant/10"></div>
+<div class="w-8 h-1.5 rounded-full bg-surface-variant/50 border border-outline-variant/10"></div>
+</div>
+</div>
+</div>
+<!-- Question Section -->
+<div class="w-full text-center mb-10">
+<h1 class="font-headline text-3xl md:text-4xl font-bold text-white leading-tight tracking-tight">
+                What country won the 2022 FIFA World Cup?
+            </h1>
+</div>
+<!-- Answer Grid -->
+<div class="w-full grid grid-cols-2 gap-4 max-w-md">
+<!-- Option A -->
+<button class="glass-card group relative p-6 rounded-xl border border-[#E21B3C]/30 flex flex-col items-center justify-center gap-3 transition-all active:scale-95 shadow-[inset_0_0_20px_rgba(226,27,60,0.1)]">
+<div class="w-10 h-10 rounded-lg bg-[#E21B3C] flex items-center justify-center shadow-[0_0_15px_rgba(226,27,60,0.4)]">
+<span class="material-symbols-outlined text-white" data-icon="change_history">change_history</span>
+</div>
+<span class="font-body font-semibold text-lg text-white">France</span>
+<div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"></div>
+</button>
+<!-- Option B -->
+<button class="glass-card group relative p-6 rounded-xl border border-[#1368CE]/30 flex flex-col items-center justify-center gap-3 transition-all active:scale-95 shadow-[inset_0_0_20px_rgba(19,104,206,0.1)]">
+<div class="w-10 h-10 rounded-lg bg-[#1368CE] flex items-center justify-center shadow-[0_0_15px_rgba(19,104,206,0.4)]">
+<span class="material-symbols-outlined text-white" data-icon="diamond">diamond</span>
+</div>
+<span class="font-body font-semibold text-lg text-white">Argentina</span>
+<div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"></div>
+</button>
+<!-- Option C -->
+<button class="glass-card group relative p-6 rounded-xl border border-[#D89E00]/30 flex flex-col items-center justify-center gap-3 transition-all active:scale-95 shadow-[inset_0_0_20px_rgba(216,158,0,0.1)]">
+<div class="w-10 h-10 rounded-lg bg-[#D89E00] flex items-center justify-center shadow-[0_0_15px_rgba(216,158,0,0.4)]">
+<span class="material-symbols-outlined text-white" data-icon="circle">circle</span>
+</div>
+<span class="font-body font-semibold text-lg text-white">Brazil</span>
+<div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"></div>
+</button>
+<!-- Option D -->
+<button class="glass-card group relative p-6 rounded-xl border border-[#26890C]/30 flex flex-col items-center justify-center gap-3 transition-all active:scale-95 shadow-[inset_0_0_20px_rgba(38,137,12,0.1)]">
+<div class="w-10 h-10 rounded-lg bg-[#26890C] flex items-center justify-center shadow-[0_0_15px_rgba(38,137,12,0.4)]">
+<span class="material-symbols-outlined text-white" data-icon="square">square</span>
+</div>
+<span class="font-body font-semibold text-lg text-white">Croatia</span>
+<div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"></div>
+</button>
+</div>
+<!-- Score Indicator -->
+<div class="mt-12 flex flex-col items-center">
+<div class="bg-surface-container-high/80 backdrop-blur-md px-8 py-3 rounded-full border border-primary/20 shadow-[0_0_30px_rgba(0,253,135,0.15)] flex items-center gap-3">
+<span class="font-label text-xs text-on-surface-variant font-bold uppercase tracking-widest">Score</span>
+<span class="font-headline text-2xl font-black text-primary-fixed drop-shadow-[0_0_10px_rgba(0,253,135,0.8)]">250 PKT</span>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="bg-[#111127]/90 backdrop-blur-lg fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 z-50 rounded-t-[1.5rem] no-border shadow-[0_-10px_40px_rgba(0,0,0,0.5)] shadow-[0_-4px_24px_rgba(0,253,135,0.1)]">
+<div class="flex flex-col items-center justify-center text-[#00FF88] bg-[#1d1d37] rounded-xl px-4 py-1.5 shadow-[inset_0_0_10px_rgba(0,253,135,0.2)] active:translate-y-[-2px] duration-200">
+<span class="material-symbols-outlined" data-icon="sports_soccer">sports_soccer</span>
+<span class="font-['Lexend'] text-[10px] uppercase font-semibold">Play</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#74738b] px-4 py-1.5 hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="font-['Lexend'] text-[10px] uppercase font-semibold">Squad</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#74738b] px-4 py-1.5 hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-['Lexend'] text-[10px] uppercase font-semibold">Market</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#74738b] px-4 py-1.5 hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span class="font-['Lexend'] text-[10px] uppercase font-semibold">Stats</span>
+</div>
+</nav>
+<!-- Contextual FAB (Suppressed on Trivia Screens per guidelines, but keeping structure if needed for other screens) -->
+</body></html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lucky Goal - Tournament Lobby</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Be+Vietnam+Pro:wght@300;400;500;600;700&amp;family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-tint": "#a4ffb9",
+              "primary-fixed-dim": "#00ed7e",
+              "on-tertiary-container": "#53575e",
+              "secondary": "#e2e0fc",
+              "on-secondary": "#505066",
+              "surface-container-low": "#111127",
+              "tertiary-fixed": "#ebeef7",
+              "tertiary": "#f8f9ff",
+              "primary": "#a4ffb9",
+              "on-secondary-container": "#d0cee9",
+              "primary-fixed": "#00fd87",
+              "on-tertiary": "#5b5f67",
+              "primary-container": "#00fd87",
+              "surface-container-high": "#1d1d37",
+              "tertiary-fixed-dim": "#dddfe8",
+              "secondary-fixed-dim": "#d4d2ed",
+              "surface-dim": "#0c0c1f",
+              "secondary-container": "#45455b",
+              "on-primary-fixed": "#004621",
+              "inverse-primary": "#006e37",
+              "error-container": "#9f0519",
+              "primary-dim": "#00ed7e",
+              "on-secondary-fixed-variant": "#5a5971",
+              "on-primary-fixed-variant": "#006632",
+              "inverse-on-surface": "#53536a",
+              "on-surface": "#e5e3ff",
+              "surface-variant": "#23233f",
+              "background": "#0c0c1f",
+              "on-surface-variant": "#aaa8c3",
+              "on-tertiary-fixed": "#43464d",
+              "outline": "#74738b",
+              "on-error-container": "#ffa8a3",
+              "surface-container-highest": "#23233f",
+              "surface-container": "#17172f",
+              "secondary-fixed": "#e2e0fc",
+              "inverse-surface": "#fcf8ff",
+              "on-background": "#e5e3ff",
+              "tertiary-container": "#e8ebf4",
+              "on-primary-container": "#005b2c",
+              "on-primary": "#006532",
+              "surface-bright": "#292948",
+              "surface": "#0c0c1f",
+              "on-secondary-fixed": "#3e3d53",
+              "secondary-dim": "#d4d2ed",
+              "tertiary-dim": "#dddfe8",
+              "surface-container-lowest": "#000000",
+              "on-tertiary-fixed-variant": "#5f636a",
+              "on-error": "#490006",
+              "error": "#ff716c",
+              "outline-variant": "#46465c",
+              "error-dim": "#d7383b"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Be Vietnam Pro"],
+              "label": ["Lexend"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(13, 17, 23, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .neon-glow {
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.6), 0 0 20px rgba(0, 255, 136, 0.4);
+        }
+        .neon-border-glow {
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3), inset 0 0 10px rgba(0, 255, 136, 0.1);
+        }
+        .pulse-green {
+            box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
+            animation: pulse-animation 2s infinite;
+        }
+        @keyframes pulse-animation {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 136, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        }
+        .hex-bg {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l25.98 15v30L30 60 4.02 45V15z' fill-opacity='0.03' fill='%2300FF88' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body selection:bg-primary selection:text-on-primary-fixed overflow-x-hidden hex-bg min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 bg-[#111127] shadow-[0px_4px_20px_rgba(0,255,136,0.1)] flex items-center justify-between px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#00FF88] hover:opacity-80 transition-opacity active:scale-95 duration-150">arrow_back</button>
+<h1 class="font-headline font-bold tracking-tight text-lg text-[#00FF88] italic tracking-tighter uppercase">LUCKY GOAL</h1>
+</div>
+<div class="flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high">
+<span class="w-2 h-2 rounded-full bg-primary pulse-green"></span>
+<span class="font-label text-xs font-medium text-on-surface uppercase tracking-wider">Live Lobby</span>
+</div>
+</header>
+<main class="max-w-md mx-auto px-6 pt-8 pb-32 space-y-8">
+<!-- Tournament Code Section -->
+<section class="text-center space-y-4">
+<p class="font-label text-on-surface-variant text-sm tracking-widest uppercase">Tournament Room</p>
+<div class="glass-card rounded-xl p-6 border border-primary/20 neon-border-glow relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent pointer-events-none"></div>
+<h2 class="font-headline text-5xl font-black tracking-widest text-primary neon-glow font-mono">ABC123</h2>
+<button class="mt-4 flex items-center justify-center gap-2 w-full text-xs font-label text-primary/80 uppercase tracking-tighter">
+<span class="material-symbols-outlined text-sm">content_copy</span> Tap to copy code
+                </button>
+</div>
+</section>
+<!-- QR Code Section -->
+<section class="flex flex-col items-center justify-center py-4">
+<div class="relative p-2 rounded-2xl bg-surface-container-lowest border border-primary/30 neon-border-glow">
+<div class="p-4 bg-white rounded-xl">
+<img alt="Tournament QR Code" class="w-48 h-48" data-alt="A stylized glowing neon green QR code centered on a clean white background with digital football elements in the corners" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDa-eA6HrlTSUimgWTEZcBOUHwlTfR0t3o0C4UuGv2ckmTH4noC9Cf8bFMwAOP5f30yrqvggGuUxEMUPmlfHlyEd5pQxZeK6DJHmZwRYLBAfMEzpJ0Qxm-jBx_ZDFG_hKo2WXpIWkE1aIKXh3A6ymnT1IwuIF-lrfrgVxNUIV4z1JJ-eKOoBW25kdl_V9QUmGjEZ_y9MvOh8SUNDyITFFXLo36v6NgjSzXMpZfZHI292bJ4K0yOzyIkQXWEi8_0V5etAcMzARCVjRw"/>
+</div>
+<!-- Scanning corner accents -->
+<div class="absolute -top-1 -left-1 w-6 h-6 border-t-2 border-l-2 border-primary rounded-tl-lg"></div>
+<div class="absolute -top-1 -right-1 w-6 h-6 border-t-2 border-r-2 border-primary rounded-tr-lg"></div>
+<div class="absolute -bottom-1 -left-1 w-6 h-6 border-b-2 border-l-2 border-primary rounded-bl-lg"></div>
+<div class="absolute -bottom-1 -right-1 w-6 h-6 border-b-2 border-r-2 border-primary rounded-br-lg"></div>
+</div>
+<p class="mt-6 font-body text-on-surface-variant text-center text-sm px-8 leading-relaxed">
+                Invite your friends by showing them this code or sharing the link below.
+            </p>
+</section>
+<!-- Status & Share Actions -->
+<section class="space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">groups</span>
+<span class="font-headline font-bold text-xl">5/20 joined</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1 rounded-lg bg-error-container/20 border border-error/20">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>
+<span class="font-label text-[10px] text-error font-bold uppercase tracking-widest">Waiting for host</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<button class="flex items-center justify-center gap-2 py-3 rounded-xl bg-[#25D366] text-white font-label font-bold text-sm transition-transform active:scale-95 shadow-lg shadow-[#25D366]/20">
+<img alt="WhatsApp" class="w-5 h-5 invert" data-alt="Official WhatsApp logo icon in white for dark background UI" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhOWEzPBy6VHNvJSaF4XWBWmjY8HCCCfc_j3yjHIr9vAbk0nrp4fBVkdeYWw7X9hWZCU4qGKHfe2xQ0B8QPynZBVfsx_gY1118BzxBTHmJsB3Cg-zstYMsathw_ZQY_tFdm6Z70zk-KBC9jCQUWmkURtXdAGykKqYRfxV11sVcNCVA058kZk9_H2_m9DlZPuMX-3pvXPIkfCXwbNU9agZwOPbBPDQ8Db6J_091QkWGzFnwbAd6WjB4fL3doZiBmMPisqyQBi1kUxQ"/>
+                    WhatsApp
+                </button>
+<button class="flex items-center justify-center gap-2 py-3 rounded-xl bg-[#1DA1F2] text-white font-label font-bold text-sm transition-transform active:scale-95 shadow-lg shadow-[#1DA1F2]/20">
+<img alt="Twitter" class="w-4 h-4 invert" data-alt="Official X twitter logo icon in white for dark background UI" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8PMWHZnIzA6H5evsEJyprF4Wpq9WcIBwqerCWMJduVlHRwq96Mn28xA9aBQJGG36kz8cifyQXiLAWjx2DXaWVAtBWnNYSyPzmzqWR1irURWsgCXQolhyfA8sJCxuhgzxyHWqXpbcySB32Lp2byCVSomPkg2eSDotctX6fwRo4JEMZMtubQYceTlMHXAIkdXsnXxvKmcimZCS9FWqVRYjzDstpiC5pdCU0_uldBpaYvAdrsssQtjWgKfATVIvZDhrrWNXNbTTyD9M"/>
+                    Twitter
+                </button>
+</div>
+</section>
+<!-- Players List -->
+<section class="space-y-4">
+<div class="flex items-center justify-between px-1">
+<h3 class="font-headline font-bold text-lg">Players List</h3>
+<span class="text-xs font-label text-on-surface-variant">Host: SoccerStar</span>
+</div>
+<div class="space-y-2 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
+<!-- Host Player -->
+<div class="glass-card flex items-center justify-between p-4 rounded-xl border border-primary/20">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-2xl shadow-inner">
+                            ⚽
+                        </div>
+<div>
+<p class="font-body font-bold text-on-surface">SoccerStar</p>
+<span class="text-[10px] font-label font-bold uppercase text-primary tracking-widest">Host</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary">verified</span>
+</div>
+<!-- Guest Players -->
+<div class="glass-card flex items-center justify-between p-4 rounded-xl border border-outline-variant/20 hover:border-primary/30 transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-2xl">
+                            🥅
+                        </div>
+<div>
+<p class="font-body font-bold text-on-surface">GoalGetter</p>
+<span class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest">Ready</span>
+</div>
+</div>
+</div>
+<div class="glass-card flex items-center justify-between p-4 rounded-xl border border-outline-variant/20">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-2xl">
+                            🔥
+                        </div>
+<div>
+<p class="font-body font-bold text-on-surface">FlameStriker</p>
+<span class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest">Ready</span>
+</div>
+</div>
+</div>
+<div class="glass-card flex items-center justify-between p-4 rounded-xl border border-outline-variant/20">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-2xl">
+                            🎮
+                        </div>
+<div>
+<p class="font-body font-bold text-on-surface">ProGamer</p>
+<span class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest">Ready</span>
+</div>
+</div>
+</div>
+<div class="glass-card flex items-center justify-between p-4 rounded-xl border border-outline-variant/20">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-2xl">
+                            ⚡
+                        </div>
+<div>
+<p class="font-body font-bold text-on-surface">Flash</p>
+<span class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest">Ready</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Sticky Bottom Action Button -->
+<div class="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background via-background/90 to-transparent pt-12">
+<div class="max-w-md mx-auto">
+<button class="w-full py-5 rounded-2xl bg-gradient-to-r from-primary-container to-primary-fixed-dim text-on-primary-fixed font-headline font-black text-xl uppercase tracking-widest shadow-[0px_0px_30px_rgba(0,255,136,0.3)] transition-all active:scale-95 active:shadow-none flex items-center justify-center gap-3">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+                Start Game
+            </button>
+<p class="text-center mt-3 text-[10px] font-label text-on-surface-variant uppercase tracking-tighter">
+                Minimum 2 players required to begin
+            </p>
+</div>
+</div>
+<style>
+        /* Custom scrollbar for player list */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 136, 0.2);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 255, 136, 0.4);
+        }
+    </style>
+</body></html>

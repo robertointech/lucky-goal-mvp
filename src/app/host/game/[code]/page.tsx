@@ -206,8 +206,8 @@ export default function HostGamePage() {
 
   if (!currentTournament) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#1a1a2e]">
-        <div className="text-[#00FF88] text-3xl animate-pulse font-bold">
+      <div className="min-h-screen flex items-center justify-center bg-surface">
+        <div className="text-primary text-3xl animate-pulse font-bold">
           {t("hostGame.loading")}
         </div>
       </div>
@@ -215,7 +215,7 @@ export default function HostGamePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#1a1a2e] relative overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-surface relative overflow-hidden">
       {/* Background glow */}
       <div className="fixed inset-0 pointer-events-none">
         <div
@@ -227,31 +227,31 @@ export default function HostGamePage() {
       </div>
 
       {/* Top bar */}
-      <div className="relative z-10 flex items-center justify-between px-8 py-4 border-b border-white/5">
+      <div className="relative z-10 flex items-center justify-between px-8 py-4 border-b border-outline-variant/15">
         <div className="flex items-center gap-3">
           <img src="/logo.jpeg" alt="Lucky Goal" className="w-10 h-10 rounded-lg object-cover" />
-          <span className="text-white font-bold text-xl">Lucky Goal</span>
-          <span className="text-gray-600 text-sm font-mono ml-2">{code}</span>
+          <span className="text-on-surface font-bold text-xl">Lucky Goal</span>
+          <span className="text-outline-variant text-sm font-mono ml-2">{code}</span>
         </div>
         <div className="flex items-center gap-6">
           {currentTournament.prize_amount > 0 && (
-            <div className="flex items-center gap-2 bg-[#00FF88]/10 border border-[#00FF88]/30 rounded-full px-4 py-1.5">
-              <span className="text-[#00FF88] font-bold">
+            <div className="flex items-center gap-2 bg-[#00FF88]/10 border border-primary/30 rounded-full px-4 py-1.5">
+              <span className="text-primary font-bold">
                 💎 {currentTournament.prize_amount} AVAX
               </span>
             </div>
           )}
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-[#00FF88] rounded-full animate-pulse" />
-            <span className="text-gray-400 text-sm">
+            <span className="text-on-surface-variant text-sm">
               {players.length} {t("hostGame.players")}
             </span>
           </div>
           {phase !== "finished" && (
             <div className="bg-white/5 rounded-lg px-3 py-1.5">
-              <span className="text-gray-400 text-sm">
+              <span className="text-on-surface-variant text-sm">
                 {t("hostGame.question")}{" "}
-                <span className="text-white font-bold">
+                <span className="text-on-surface font-bold">
                   {currentQ + 1}/{totalQ}
                 </span>
               </span>
@@ -318,15 +318,15 @@ export default function HostGamePage() {
 
             {/* Question */}
             <div
-              className="bg-[#0D1117] border border-white/10 rounded-3xl px-10 py-8 mb-8 animate-[fadeIn_0.5s_ease-out]"
+              className="bg-lucky-card border border-outline-variant/20 rounded-3xl px-10 py-8 mb-8 animate-[fadeIn_0.5s_ease-out]"
               style={{
                 boxShadow: "0 0 40px rgba(0, 0, 0, 0.3)",
               }}
             >
-              <p className="text-[#00FF88] text-sm font-bold uppercase tracking-widest mb-3">
+              <p className="text-primary text-sm font-bold uppercase tracking-widest mb-3">
                 {t("hostGame.question")} {currentQ + 1} {t("hostGame.of")} {totalQ}
               </p>
-              <h2 className="text-4xl text-white font-bold leading-tight">
+              <h2 className="text-4xl text-on-surface font-bold leading-tight">
                 {question.question}
               </h2>
             </div>
@@ -359,7 +359,7 @@ export default function HostGamePage() {
         {/* ========== COUNTDOWN (buffer before question timer) ========== */}
         {phase === "countdown" && question && (
           <div className="flex-1 flex flex-col items-center justify-center px-8">
-            <p className="text-[#00FF88] text-xl font-bold uppercase tracking-widest mb-6 animate-pulse">
+            <p className="text-primary text-xl font-bold uppercase tracking-widest mb-6 animate-pulse">
               {t("hostGame.question")} {currentQ + 1} {t("hostGame.of")} {totalQ}
             </p>
             <div
@@ -393,10 +393,10 @@ export default function HostGamePage() {
               />
             </div>
 
-            <h2 className="text-5xl text-white font-black mb-4 text-center">
+            <h2 className="text-5xl text-on-surface font-headline font-black mb-4 text-center">
               {t("hostGame.penaltyTime")}
             </h2>
-            <div className="flex items-center gap-2 text-gray-400 text-2xl">
+            <div className="flex items-center gap-2 text-on-surface-variant text-2xl">
               <span>{t("hostGame.playersKicking")}</span>
               <span className="inline-flex">
                 <span className="animate-[dotBounce_1.4s_ease-in-out_infinite]">
@@ -416,13 +416,13 @@ export default function HostGamePage() {
               {sorted.slice(0, 5).map((p, i) => (
                 <div
                   key={p.id}
-                  className="flex items-center gap-2 bg-[#0D1117]/80 border border-white/10 rounded-xl px-4 py-2"
+                  className="flex items-center gap-2 bg-lucky-card/80 border border-outline-variant/20 rounded-xl px-4 py-2"
                 >
                   <span className="text-lg">{p.avatar}</span>
                   <span className="text-white font-semibold text-sm">
                     {p.nickname}
                   </span>
-                  <span className="text-[#00FF88] font-bold text-sm">
+                  <span className="text-primary font-bold text-sm">
                     {p.score}
                   </span>
                 </div>
@@ -434,10 +434,10 @@ export default function HostGamePage() {
         {/* ========== RESULTS PHASE ========== */}
         {phase === "results" && (
           <div className="flex-1 flex flex-col px-8 py-6">
-            <h2 className="text-3xl text-white font-black text-center mb-2">
+            <h2 className="text-3xl text-on-surface font-headline font-black text-center mb-2">
               {t("hostGame.results")}
             </h2>
-            <p className="text-gray-500 text-center mb-8 text-lg">
+            <p className="text-outline text-center mb-8 text-lg">
               {t("hostGame.question")} {currentQ + 1} {t("hostGame.of")} {totalQ}
             </p>
 
@@ -469,7 +469,7 @@ export default function HostGamePage() {
                     {/* Rank */}
                     <span className="text-3xl min-w-[48px] text-center">
                       {isTop3 ? medals[i] : (
-                        <span className="text-gray-600 font-bold text-2xl">
+                        <span className="text-outline-variant font-bold text-2xl">
                           {i + 1}
                         </span>
                       )}
@@ -488,7 +488,7 @@ export default function HostGamePage() {
                     {/* Name */}
                     <span
                       className={`text-2xl font-bold flex-1 truncate ${
-                        isTop3 ? "text-white" : "text-gray-300"
+                        isTop3 ? "text-white" : "text-on-surface/80"
                       }`}
                     >
                       {player.nickname}
@@ -496,7 +496,7 @@ export default function HostGamePage() {
 
                     {/* Score delta */}
                     {delta > 0 && (
-                      <span className="text-[#00FF88] font-bold text-lg animate-[popIn_0.6s_ease-out] whitespace-nowrap">
+                      <span className="text-primary font-bold text-lg animate-[popIn_0.6s_ease-out] whitespace-nowrap">
                         +{delta}
                       </span>
                     )}
@@ -504,7 +504,7 @@ export default function HostGamePage() {
                     {/* Total score */}
                     <span
                       className={`text-3xl font-black tabular-nums min-w-[80px] text-right ${
-                        isTop3 ? "text-[#00FF88]" : "text-gray-400"
+                        isTop3 ? "text-primary" : "text-on-surface-variant"
                       }`}
                     >
                       {player.score}
@@ -545,20 +545,20 @@ export default function HostGamePage() {
               </h2>
 
               {/* Score */}
-              <p className="text-[#00FF88] text-4xl font-bold mb-8 animate-[fadeIn_0.5s_ease-out_0.7s_backwards]">
+              <p className="text-primary text-4xl font-bold mb-8 animate-[fadeIn_0.5s_ease-out_0.7s_backwards]">
                 {winner.score} {t("hostGame.points")}
               </p>
 
               {/* Prize card */}
               {currentTournament.prize_amount > 0 && (
                 <div
-                  className="bg-[#0D1117] border-2 border-[#00FF88]/30 rounded-3xl px-10 py-6 text-center mb-8 animate-[fadeIn_0.5s_ease-out_0.9s_backwards]"
+                  className="bg-lucky-card border-2 border-primary/30 rounded-3xl px-10 py-6 text-center mb-8 animate-[fadeIn_0.5s_ease-out_0.9s_backwards]"
                   style={{
                     boxShadow: "0 0 60px rgba(0, 255, 136, 0.15)",
                   }}
                 >
-                  <p className="text-gray-400 text-lg mb-1">{t("hostGame.prize")}</p>
-                  <p className="text-[#00FF88] text-5xl font-black">
+                  <p className="text-on-surface-variant text-lg mb-1">{t("hostGame.prize")}</p>
+                  <p className="text-primary text-5xl font-black">
                     {currentTournament.prize_amount} AVAX
                   </p>
 
@@ -569,10 +569,10 @@ export default function HostGamePage() {
                         <div className="flex items-center justify-center gap-3">
                           <span className="text-3xl">✅</span>
                           <div>
-                            <p className="text-[#00FF88] font-bold text-xl">
+                            <p className="text-primary font-bold text-xl">
                               {t("hostGame.prizeSent")}
                             </p>
-                            <p className="text-gray-400 text-sm">
+                            <p className="text-on-surface-variant text-sm">
                               {winner.wallet_address.slice(0, 8)}...
                               {winner.wallet_address.slice(-6)}
                             </p>
@@ -603,7 +603,7 @@ export default function HostGamePage() {
                               `${t("hostGame.sendPrize")} ${currentTournament.prize_amount} AVAX`
                             )}
                           </button>
-                          <p className="text-gray-600 text-xs mt-3 font-mono">
+                          <p className="text-outline-variant text-xs mt-3 font-mono">
                             → {winner.wallet_address.slice(0, 8)}...
                             {winner.wallet_address.slice(-6)}
                           </p>
@@ -611,12 +611,12 @@ export default function HostGamePage() {
                       )
                     ) : (
                       <div>
-                        <p className="text-gray-400 animate-pulse text-lg">
+                        <p className="text-on-surface-variant animate-pulse text-lg">
                           {t("hostGame.waitingWallet")}
                         </p>
                         <button
                           onClick={refreshPlayers}
-                          className="mt-3 text-[#00FF88] text-sm underline hover:no-underline"
+                          className="mt-3 text-primary text-sm underline hover:no-underline"
                         >
                           {t("hostGame.refresh")}
                         </button>
@@ -628,7 +628,7 @@ export default function HostGamePage() {
 
               {/* ─── Tournament Dashboard ─── */}
               <div className="w-full max-w-4xl mt-4">
-                <h3 className="text-2xl text-white font-black text-center mb-6">{t("hostGame.dashboard")}</h3>
+                <h3 className="text-2xl text-on-surface font-headline font-black text-center mb-6">{t("hostGame.dashboard")}</h3>
 
                 {/* Stats cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -638,17 +638,17 @@ export default function HostGamePage() {
                     { label: t("hostGame.totalGoals"), value: sorted.reduce((s, p) => s + p.goals, 0), color: "#4ECDC4" },
                     { label: t("hostGame.highestScore"), value: sorted[0]?.score ?? 0, color: "#A855F7" },
                   ].map((stat, i) => (
-                    <div key={i} className="bg-[#0D1117] border border-white/8 rounded-xl p-4 text-center">
-                      <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">{stat.label}</p>
+                    <div key={i} className="bg-lucky-card border border-white/8 rounded-xl p-4 text-center">
+                      <p className="text-outline text-xs uppercase tracking-wider mb-1">{stat.label}</p>
                       <p className="text-3xl font-black" style={{ color: stat.color }}>{stat.value}</p>
                     </div>
                   ))}
                 </div>
 
                 {/* Player table */}
-                <div className="bg-[#0D1117] border border-white/8 rounded-xl overflow-hidden mb-4">
-                  <div className="flex items-center justify-between px-5 py-3 border-b border-white/5">
-                    <h4 className="text-white font-bold">{t("hostGame.playerTable")}</h4>
+                <div className="bg-lucky-card border border-white/8 rounded-xl overflow-hidden mb-4">
+                  <div className="flex items-center justify-between px-5 py-3 border-b border-outline-variant/15">
+                    <h4 className="text-on-surface font-bold">{t("hostGame.playerTable")}</h4>
                     <button
                       onClick={() => {
                         const header = "rank,nickname,avatar,score,goals,correct_answers,wallet_address\n";
@@ -663,7 +663,7 @@ export default function HostGamePage() {
                         a.click();
                         URL.revokeObjectURL(url);
                       }}
-                      className="text-[#00FF88] text-xs font-semibold hover:underline flex items-center gap-1"
+                      className="text-primary text-xs font-semibold hover:underline flex items-center gap-1"
                     >
                       📥 {t("hostGame.exportCsv")}
                     </button>
@@ -671,7 +671,7 @@ export default function HostGamePage() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="text-gray-500 text-xs uppercase tracking-wider border-b border-white/5">
+                        <tr className="text-outline text-xs uppercase tracking-wider border-b border-outline-variant/15">
                           <th className="px-4 py-3 text-left">#</th>
                           <th className="px-4 py-3 text-left">{t("hostGame.nickname")}</th>
                           <th className="px-4 py-3 text-right">{t("hostGame.score")}</th>
@@ -684,7 +684,7 @@ export default function HostGamePage() {
                         {sorted.map((p, i) => (
                           <tr key={p.id} className="border-b border-white/3 hover:bg-white/3 transition-colors"
                             style={p.id === winner.id ? { backgroundColor: "rgba(0,255,136,0.06)" } : {}}>
-                            <td className="px-4 py-3 text-gray-500 font-bold">{i + 1}</td>
+                            <td className="px-4 py-3 text-outline font-bold">{i + 1}</td>
                             <td className="px-4 py-3">
                               <span className="flex items-center gap-2">
                                 <span className="text-lg">{p.avatar}</span>
@@ -692,10 +692,10 @@ export default function HostGamePage() {
                                 {p.id === winner.id && <span className="text-xs">👑</span>}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-right text-[#00FF88] font-bold tabular-nums">{p.score}</td>
+                            <td className="px-4 py-3 text-right text-primary font-bold tabular-nums">{p.score}</td>
                             <td className="px-4 py-3 text-right text-white tabular-nums">{p.goals}</td>
                             <td className="px-4 py-3 text-right text-white tabular-nums">{correctCounts[p.id] || 0}</td>
-                            <td className="px-4 py-3 text-gray-500 font-mono text-xs">
+                            <td className="px-4 py-3 text-outline font-mono text-xs">
                               {p.wallet_address ? `${p.wallet_address.slice(0, 6)}...${p.wallet_address.slice(-4)}` : t("hostGame.noWallet")}
                             </td>
                           </tr>
@@ -717,10 +717,10 @@ export default function HostGamePage() {
                 </div>
 
                 {/* Messaging card */}
-                <div className="bg-[#0D1117] border border-white/8 rounded-xl p-5 mt-6">
-                  <h4 className="text-white font-bold mb-4">{t("hostGame.sendMessage")}</h4>
+                <div className="bg-lucky-card border border-white/8 rounded-xl p-5 mt-6">
+                  <h4 className="text-on-surface font-bold mb-4">{t("hostGame.sendMessage")}</h4>
                   {messageSent ? (
-                    <div className="flex items-center gap-2 text-[#00FF88] font-semibold py-2">
+                    <div className="flex items-center gap-2 text-primary font-semibold py-2">
                       <span>✅</span>
                       <span>{t("hostGame.messageSent")}</span>
                     </div>
@@ -731,10 +731,10 @@ export default function HostGamePage() {
                         onChange={(e) => setMessageText(e.target.value)}
                         placeholder={t("hostGame.messagePlaceholder")}
                         rows={3}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm resize-none focus:outline-none focus:border-[#00FF88]/50 placeholder-gray-600 mb-3"
+                        className="w-full bg-white/5 border border-outline-variant/20 rounded-xl px-4 py-3 text-white text-sm resize-none focus:outline-none focus:border-primary/50 placeholder-gray-600 mb-3"
                       />
                       {sorted.filter((p) => p.wallet_address).length === 0 ? (
-                        <p className="text-gray-500 text-xs">{t("hostGame.noWallets")}</p>
+                        <p className="text-outline text-xs">{t("hostGame.noWallets")}</p>
                       ) : (
                         <button
                           onClick={handleSendMessage}
@@ -863,21 +863,21 @@ function AirdropCard({
   const each = walletPlayers.length > 0 ? amount / walletPlayers.length : 0;
 
   return (
-    <div className="bg-[#0D1117] border border-white/8 rounded-xl p-5 mt-6">
-      <h4 className="text-white font-bold mb-4">{t("hostGame.airdrop")}</h4>
+    <div className="bg-lucky-card border border-white/8 rounded-xl p-5 mt-6">
+      <h4 className="text-on-surface font-bold mb-4">{t("hostGame.airdrop")}</h4>
 
       {airdropSent ? (
-        <div className="flex items-center gap-2 text-[#00FF88] font-semibold py-2">
+        <div className="flex items-center gap-2 text-primary font-semibold py-2">
           <span>✅</span>
           <span>{t("hostGame.airdropSent")}</span>
         </div>
       ) : walletPlayers.length === 0 ? (
-        <p className="text-gray-500 text-xs">{t("hostGame.airdropNoWallets")}</p>
+        <p className="text-outline text-xs">{t("hostGame.airdropNoWallets")}</p>
       ) : (
         <>
           <div className="flex gap-3 items-end mb-3">
             <div className="flex-1">
-              <label className="text-gray-500 text-xs block mb-1">{t("hostGame.airdropAmount")}</label>
+              <label className="text-outline text-xs block mb-1">{t("hostGame.airdropAmount")}</label>
               <input
                 type="number"
                 step="0.001"
@@ -886,21 +886,21 @@ function AirdropCard({
                 onChange={(e) => { setAirdropAmount(e.target.value); setAirdropConfirm(false); }}
                 disabled={airdropSending}
                 placeholder="0.05"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00FF88]/50 placeholder-gray-600"
+                className="w-full bg-white/5 border border-outline-variant/20 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-primary/50 placeholder-gray-600"
               />
             </div>
           </div>
 
           {amount > 0 && (
-            <p className="text-gray-400 text-xs mb-3">
-              Send <span className="text-white font-bold">{each.toFixed(4)} AVAX</span> to each of <span className="text-white font-bold">{walletPlayers.length}</span> players (<span className="text-[#00FF88] font-bold">{amount} AVAX</span> total)
+            <p className="text-on-surface-variant text-xs mb-3">
+              Send <span className="text-on-surface font-bold">{each.toFixed(4)} AVAX</span> to each of <span className="text-on-surface font-bold">{walletPlayers.length}</span> players (<span className="text-primary font-bold">{amount} AVAX</span> total)
             </p>
           )}
 
           {airdropError && <p className="text-red-400 text-xs mb-3">{airdropError}</p>}
 
           {airdropSending ? (
-            <div className="flex items-center gap-2 text-gray-400 text-sm">
+            <div className="flex items-center gap-2 text-on-surface-variant text-sm">
               <span className="animate-spin">⏳</span>
               {t("hostGame.airdropSending")
                 .replace("{current}", String(airdropProgress.current))
@@ -924,7 +924,7 @@ function AirdropCard({
               </button>
               <button
                 onClick={() => setAirdropConfirm(false)}
-                className="border border-white/20 text-gray-400 font-bold py-2.5 px-4 rounded-xl text-sm active:scale-95 transform transition-transform hover:text-white"
+                className="border border-white/20 text-on-surface-variant font-bold py-2.5 px-4 rounded-xl text-sm active:scale-95 transform transition-transform hover:text-white"
               >
                 {t("hostGame.airdropCancel")}
               </button>
