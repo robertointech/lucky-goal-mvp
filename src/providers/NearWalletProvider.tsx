@@ -17,6 +17,7 @@ import type { WalletSelectorModal } from "@near-wallet-selector/modal-ui";
 import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 import { setupNightly } from "@near-wallet-selector/nightly";
 import { setupWalletConnect } from "@near-wallet-selector/wallet-connect";
+import { setupMetaMask, setupCoinbaseWalletNear } from "@/lib/custom-wallets";
 import { nearConfig, NEAR_CONTRACT_ID } from "@/lib/near-config";
 import "@near-wallet-selector/modal-ui/styles.css";
 
@@ -48,8 +49,13 @@ export function NearWalletProvider({ children }: { children: ReactNode }) {
 
   const init = useCallback(async () => {
     const modules = [
+      // EVM wallets (individual entries via custom wrappers)
+      setupMetaMask(),
+      setupCoinbaseWalletNear(),
+      // NEAR-native wallets
       setupMyNearWallet(),
       setupNightly(),
+      // WalletConnect (QR code for mobile)
       ...(process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
         ? [setupWalletConnect({
             projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
